@@ -1,0 +1,43 @@
+# .NET
+bin/
+obj/
+*.user
+*.userosscache
+*.suo
+*.cache
+*.log
+.vs/
+
+# ASP.NET
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+# Node.js
+node_modules/
+dist/
+.npm
+*.tgz
+
+# Vite
+bizquits.frontend/dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
