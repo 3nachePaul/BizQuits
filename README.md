@@ -122,7 +122,7 @@ Team members can set up the same database environment by running the Docker comm
 - Port: `1433`
 - Password: (share securely with your team)
 
-Alternatively, you can create a `docker-compose.yml` file (see below) and commit it to the repository so everyone can run `docker-compose up -d`.
+Alternatively, you can run `docker-compose up -d`.
 
 ---
 
