@@ -117,12 +117,13 @@ BizQuits/
 
 ### Sharing the Database Container
 
-Team members can set up the same database environment by running the Docker command above. Make sure everyone uses the same:
-- Container name: `bizquits-db`
-- Port: `1433`
-- Password: (share securely with your team)
+To make sure everyone on our team is working with the same database setup, we used a shared Docker configuration with the following settings:
+Container name: bizquits-db
+Port: 1433
+Password: (shared securely within the team)
+We started the database using the Docker command above, but we also set it up so it can be brought up with:
+docker-compose up -d
 
-Alternatively, you can run `docker-compose up -d`.
 
 ---
 
