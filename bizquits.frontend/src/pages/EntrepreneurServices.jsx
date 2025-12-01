@@ -20,7 +20,6 @@ function EntrepreneurServices() {
 
   const fetchServices = async () => {
     setLoading(true);
-    // Mock data until backend endpoint is implemented
     setTimeout(() => {
       setServices([
         {

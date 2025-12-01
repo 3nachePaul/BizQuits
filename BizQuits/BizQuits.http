@@ -1,6 +1,11 @@
 @BizQuits_HostAddress = http://localhost:5204
 
-GET {{BizQuits_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{BizQuits_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
 
 ###

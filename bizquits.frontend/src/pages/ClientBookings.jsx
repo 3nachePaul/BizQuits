@@ -13,7 +13,6 @@ function ClientBookings() {
 
   const fetchBookings = async () => {
     setLoading(true);
-    // Mock data until backend endpoint is implemented
     setTimeout(() => {
       setBookings([
         {

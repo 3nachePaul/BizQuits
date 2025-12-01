@@ -27,13 +27,6 @@ const EntrepreneurCompany = () => {
       }
     } catch (err) {
       console.error('Error fetching company info:', err);
-      // Fallback mock data
-      setCompanyInfo({
-        companyName: 'Your Company Name',
-        cui: 'RO12345678',
-        isApproved: false,
-        email: user?.email
-      });
     } finally {
       setIsLoading(false);
     }
