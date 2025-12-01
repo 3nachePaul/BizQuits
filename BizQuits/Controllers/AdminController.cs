@@ -87,8 +87,6 @@ public class AdminController : ControllerBase
         {
             _context.Users.Remove(user);
         }
-        
-        // The profile will be deleted by cascade due to the foreign key relationship
 
         await _context.SaveChangesAsync();
 
