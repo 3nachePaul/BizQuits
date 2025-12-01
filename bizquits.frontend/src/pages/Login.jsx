@@ -6,16 +6,33 @@ import '../styles/Form.css';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [isPendingApproval, setIsPendingApproval] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const validateForm = () => {
+    const newErrors = {};
+    if (!email.trim()) {
+      newErrors.email = 'Email is required.';
+    }
+    if (!password) {
+      newErrors.password = 'Password is required.';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setErrors({});
     setIsPendingApproval(false);
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -37,9 +54,9 @@ const Login = () => {
         if (errorMessage.toLowerCase().includes('pending approval')) {
           setIsPendingApproval(true);
         }
-        setError(errorMessage);
+        setErrors({ general: errorMessage });
       } else {
-        setError('Login failed. An unknown error occurred.');
+        setErrors({ general: 'Login failed. An unknown error occurred.' });
       }
     } finally {
       setIsLoading(false);
@@ -51,33 +68,43 @@ const Login = () => {
       <h2>Login</h2>
       {isPendingApproval && (
         <div className="alert alert-warning">
-          <strong>Account Pending Approval</strong>
-          <p>Your entrepreneur account is awaiting admin approval. You will be able to log in once your account has been verified.</p>
+          <span className="alert-icon">⏳</span>
+          <div>
+            <strong>Account Pending Approval</strong>
+            <p>Your entrepreneur account is awaiting admin approval. You will be able to log in once your account has been verified.</p>
+          </div>
         </div>
       )}
-      {error && !isPendingApproval && <div className="alert alert-danger">{error}</div>}
+      {errors.general && !isPendingApproval && (
+        <div className="alert alert-danger">
+          <span className="alert-icon">⚠️</span>
+          <span>{errors.general}</span>
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label className="form-label">Email address</label>
           <input
             type="email"
-            className="form-control"
+            className={`form-control ${errors.email ? 'input-error' : ''}`}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => { setEmail(e.target.value); setErrors(prev => ({...prev, email: ''})); }}
             required
             disabled={isLoading}
           />
+          {errors.email && <span className="field-error">⚠️ {errors.email}</span>}
         </div>
         <div className="form-group">
           <label className="form-label">Password</label>
           <input
             type="password"
-            className="form-control"
+            className={`form-control ${errors.password ? 'input-error' : ''}`}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => { setPassword(e.target.value); setErrors(prev => ({...prev, password: ''})); }}
             required
             disabled={isLoading}
           />
+          {errors.password && <span className="field-error">⚠️ {errors.password}</span>}
         </div>
         <button type="submit" className="btn-primary" disabled={isLoading}>
           {isLoading ? 'Logging in...' : 'Login'}
