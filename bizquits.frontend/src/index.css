@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
   --primary-color: #0A3A0B;
   --primary-light: #0A3A0B10;
@@ -26,8 +28,6 @@
   --border-radius-lg: 0.75rem;
   --border-radius-xl: 1rem;
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 * {
   box-sizing: border-box;

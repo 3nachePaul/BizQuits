@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
+import { serviceApi } from '../services/api';
+import { useToast } from '../components/Toast';
 import './EntrepreneurServices.css';
 
 function EntrepreneurServices() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [formData, setFormData] = useState({
@@ -13,6 +16,7 @@ function EntrepreneurServices() {
     duration: '',
     category: ''
   });
+  const toast = useToast();
 
   useEffect(() => {
     fetchServices();
@@ -20,41 +24,16 @@ function EntrepreneurServices() {
 
   const fetchServices = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setServices([
-        {
-          id: 1,
-          name: 'Website Development',
-          description: 'Custom website design and development using modern technologies.',
-          price: 500,
-          duration: '2 weeks',
-          category: 'Development',
-          bookings: 12,
-          status: 'active'
-        },
-        {
-          id: 2,
-          name: 'SEO Optimization',
-          description: 'Improve your website search rankings with our SEO services.',
-          price: 200,
-          duration: '1 week',
-          category: 'Marketing',
-          bookings: 8,
-          status: 'active'
-        },
-        {
-          id: 3,
-          name: 'Logo Design',
-          description: 'Professional logo design with multiple concepts and revisions.',
-          price: 150,
-          duration: '3 days',
-          category: 'Design',
-          bookings: 5,
-          status: 'paused'
-        }
-      ]);
+    try {
+      const response = await serviceApi.getMyServices();
+      setServices(response.data);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      const message = error.response?.data || 'Failed to load services';
+      toast.error(typeof message === 'string' ? message : 'Failed to load services');
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -86,43 +65,67 @@ function EntrepreneurServices() {
     setShowModal(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingService) {
-      setServices(prev =>
-        prev.map(s =>
-          s.id === editingService.id
-            ? { ...s, ...formData, price: parseFloat(formData.price) }
-            : s
-        )
-      );
-    } else {
-      const newService = {
-        id: Date.now(),
-        ...formData,
+    setActionLoading('submit');
+    
+    try {
+      const serviceData = {
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        duration: formData.duration,
         price: parseFloat(formData.price),
-        bookings: 0,
-        status: 'active'
+        isActive: editingService ? editingService.isActive : true
       };
-      setServices(prev => [...prev, newService]);
+
+      if (editingService) {
+        await serviceApi.update(editingService.id, serviceData);
+        toast.success('Service updated successfully!');
+      } else {
+        await serviceApi.create(serviceData);
+        toast.success('Service created successfully!');
+      }
+      
+      setShowModal(false);
+      fetchServices();
+    } catch (error) {
+      console.error('Error saving service:', error);
+      const message = error.response?.data || 'Failed to save service';
+      toast.error(typeof message === 'string' ? message : 'Failed to save service');
+    } finally {
+      setActionLoading(null);
     }
-    setShowModal(false);
   };
 
-  const handleDeleteService = (serviceId) => {
+  const handleDeleteService = async (serviceId) => {
     if (window.confirm('Are you sure you want to delete this service?')) {
-      setServices(prev => prev.filter(s => s.id !== serviceId));
+      setActionLoading(serviceId);
+      try {
+        await serviceApi.delete(serviceId);
+        toast.success('Service deleted successfully!');
+        fetchServices();
+      } catch (error) {
+        console.error('Error deleting service:', error);
+        toast.error('Failed to delete service');
+      } finally {
+        setActionLoading(null);
+      }
     }
   };
 
-  const handleToggleStatus = (serviceId) => {
-    setServices(prev =>
-      prev.map(s =>
-        s.id === serviceId
-          ? { ...s, status: s.status === 'active' ? 'paused' : 'active' }
-          : s
-      )
-    );
+  const handleToggleStatus = async (serviceId) => {
+    setActionLoading(serviceId);
+    try {
+      await serviceApi.toggle(serviceId);
+      toast.success('Service status updated!');
+      fetchServices();
+    } catch (error) {
+      console.error('Error toggling service:', error);
+      toast.error('Failed to update service status');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   if (loading) {
@@ -148,16 +151,12 @@ function EntrepreneurServices() {
           <div className="stat-label">Total Services</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value">{services.filter(s => s.status === 'active').length}</div>
+          <div className="stat-value">{services.filter(s => s.isActive).length}</div>
           <div className="stat-label">Active</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value">{services.reduce((acc, s) => acc + s.bookings, 0)}</div>
-          <div className="stat-label">Total Bookings</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">${services.reduce((acc, s) => acc + (s.price * s.bookings), 0).toLocaleString()}</div>
-          <div className="stat-label">Total Revenue</div>
+          <div className="stat-value">{services.filter(s => !s.isActive).length}</div>
+          <div className="stat-label">Paused</div>
         </div>
       </div>
 
@@ -173,11 +172,11 @@ function EntrepreneurServices() {
       ) : (
         <div className="services-grid">
           {services.map(service => (
-            <div key={service.id} className={`service-card card ${service.status === 'paused' ? 'service-paused' : ''}`}>
+            <div key={service.id} className={`service-card card ${!service.isActive ? 'service-paused' : ''}`}>
               <div className="service-header">
                 <span className="service-category">{service.category}</span>
-                <span className={`service-status status-${service.status}`}>
-                  {service.status}
+                <span className={`service-status status-${service.isActive ? 'active' : 'paused'}`}>
+                  {service.isActive ? 'active' : 'paused'}
                 </span>
               </div>
               <h3 className="service-name">{service.name}</h3>
@@ -191,19 +190,27 @@ function EntrepreneurServices() {
                   {service.duration}
                 </div>
               </div>
-              <div className="service-stats">
-                <span>{service.bookings} bookings</span>
-                <span>${(service.price * service.bookings).toLocaleString()} earned</span>
-              </div>
               <div className="service-actions">
-                <button className="btn btn-sm btn-outline" onClick={() => handleEditService(service)}>
+                <button 
+                  className="btn btn-sm btn-outline" 
+                  onClick={() => handleEditService(service)}
+                  disabled={actionLoading === service.id}
+                >
                   Edit
                 </button>
-                <button className="btn btn-sm btn-outline" onClick={() => handleToggleStatus(service.id)}>
-                  {service.status === 'active' ? 'Pause' : 'Activate'}
+                <button 
+                  className="btn btn-sm btn-outline" 
+                  onClick={() => handleToggleStatus(service.id)}
+                  disabled={actionLoading === service.id}
+                >
+                  {actionLoading === service.id ? '...' : (service.isActive ? 'Pause' : 'Activate')}
                 </button>
-                <button className="btn btn-sm btn-danger" onClick={() => handleDeleteService(service.id)}>
-                  Delete
+                <button 
+                  className="btn btn-sm btn-danger" 
+                  onClick={() => handleDeleteService(service.id)}
+                  disabled={actionLoading === service.id}
+                >
+                  {actionLoading === service.id ? '...' : 'Delete'}
                 </button>
               </div>
             </div>
@@ -289,11 +296,11 @@ function EntrepreneurServices() {
                 </select>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)}>
+                <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)} disabled={actionLoading === 'submit'}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  {editingService ? 'Save Changes' : 'Add Service'}
+                <button type="submit" className="btn btn-primary" disabled={actionLoading === 'submit'}>
+                  {actionLoading === 'submit' ? 'Saving...' : (editingService ? 'Save Changes' : 'Add Service')}
                 </button>
               </div>
             </form>

@@ -424,6 +424,115 @@
   color: var(--text-muted);
 }
 
+/* Booking message and response styles */
+.booking-message,
+.booking-response {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: var(--border-radius-md);
+  font-size: 0.875rem;
+}
+
+.booking-message {
+  background: var(--primary-color-light, #e8f4fd);
+  border-left: 3px solid var(--primary-color);
+}
+
+.booking-response {
+  background: #f0f9f0;
+  border-left: 3px solid var(--success-color);
+}
+
+.message-label,
+.response-label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.message-label {
+  color: var(--primary-color);
+}
+
+.response-label {
+  color: var(--success-color);
+}
+
+.booking-message p,
+.booking-response p {
+  margin: 0;
+  color: var(--text-color);
+}
+
+.detail-message {
+  background: var(--bg-color);
+  padding: 1rem;
+  border-radius: var(--border-radius-md);
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Status badge styles for accepted */
+.status-badge-accepted {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge-rejected {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* Booking message field in modal */
+.booking-message-field {
+  margin-top: 1rem;
+}
+
+.booking-message-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.booking-message-field textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.booking-message-field textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Button success variant */
+.btn-success {
+  background: var(--success-color);
+  color: white;
+}
+
+.btn-success:hover {
+  background: #16a34a;
+}
+
+/* Status info text for entrepreneur */
+.status-info {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
 @media (max-width: 768px) {
   .bookings-stats {
     grid-template-columns: repeat(2, 1fr);

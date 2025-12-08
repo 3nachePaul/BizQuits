@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { serviceApi, bookingApi } from '../services/api';
+import { useToast } from '../components/Toast';
 import './ClientServices.css';
 
 function ClientServices() {
@@ -8,105 +10,65 @@ function ClientServices() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
   const [selectedService, setSelectedService] = useState(null);
+  const [bookingMessage, setBookingMessage] = useState('');
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [categories, setCategories] = useState(['all', 'Development', 'Design', 'Marketing', 'Consulting', 'Other']);
+  const toast = useToast();
 
+  const fetchServices = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Build filter params
+      const params = {};
+      if (selectedCategory !== 'all') {
+        params.category = selectedCategory;
+      }
+      if (priceRange !== 'all') {
+        if (priceRange === '0-200') {
+          params.maxPrice = 200;
+        } else if (priceRange === '200-500') {
+          params.minPrice = 200;
+          params.maxPrice = 500;
+        } else if (priceRange === '500+') {
+          params.minPrice = 500;
+        }
+      }
+      if (searchTerm.trim()) {
+        params.search = searchTerm.trim();
+      }
+
+      const response = await serviceApi.getAll(params);
+      setServices(response.data);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      toast.error('Failed to load services');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedCategory, priceRange, searchTerm, toast]);
+
+  // Fetch categories on mount
   useEffect(() => {
-    fetchServices();
+    const fetchCategories = async () => {
+      try {
+        const response = await serviceApi.getCategories();
+        if (response.data.length > 0) {
+          setCategories(['all', ...response.data]);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
   }, []);
 
-  const fetchServices = async () => {
-    setLoading(true);
-    setTimeout(() => {
-      setServices([
-        {
-          id: 1,
-          name: 'Website Development',
-          description: 'Custom website design and development using modern technologies. Includes responsive design, SEO optimization, and content management system.',
-          price: 500,
-          duration: '2 weeks',
-          category: 'Development',
-          entrepreneur: {
-            name: 'Tech Solutions LLC',
-            rating: 4.8,
-            reviews: 24,
-            avatar: '💻'
-          }
-        },
-        {
-          id: 2,
-          name: 'SEO Optimization',
-          description: 'Improve your website search rankings with our comprehensive SEO services. Keyword research, on-page optimization, and monthly reporting included.',
-          price: 200,
-          duration: '1 week',
-          category: 'Marketing',
-          entrepreneur: {
-            name: 'Digital Growth Co',
-            rating: 4.5,
-            reviews: 18,
-            avatar: '📈'
-          }
-        },
-        {
-          id: 3,
-          name: 'Logo Design',
-          description: 'Professional logo design with multiple concepts and revisions. Includes brand guidelines and all file formats.',
-          price: 150,
-          duration: '3 days',
-          category: 'Design',
-          entrepreneur: {
-            name: 'Creative Studio',
-            rating: 4.9,
-            reviews: 42,
-            avatar: '🎨'
-          }
-        },
-        {
-          id: 4,
-          name: 'Business Consulting',
-          description: 'Strategic business consulting to help you grow. Market analysis, business planning, and growth strategies.',
-          price: 300,
-          duration: '1 week',
-          category: 'Consulting',
-          entrepreneur: {
-            name: 'BizGrowth Partners',
-            rating: 4.7,
-            reviews: 15,
-            avatar: '💼'
-          }
-        },
-        {
-          id: 5,
-          name: 'Mobile App Development',
-          description: 'Native and cross-platform mobile app development. iOS and Android apps with modern UI/UX design.',
-          price: 1500,
-          duration: '4 weeks',
-          category: 'Development',
-          entrepreneur: {
-            name: 'AppCraft Studios',
-            rating: 4.6,
-            reviews: 31,
-            avatar: '📱'
-          }
-        },
-        {
-          id: 6,
-          name: 'Social Media Management',
-          description: 'Full-service social media management including content creation, scheduling, and engagement analytics.',
-          price: 250,
-          duration: '1 month',
-          category: 'Marketing',
-          entrepreneur: {
-            name: 'Social Buzz Agency',
-            rating: 4.4,
-            reviews: 28,
-            avatar: '📢'
-          }
-        }
-      ]);
-      setLoading(false);
-    }, 500);
-  };
-
-  const categories = ['all', 'Development', 'Design', 'Marketing', 'Consulting'];
+  // Debounce search and fetch when filters change
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchServices();
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [selectedCategory, priceRange, searchTerm, fetchServices]);
   
   const priceRanges = [
     { value: 'all', label: 'All Prices' },
@@ -115,28 +77,26 @@ function ClientServices() {
     { value: '500+', label: '$500+' }
   ];
 
-  const filteredServices = services.filter(service => {
-    const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.entrepreneur.name.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
-    
-    let matchesPrice = true;
-    if (priceRange === '0-200') matchesPrice = service.price < 200;
-    else if (priceRange === '200-500') matchesPrice = service.price >= 200 && service.price <= 500;
-    else if (priceRange === '500+') matchesPrice = service.price > 500;
-    
-    return matchesSearch && matchesCategory && matchesPrice;
-  });
-
   const handleBookService = (service) => {
     setSelectedService(service);
+    setBookingMessage('');
   };
 
-  const confirmBooking = () => {
-    alert(`Booking confirmed for ${selectedService.name}! The entrepreneur will contact you shortly.`);
-    setSelectedService(null);
+  const confirmBooking = async () => {
+    if (!selectedService) return;
+    
+    setBookingLoading(true);
+    try {
+      await bookingApi.create(selectedService.id, bookingMessage);
+      toast.success(`Booking request sent for ${selectedService.name}! The entrepreneur will contact you shortly.`);
+      setSelectedService(null);
+      setBookingMessage('');
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      toast.error(error.response?.data?.message || 'Failed to create booking');
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   if (loading) {
@@ -185,10 +145,10 @@ function ClientServices() {
       </div>
 
       <div className="results-info">
-        <span>{filteredServices.length} services found</span>
+        <span>{services.length} services found</span>
       </div>
 
-      {filteredServices.length === 0 ? (
+      {services.length === 0 ? (
         <div className="empty-state card">
           <div className="empty-icon">🔍</div>
           <h3>No services found</h3>
@@ -196,7 +156,7 @@ function ClientServices() {
         </div>
       ) : (
         <div className="services-grid">
-          {filteredServices.map(service => (
+          {services.map(service => (
             <div key={service.id} className="service-card card">
               <div className="service-header">
                 <span className="service-category">{service.category}</span>
@@ -204,17 +164,15 @@ function ClientServices() {
               <h3 className="service-name">{service.name}</h3>
               <p className="service-description">{service.description}</p>
               
-              <div className="entrepreneur-info">
-                <span className="entrepreneur-avatar">{service.entrepreneur.avatar}</span>
-                <div className="entrepreneur-details">
-                  <span className="entrepreneur-name">{service.entrepreneur.name}</span>
-                  <div className="entrepreneur-rating">
-                    <span className="star">⭐</span>
-                    <span>{service.entrepreneur.rating}</span>
-                    <span className="reviews">({service.entrepreneur.reviews} reviews)</span>
+              {service.entrepreneur && (
+                <div className="entrepreneur-info">
+                  <span className="entrepreneur-avatar">🏢</span>
+                  <div className="entrepreneur-details">
+                    <span className="entrepreneur-name">{service.entrepreneur.companyName}</span>
+                    <span className="entrepreneur-email">{service.entrepreneur.email}</span>
                   </div>
                 </div>
-              </div>
+              )}
 
               <div className="service-footer">
                 <div className="service-meta">
@@ -252,7 +210,7 @@ function ClientServices() {
                 <div className="booking-details">
                   <div className="booking-detail">
                     <span className="detail-label">Provider</span>
-                    <span className="detail-value">{selectedService.entrepreneur.name}</span>
+                    <span className="detail-value">{selectedService.entrepreneur?.companyName || 'N/A'}</span>
                   </div>
                   <div className="booking-detail">
                     <span className="detail-label">Duration</span>
@@ -263,14 +221,24 @@ function ClientServices() {
                     <span className="detail-value price">${selectedService.price}</span>
                   </div>
                 </div>
+                <div className="booking-message-field">
+                  <label htmlFor="bookingMessage">Message to entrepreneur (optional)</label>
+                  <textarea
+                    id="bookingMessage"
+                    placeholder="Describe your requirements or any special requests..."
+                    value={bookingMessage}
+                    onChange={(e) => setBookingMessage(e.target.value)}
+                    rows={4}
+                  />
+                </div>
               </div>
             </div>
             <div className="modal-footer">
-              <button className="btn btn-outline" onClick={() => setSelectedService(null)}>
+              <button className="btn btn-outline" onClick={() => setSelectedService(null)} disabled={bookingLoading}>
                 Cancel
               </button>
-              <button className="btn btn-primary" onClick={confirmBooking}>
-                Confirm Booking
+              <button className="btn btn-primary" onClick={confirmBooking} disabled={bookingLoading}>
+                {bookingLoading ? 'Sending...' : 'Confirm Booking'}
               </button>
             </div>
           </div>

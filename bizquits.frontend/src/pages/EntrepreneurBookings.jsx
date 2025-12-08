@@ -3,19 +3,21 @@ import { bookingApi } from '../services/api';
 import { useToast } from '../components/Toast';
 import './ClientBookings.css';
 
-function ClientBookings() {
+function EntrepreneurBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [selectedBooking, setSelectedBooking] = useState(null);
-  const [cancellingId, setCancellingId] = useState(null);
+  const [actionLoading, setActionLoading] = useState(null);
+  const [responseModal, setResponseModal] = useState(null);
+  const [responseText, setResponseText] = useState('');
   const toast = useToast();
   const hasFetched = useRef(false);
 
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      const response = await bookingApi.getMyBookings();
+      const response = await bookingApi.getEntrepreneurBookings();
       setBookings(response.data);
     } catch (error) {
       console.error('Error fetching bookings:', error);
@@ -35,7 +37,7 @@ function ClientBookings() {
   }, []);
 
   const filters = [
-    { value: 'all', label: 'All Bookings' },
+    { value: 'all', label: 'All Requests' },
     { value: 'Pending', label: 'Pending' },
     { value: 'Accepted', label: 'Accepted' },
     { value: 'InProgress', label: 'In Progress' },
@@ -69,57 +71,46 @@ function ClientBookings() {
     });
   };
 
-  const handleCancelBooking = async (bookingId) => {
-    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
-    
-    setCancellingId(bookingId);
+  const handleStatusChange = async (bookingId, newStatus, response = '') => {
+    setActionLoading(bookingId);
     try {
-      await bookingApi.cancel(bookingId);
-      toast.success('Booking cancelled successfully');
+      await bookingApi.updateStatus(bookingId, newStatus, response);
+      toast.success(`Booking ${newStatus.toLowerCase()} successfully`);
       fetchBookings();
+      setResponseModal(null);
+      setResponseText('');
     } catch (error) {
-      console.error('Error cancelling booking:', error);
-      toast.error(error.response?.data?.message || 'Failed to cancel booking');
+      console.error('Error updating booking:', error);
+      toast.error(error.response?.data?.message || 'Failed to update booking');
     } finally {
-      setCancellingId(null);
+      setActionLoading(null);
     }
   };
 
-  const handleCompleteBooking = async (bookingId) => {
-    if (!window.confirm('Confirm that you have received this service and mark it as completed?')) return;
-    
-    setCancellingId(bookingId); // reuse state for loading
-    try {
-      await bookingApi.complete(bookingId);
-      toast.success('Booking marked as completed!');
-      fetchBookings();
-    } catch (error) {
-      console.error('Error completing booking:', error);
-      toast.error(error.response?.data?.message || 'Failed to complete booking');
-    } finally {
-      setCancellingId(null);
-    }
+  const openResponseModal = (booking, status) => {
+    setResponseModal({ booking, status });
+    setResponseText('');
   };
 
   if (loading) {
-    return <div className="loading-state">Loading bookings...</div>;
+    return <div className="loading-state">Loading booking requests...</div>;
   }
 
   return (
     <div className="client-bookings-container">
       <div className="page-header">
-        <h1>My Bookings</h1>
-        <p>Track and manage your service bookings</p>
+        <h1>Booking Requests</h1>
+        <p>Manage incoming booking requests from clients</p>
       </div>
 
       <div className="bookings-stats">
         <div className="stat-card">
           <div className="stat-value">{bookings.length}</div>
-          <div className="stat-label">Total Bookings</div>
+          <div className="stat-label">Total Requests</div>
         </div>
-        <div className="stat-card">
+        <div className="stat-card pending">
           <div className="stat-value">{bookings.filter(b => b.status === 'Pending').length}</div>
-          <div className="stat-label">Pending</div>
+          <div className="stat-label">Awaiting Response</div>
         </div>
         <div className="stat-card">
           <div className="stat-value">{bookings.filter(b => b.status === 'InProgress').length}</div>
@@ -151,8 +142,8 @@ function ClientBookings() {
       {filteredBookings.length === 0 ? (
         <div className="empty-state card">
           <div className="empty-icon">📋</div>
-          <h3>No bookings found</h3>
-          <p>{filter === 'all' ? "You haven't made any bookings yet" : `No ${filter} bookings`}</p>
+          <h3>No booking requests</h3>
+          <p>{filter === 'all' ? "You haven't received any booking requests yet" : `No ${filter.toLowerCase()} requests`}</p>
         </div>
       ) : (
         <div className="bookings-list">
@@ -171,29 +162,30 @@ function ClientBookings() {
                 </div>
 
                 <div className="entrepreneur-row">
-                  <span className="entrepreneur-avatar">🏢</span>
+                  <span className="entrepreneur-avatar">👤</span>
                   <div className="entrepreneur-details">
-                    <span className="entrepreneur-name">{booking.service.entrepreneurCompanyName || 'N/A'}</span>
+                    <span className="entrepreneur-name">Client #{booking.client.id}</span>
+                    <span className="entrepreneur-email">{booking.client.email}</span>
                   </div>
                 </div>
 
                 {booking.message && (
                   <div className="booking-message">
-                    <span className="message-label">Your message:</span>
+                    <span className="message-label">Client message:</span>
                     <p>{booking.message}</p>
                   </div>
                 )}
 
                 {booking.entrepreneurResponse && (
                   <div className="booking-response">
-                    <span className="response-label">Response:</span>
+                    <span className="response-label">Your response:</span>
                     <p>{booking.entrepreneurResponse}</p>
                   </div>
                 )}
 
                 <div className="booking-dates">
                   <div className="date-item">
-                    <span className="date-label">Booked</span>
+                    <span className="date-label">Requested</span>
                     <span className="date-value">{formatDate(booking.createdAt)}</span>
                   </div>
                   {booking.startDate && (
@@ -222,23 +214,38 @@ function ClientBookings() {
                 >
                   View Details
                 </button>
-                {(booking.status === 'Pending' || booking.status === 'Accepted') && (
+                
+                {booking.status === 'Pending' && (
+                  <>
+                    <button 
+                      className="btn btn-primary btn-sm"
+                      onClick={() => openResponseModal(booking, 'Accepted')}
+                      disabled={actionLoading === booking.id}
+                    >
+                      Accept
+                    </button>
+                    <button 
+                      className="btn btn-danger btn-sm"
+                      onClick={() => openResponseModal(booking, 'Rejected')}
+                      disabled={actionLoading === booking.id}
+                    >
+                      Reject
+                    </button>
+                  </>
+                )}
+                
+                {booking.status === 'Accepted' && (
                   <button 
-                    className="btn btn-danger btn-sm"
-                    onClick={() => handleCancelBooking(booking.id)}
-                    disabled={cancellingId === booking.id}
+                    className="btn btn-primary btn-sm"
+                    onClick={() => handleStatusChange(booking.id, 'InProgress')}
+                    disabled={actionLoading === booking.id}
                   >
-                    {cancellingId === booking.id ? 'Cancelling...' : 'Cancel'}
+                    {actionLoading === booking.id ? 'Starting...' : 'Start Work'}
                   </button>
                 )}
+                
                 {booking.status === 'InProgress' && (
-                  <button 
-                    className="btn btn-success btn-sm"
-                    onClick={() => handleCompleteBooking(booking.id)}
-                    disabled={cancellingId === booking.id}
-                  >
-                    {cancellingId === booking.id ? 'Completing...' : 'Mark Completed'}
-                  </button>
+                  <span className="status-info">Waiting for client to confirm completion</span>
                 )}
               </div>
             </div>
@@ -246,6 +253,50 @@ function ClientBookings() {
         </div>
       )}
 
+      {/* Response Modal for Accept/Reject */}
+      {responseModal && (
+        <div className="modal-overlay" onClick={() => setResponseModal(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{responseModal.status === 'Accepted' ? 'Accept' : 'Reject'} Booking</h2>
+              <button className="modal-close" onClick={() => setResponseModal(null)}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="detail-section">
+                <h4>Service: {responseModal.booking.service.name}</h4>
+                <p>Client message: {responseModal.booking.message || 'No message'}</p>
+              </div>
+              <div className="booking-message-field">
+                <label htmlFor="response">Response to client (optional)</label>
+                <textarea
+                  id="response"
+                  placeholder={responseModal.status === 'Accepted' 
+                    ? "Thank you for your booking! I'll start working on it soon..." 
+                    : "Sorry, I cannot take this booking at this time..."
+                  }
+                  value={responseText}
+                  onChange={(e) => setResponseText(e.target.value)}
+                  rows={4}
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-outline" onClick={() => setResponseModal(null)}>
+                Cancel
+              </button>
+              <button 
+                className={`btn ${responseModal.status === 'Accepted' ? 'btn-primary' : 'btn-danger'}`}
+                onClick={() => handleStatusChange(responseModal.booking.id, responseModal.status, responseText)}
+                disabled={actionLoading}
+              >
+                {actionLoading ? 'Processing...' : `Confirm ${responseModal.status === 'Accepted' ? 'Accept' : 'Reject'}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Details Modal */}
       {selectedBooking && (
         <div className="modal-overlay" onClick={() => setSelectedBooking(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -276,11 +327,11 @@ function ClientBookings() {
                 </div>
               </div>
               <div className="detail-section">
-                <h4>Provider</h4>
+                <h4>Client</h4>
                 <div className="detail-grid">
                   <div className="detail-item">
-                    <span className="detail-label">Company</span>
-                    <span className="detail-value">{selectedBooking.service.entrepreneurCompanyName || 'N/A'}</span>
+                    <span className="detail-label">Email</span>
+                    <span className="detail-value">{selectedBooking.client.email}</span>
                   </div>
                 </div>
               </div>
@@ -294,7 +345,7 @@ function ClientBookings() {
                     </span>
                   </div>
                   <div className="detail-item">
-                    <span className="detail-label">Created</span>
+                    <span className="detail-label">Requested</span>
                     <span className="detail-value">{formatDate(selectedBooking.createdAt)}</span>
                   </div>
                   {selectedBooking.startDate && (
@@ -313,13 +364,13 @@ function ClientBookings() {
               </div>
               {selectedBooking.message && (
                 <div className="detail-section">
-                  <h4>Your Message</h4>
+                  <h4>Client Message</h4>
                   <p className="detail-message">{selectedBooking.message}</p>
                 </div>
               )}
               {selectedBooking.entrepreneurResponse && (
                 <div className="detail-section">
-                  <h4>Entrepreneur Response</h4>
+                  <h4>Your Response</h4>
                   <p className="detail-message">{selectedBooking.entrepreneurResponse}</p>
                 </div>
               )}
@@ -336,4 +387,4 @@ function ClientBookings() {
   );
 }
 
-export default ClientBookings;
+export default EntrepreneurBookings;
