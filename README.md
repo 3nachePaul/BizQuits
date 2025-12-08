@@ -53,6 +53,52 @@ A web application for connecting entrepreneurs with clients, featuring user auth
 
 ---
 
+## Sprint 2
+
+**Interval**: 30 noiembrie - 12 decembrie
+
+**Scop**: Dezvoltarea elementelor necesare pentru adăugarea și vizualizarea ofertelor.
+
+### Obiective specifice
+
+#### 1. Crearea paginii de activitate a antreprenorilor și formularul de adăugare a ofertelor
+
+**a. Crearea paginii de activitate a antreprenorilor**
+
+**b. Implementarea funcționalității de adăugare a ofertelor**
+- Antreprenorul creează o ofertă nouă, introducând detalii precum titlu, descriere, categorie, durată de valabilitate pentru a promova produsele sau serviciile oferite.
+- Sistemul afișează un formular de creare cu câmpuri pentru titlu, descriere, categorie, durată și alte detalii specifice pentru ca antreprenorul să poată introduce informațiile necesare.
+
+#### 2. Crearea paginii de vizualizare a ofertelor pentru clienți
+- Utilizatorul navighează printr-o listă cu toate ofertele disponibile pentru a vedea opțiunile din platformă.
+- Interfața permite utilizatorului să selecteze criterii de filtrare (categorie/tip/locație) a listelor de oferte și joburi pentru a restrânge lista cu elemente de interes.
+- Interfața permite utilizatorului să sorteze lista de oferte și joburi (după dată, recompense) pentru a vizualiza elementele în ordinea preferată.
+
+#### 3. Sistemul de rezervări (Booking System)
+- **Clienții** pot rezerva servicii prin butonul "Book Now" și pot adăuga un mesaj opțional.
+- **Antreprenorii** văd cererile de rezervare în dashboard-ul lor și pot accepta sau respinge.
+- **Fluxul de lucru:**
+  1. Client face rezervare → Status: Pending
+  2. Antreprenor acceptă → Status: Accepted
+  3. Antreprenor începe lucrul → Status: InProgress
+  4. Client confirmă finalizarea → Status: Completed
+- Ambele părți pot anula rezervările (cu restricții bazate pe status).
+
+#### 4. Activități de testare
+- Testarea manuală a funcționalităților integrate
+
+#### 5. Activități de dezvoltare
+- Dezvoltarea paginii de activitate a antreprenorilor (frontend, backend)
+- Dezvoltarea funcționalității de adăugare a ofertelor (frontend, backend)
+- Dezvoltarea funcționalității de vizualizare a ofertelor (frontend, backend)
+- Dezvoltarea sistemului de rezervări (frontend, backend)
+
+#### 6. Activități de învățare
+- Urmărirea de tutoriale video și citirea articolelor pentru a aprofunda tehnologiile alese pentru dezvoltarea aplicației și pentru a rezolva probleme întâmpinate
+- Sesiune de mentorat dacă echipa are nevoie de ajutor suplimentar
+
+---
+
 ## Getting Started
 
 ### Prerequisites
@@ -61,7 +107,25 @@ A web application for connecting entrepreneurs with clients, featuring user auth
 - [Node.js](https://nodejs.org/) (v18+)
 - [Docker](https://www.docker.com/)
 
-### Database Setup (Docker)
+### Quick Start
+
+The easiest way to start the entire application:
+
+```bash
+./start.sh
+```
+
+This will:
+1. Start the SQL Server database in Docker
+2. Apply database migrations
+3. Start the backend API (http://localhost:5204)
+4. Start the frontend (http://localhost:5173)
+
+Press `Ctrl+C` to stop all services.
+
+### Manual Setup
+
+#### Database Setup (Docker)
 
 Run SQL Server in a Docker container:
 
@@ -95,10 +159,10 @@ npm run dev
 ```
 BizQuits/
 ├── BizQuits/                 # ASP.NET Core Backend
-│   ├── Controllers/          # API Controllers
+│   ├── Controllers/          # API Controllers (Auth, Admin, User, Service, Booking)
 │   ├── Data/                 # Database Context & Migrations
 │   ├── DTOs/                 # Data Transfer Objects
-│   ├── Models/               # Entity Models
+│   ├── Models/               # Entity Models (User, EntrepreneurProfile, Service, Booking)
 │   └── Services/             # Business Logic Services
 ├── bizquits.frontend/        # React Frontend
 │   ├── src/
@@ -108,6 +172,9 @@ BizQuits/
 │   │   ├── services/         # API Service Layer
 │   │   └── styles/           # CSS Styles
 │   └── public/               # Static Assets
+├── database/                 # Database initialization scripts
+├── start.sh                  # Quick start script
+├── docker-compose.yml        # Docker configuration
 └── README.md
 ```
 

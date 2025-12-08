@@ -9,6 +9,7 @@ import AdminUsers from './pages/AdminUsers';
 import Profile from './pages/Profile';
 import EntrepreneurCompany from './pages/EntrepreneurCompany';
 import EntrepreneurServices from './pages/EntrepreneurServices';
+import EntrepreneurBookings from './pages/EntrepreneurBookings';
 import ClientServices from './pages/ClientServices';
 import ClientBookings from './pages/ClientBookings';
 import PrivateRoute from './components/PrivateRoute';
@@ -45,6 +46,7 @@ const AppLayout = () => {
           {/* Entrepreneur Routes */}
           <Route path="/entrepreneur/company" element={<PrivateRoute roles={['Entrepreneur']}><EntrepreneurCompany /></PrivateRoute>} />
           <Route path="/entrepreneur/services" element={<PrivateRoute roles={['Entrepreneur']}><EntrepreneurServices /></PrivateRoute>} />
+          <Route path="/entrepreneur/bookings" element={<PrivateRoute roles={['Entrepreneur']}><EntrepreneurBookings /></PrivateRoute>} />
           
           {/* Client Routes */}
           <Route path="/client/services" element={<PrivateRoute roles={['Client']}><ClientServices /></PrivateRoute>} />

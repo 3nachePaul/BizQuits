@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    # SQL Server for Mac M1/M2/M3/M4 via Rosetta emulation
+    platform: linux/amd64
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: bizquits-db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Parola123!
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+volumes:
+  sqlserver_data:
