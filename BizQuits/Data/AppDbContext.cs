@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<EntrepreneurProfile> EntrepreneurProfiles { get; set; }
     public DbSet<Service> Services { get; set; }
     public DbSet<Booking> Bookings { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -60,5 +61,19 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Booking>()
             .HasIndex(b => b.ServiceId);
+
+        // RefreshToken relationships
+        modelBuilder.Entity<RefreshToken>()
+            .HasOne(rt => rt.User)
+            .WithMany()
+            .HasForeignKey(rt => rt.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RefreshToken>()
+            .HasIndex(rt => rt.Token)
+            .IsUnique();
+
+        modelBuilder.Entity<RefreshToken>()
+            .HasIndex(rt => rt.UserId);
     }
 }
