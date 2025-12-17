@@ -365,6 +365,20 @@ public class ServiceController : ControllerBase
             return Forbid();
         }
 
+        // Check if there are any bookings associated with this service
+        var hasBookings = await _context.Bookings.AnyAsync(b => b.ServiceId == id);
+        if (hasBookings)
+        {
+            return BadRequest("Cannot delete service with existing bookings. Please deactivate it instead.");
+        }
+
+        // Check if there are any reviews associated with this service
+        var hasReviews = await _context.Reviews.AnyAsync(r => r.ServiceId == id);
+        if (hasReviews)
+        {
+            return BadRequest("Cannot delete service with existing reviews. Please deactivate it instead.");
+        }
+
         _context.Services.Remove(service);
         await _context.SaveChangesAsync();
 

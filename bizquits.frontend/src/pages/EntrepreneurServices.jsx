@@ -107,7 +107,8 @@ function EntrepreneurServices() {
         fetchServices();
       } catch (error) {
         console.error('Error deleting service:', error);
-        toast.error('Failed to delete service');
+        const errorMessage = error.response?.data?.message || error.response?.data || 'Failed to delete service';
+        toast.error(typeof errorMessage === 'string' ? errorMessage : 'Failed to delete service');
       } finally {
         setActionLoading(null);
       }

@@ -87,7 +87,8 @@ function ClientServices() {
       setBookingMessage('');
     } catch (error) {
       console.error('Error creating booking:', error);
-      toast.error(error.response?.data?.message || 'Failed to create booking');
+      const errorMessage = error.response?.data?.message || error.response?.data || 'Failed to create booking';
+      toast.error(typeof errorMessage === 'string' ? errorMessage : 'Failed to create booking');
     } finally {
       setBookingLoading(false);
     }
