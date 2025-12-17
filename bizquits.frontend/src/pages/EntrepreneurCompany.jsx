@@ -1,35 +1,75 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { userService } from '../services/api';
+import { userService, publicEntrepreneurApi } from '../services/api';
 import './EntrepreneurCompany.css';
 
 const EntrepreneurCompany = () => {
   const { user } = useAuth();
+  const { id } = useParams(); // ✅ dacă există => pagină publică
+  const isPublic = !!id;
+
   const [companyInfo, setCompanyInfo] = useState(null);
+  const [reviewsData, setReviewsData] = useState({ averageRating: null, totalReviews: 0, reviews: [] });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchCompanyInfo();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const fetchCompanyInfo = async () => {
     setIsLoading(true);
     try {
-      const response = await userService.getProfile();
-      const profile = response.data;
-      if (profile.entrepreneurProfile) {
+      if (isPublic) {
+        const res = await publicEntrepreneurApi.getProfile(id);
+
+        // Backend-ul ar trebui să trimită ceva gen:
+        // { entrepreneurProfileId, companyName, cui, email, averageRating, totalReviews, reviews:[{rating, comment, serviceName, createdAt}] }
+        const data = res.data;
+
         setCompanyInfo({
-          companyName: profile.entrepreneurProfile.companyName,
-          cui: profile.entrepreneurProfile.cui,
-          isApproved: profile.entrepreneurProfile.isApproved,
-          email: profile.email
+          companyName: data.companyName,
+          cui: data.cui,
+          isApproved: true, // public => deja aprobat
+          email: data.email
         });
+
+        setReviewsData({
+          averageRating: data.averageRating ?? data.avgRating ?? null,
+          totalReviews: data.totalReviews ?? (data.reviews?.length ?? 0),
+          reviews: data.reviews ?? []
+        });
+      } else {
+        const response = await userService.getProfile();
+        const profile = response.data;
+
+        if (profile.entrepreneurProfile) {
+          setCompanyInfo({
+            entrepreneurProfileId: profile.entrepreneurProfile.id,
+            companyName: profile.entrepreneurProfile.companyName,
+            cui: profile.entrepreneurProfile.cui,
+            isApproved: profile.entrepreneurProfile.isApproved,
+            email: profile.email
+          });
+        }
       }
     } catch (err) {
       console.error('Error fetching company info:', err);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const renderStars = (rating) => {
+    const r = Number(rating || 0);
+    return (
+      <div className="company-stars" aria-label={`Rating ${r} out of 5`}>
+        {[1,2,3,4,5].map((s) => (
+          <span key={s} className={`company-star ${s <= Math.round(r) ? 'on' : ''}`}>★</span>
+        ))}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -43,8 +83,8 @@ const EntrepreneurCompany = () => {
   return (
     <div className="entrepreneur-company-container">
       <div className="page-header">
-        <h1>My Company</h1>
-        <p>Manage your business profile and information</p>
+        <h1>{isPublic ? 'Company Profile' : 'My Company'}</h1>
+        <p>{isPublic ? 'Public company profile' : 'Manage your business profile and information'}</p>
       </div>
 
       <div className="company-layout">
@@ -57,32 +97,49 @@ const EntrepreneurCompany = () => {
               <div className="company-info">
                 <h2>{companyInfo?.companyName || 'Company Name'}</h2>
                 <p className="company-cui">CUI: {companyInfo?.cui || 'N/A'}</p>
+
+                {/* ✅ PUBLIC: rating mediu */}
+                {isPublic && (
+                  <div className="company-rating-row">
+                    {renderStars(reviewsData.averageRating)}
+                    <div className="company-rating-meta">
+                      <strong>{(reviewsData.averageRating ?? 0).toFixed(1)}</strong> / 5
+                      <span className="company-rating-count">({reviewsData.totalReviews} reviews)</span>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className={`status-badge ${companyInfo?.isApproved ? 'status-approved' : 'status-pending'}`}>
-                {companyInfo?.isApproved ? '✓ Approved' : '⏳ Pending Approval'}
-              </div>
+
+              {!isPublic && (
+                <div className={`status-badge ${companyInfo?.isApproved ? 'status-approved' : 'status-pending'}`}>
+                  {companyInfo?.isApproved ? '✓ Approved' : '⏳ Pending Approval'}
+                </div>
+              )}
             </div>
+
             <div className="card-content">
               <div className="info-grid">
                 <div className="info-item">
                   <label>Email</label>
-                  <span>{user?.email}</span>
+                  <span>{isPublic ? (companyInfo?.email || '-') : (user?.email || '-')}</span>
                 </div>
-                <div className="info-item">
-                  <label>Registration Status</label>
-                  <span className={companyInfo?.isApproved ? 'text-success' : 'text-warning'}>
-                    {companyInfo?.isApproved ? 'Active' : 'Awaiting Approval'}
-                  </span>
-                </div>
+                {!isPublic && (
+                  <div className="info-item">
+                    <label>Registration Status</label>
+                    <span className={companyInfo?.isApproved ? 'text-success' : 'text-warning'}>
+                      {companyInfo?.isApproved ? 'Active' : 'Awaiting Approval'}
+                    </span>
+                  </div>
+                )}
                 <div className="info-item">
                   <label>Member Since</label>
-                  <span>{new Date(companyInfo?.createdAt || Date.now()).toLocaleDateString()}</span>
+                  <span>{new Date(Date.now()).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {!companyInfo?.isApproved && (
+          {!isPublic && !companyInfo?.isApproved && (
             <div className="alert alert-warning">
               <div className="alert-icon">⏳</div>
               <div className="alert-content">
@@ -92,32 +149,71 @@ const EntrepreneurCompany = () => {
             </div>
           )}
 
-          <div className="card">
-            <div className="card-header">
-              <h3 className="card-title">Company Details</h3>
-              <button className="btn btn-secondary btn-sm">Edit</button>
+          {/* ✅ PUBLIC: lista reviews */}
+          {isPublic && (
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">Reviews</h3>
+              </div>
+              <div className="card-content">
+                {(reviewsData.reviews?.length ?? 0) === 0 ? (
+                  <div className="reviews-empty">
+                    No approved reviews yet.
+                  </div>
+                ) : (
+                  <div className="reviews-list">
+                    {reviewsData.reviews.map((r) => (
+                      <div key={r.id || `${r.createdAt}-${r.serviceName}`} className="review-item">
+                        <div className="review-top">
+                          <div className="review-service">{r.serviceName || r.bookingTitle || 'Service'}</div>
+                          <div className="review-rating">
+                            {renderStars(r.rating)}
+                            <span className="review-score">{Number(r.rating || 0).toFixed(1)}</span>
+                          </div>
+                        </div>
+                        <div className="review-comment">{r.comment}</div>
+                        {r.createdAt && (
+                          <div className="review-date">
+                            {new Date(r.createdAt).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="card-content">
-              <form className="company-form">
-                <div className="form-group">
-                  <label>Company Name</label>
-                  <input type="text" value={companyInfo?.companyName || ''} readOnly />
-                </div>
-                <div className="form-group">
-                  <label>CUI (Company Registration Number)</label>
-                  <input type="text" value={companyInfo?.cui || ''} readOnly />
-                </div>
-                <div className="form-group">
-                  <label>Business Email</label>
-                  <input type="email" value={user?.email || ''} readOnly />
-                </div>
-                <div className="form-group">
-                  <label>Description</label>
-                  <textarea placeholder="Describe your business..." rows={4} />
-                </div>
-              </form>
+          )}
+
+          {/* Privat: form existente */}
+          {!isPublic && (
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">Company Details</h3>
+                <button className="btn btn-secondary btn-sm">Edit</button>
+              </div>
+              <div className="card-content">
+                <form className="company-form">
+                  <div className="form-group">
+                    <label>Company Name</label>
+                    <input type="text" value={companyInfo?.companyName || ''} readOnly />
+                  </div>
+                  <div className="form-group">
+                    <label>CUI (Company Registration Number)</label>
+                    <input type="text" value={companyInfo?.cui || ''} readOnly />
+                  </div>
+                  <div className="form-group">
+                    <label>Business Email</label>
+                    <input type="email" value={user?.email || ''} readOnly />
+                  </div>
+                  <div className="form-group">
+                    <label>Description</label>
+                    <textarea placeholder="Describe your business..." rows={4} />
+                  </div>
+                </form>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="company-sidebar">
@@ -136,10 +232,19 @@ const EntrepreneurCompany = () => {
                   <span className="quick-stat-label">Bookings</span>
                 </div>
                 <div className="quick-stat">
-                  <span className="quick-stat-value">0</span>
+                  <span className="quick-stat-value">{isPublic ? (reviewsData.totalReviews || 0) : 0}</span>
                   <span className="quick-stat-label">Reviews</span>
                 </div>
               </div>
+
+              {isPublic && (
+                <div className="public-rating-mini">
+                  <div className="public-rating-label">Average Rating</div>
+                  <div className="public-rating-value">
+                    {(reviewsData.averageRating ?? 0).toFixed(1)} / 5
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

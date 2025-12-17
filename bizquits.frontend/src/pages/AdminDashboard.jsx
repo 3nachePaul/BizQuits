@@ -1,45 +1,79 @@
 import { useEffect, useState, useCallback } from 'react';
-import { adminService } from '../services/api';
+import { adminService, adminReviewApi } from '../services/api';
 import { useToast } from '../components/Toast';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
+  // Entrepreneurs
   const [pendingEntrepreneurs, setPendingEntrepreneurs] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(null);
-  const [confirmDialog, setConfirmDialog] = useState({ show: false, type: '', id: null, email: '' });
+  const [isLoadingEntrepreneurs, setIsLoadingEntrepreneurs] = useState(true);
+  const [actionLoadingEntrepreneur, setActionLoadingEntrepreneur] = useState(null);
+
+  // Reviews
+  const [pendingReviews, setPendingReviews] = useState([]);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(true);
+  const [actionLoadingReview, setActionLoadingReview] = useState(null);
+
+  // Confirm modal (generic)
+  const [confirmDialog, setConfirmDialog] = useState({
+    show: false,
+    type: '', // 'approveEntrepreneur' | 'rejectEntrepreneur' | 'approveReview' | 'rejectReview'
+    id: null,
+    label: '',
+  });
+
   const toast = useToast();
 
   const getErrorMessage = (err) => {
-    if (err.response && err.response.data) {
-      const errorData = err.response.data;
-      if (typeof errorData === 'string') {
-        return errorData;
-      } else if (errorData.title) {
-        return errorData.title;
-      }
+    if (err?.response?.data) {
+      const d = err.response.data;
+      if (typeof d === 'string') return d;
+      if (d.title) return d.title;
+      if (d.message) return d.message;
     }
     return 'An unexpected error occurred.';
   };
 
+  // -------------------------
+  // FETCH: Entrepreneurs
+  // -------------------------
   const fetchPendingEntrepreneurs = useCallback(async () => {
-    setIsLoading(true);
+    setIsLoadingEntrepreneurs(true);
     try {
       const response = await adminService.getPendingEntrepreneurs();
       setPendingEntrepreneurs(response.data);
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {
-      setIsLoading(false);
+      setIsLoadingEntrepreneurs(false);
+    }
+  }, [toast]);
+
+  // -------------------------
+  // FETCH: Reviews
+  // -------------------------
+  const fetchPendingReviews = useCallback(async () => {
+    setIsLoadingReviews(true);
+    try {
+      const response = await adminReviewApi.getPending();
+      setPendingReviews(response.data);
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setIsLoadingReviews(false);
     }
   }, [toast]);
 
   useEffect(() => {
     fetchPendingEntrepreneurs();
+    fetchPendingReviews();
   }, []);
 
-  const handleApprove = async (id) => {
-    setActionLoading(id);
+  // -------------------------
+  // ENTREPRENEUR actions
+  // -------------------------
+  const approveEntrepreneur = async (id) => {
+    setActionLoadingEntrepreneur(id);
     try {
       await adminService.approveEntrepreneur(id);
       toast.success('Entrepreneur approved successfully!');
@@ -47,13 +81,13 @@ const AdminDashboard = () => {
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {
-      setActionLoading(null);
-      setConfirmDialog({ show: false, type: '', id: null, email: '' });
+      setActionLoadingEntrepreneur(null);
+      setConfirmDialog({ show: false, type: '', id: null, label: '' });
     }
   };
 
-  const handleReject = async (id) => {
-    setActionLoading(id);
+  const rejectEntrepreneur = async (id) => {
+    setActionLoadingEntrepreneur(id);
     try {
       await adminService.rejectEntrepreneur(id);
       toast.success('Entrepreneur rejected and account deleted successfully!');
@@ -61,26 +95,65 @@ const AdminDashboard = () => {
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {
-      setActionLoading(null);
-      setConfirmDialog({ show: false, type: '', id: null, email: '' });
+      setActionLoadingEntrepreneur(null);
+      setConfirmDialog({ show: false, type: '', id: null, label: '' });
     }
   };
 
-  const openConfirmDialog = (type, id, email) => {
-    setConfirmDialog({ show: true, type, id, email });
+  // -------------------------
+  // REVIEW actions
+  // -------------------------
+  const approveReview = async (id) => {
+    setActionLoadingReview(id);
+    try {
+      await adminReviewApi.approve(id);
+      toast.success('Review approved!');
+      fetchPendingReviews();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setActionLoadingReview(null);
+      setConfirmDialog({ show: false, type: '', id: null, label: '' });
+    }
+  };
+
+  const rejectReview = async (id) => {
+    setActionLoadingReview(id);
+    try {
+      await adminReviewApi.reject(id);
+      toast.success('Review rejected!');
+      fetchPendingReviews();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setActionLoadingReview(null);
+      setConfirmDialog({ show: false, type: '', id: null, label: '' });
+    }
+  };
+
+  // -------------------------
+  // CONFIRM modal
+  // -------------------------
+  const openConfirmDialog = (type, id, label) => {
+    setConfirmDialog({ show: true, type, id, label });
   };
 
   const closeConfirmDialog = () => {
-    setConfirmDialog({ show: false, type: '', id: null, email: '' });
+    setConfirmDialog({ show: false, type: '', id: null, label: '' });
   };
 
   const confirmAction = () => {
-    if (confirmDialog.type === 'approve') {
-      handleApprove(confirmDialog.id);
-    } else if (confirmDialog.type === 'reject') {
-      handleReject(confirmDialog.id);
-    }
+    const { type, id } = confirmDialog;
+    if (!id) return;
+
+    if (type === 'approveEntrepreneur') return approveEntrepreneur(id);
+    if (type === 'rejectEntrepreneur') return rejectEntrepreneur(id);
+    if (type === 'approveReview') return approveReview(id);
+    if (type === 'rejectReview') return rejectReview(id);
   };
+
+  const isAnyActionLoading =
+    actionLoadingEntrepreneur !== null || actionLoadingReview !== null;
 
   return (
     <div className="admin-dashboard">
@@ -88,21 +161,38 @@ const AdminDashboard = () => {
         <div className="header-content">
           <div>
             <h1>Admin Dashboard</h1>
-            <p>Manage pending entrepreneur approvals.</p>
+            <p>Manage entrepreneur approvals and review moderation.</p>
           </div>
-          <button 
-            className="btn-refresh" 
-            onClick={fetchPendingEntrepreneurs}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Refreshing...' : 'Refresh'}
-          </button>
+
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              className="btn-refresh"
+              onClick={fetchPendingEntrepreneurs}
+              disabled={isLoadingEntrepreneurs}
+              title="Refresh entrepreneurs"
+            >
+              {isLoadingEntrepreneurs ? 'Refreshing...' : 'Refresh Entrepreneurs'}
+            </button>
+
+            <button
+              className="btn-refresh"
+              onClick={fetchPendingReviews}
+              disabled={isLoadingReviews}
+              title="Refresh reviews"
+            >
+              {isLoadingReviews ? 'Refreshing...' : 'Refresh Reviews'}
+            </button>
+          </div>
         </div>
       </header>
 
+      {/* =========================
+          PENDING ENTREPRENEURS
+          ========================= */}
       <div className="table-container">
         <h3>Pending Entrepreneurs ({pendingEntrepreneurs.length})</h3>
-        {isLoading ? (
+
+        {isLoadingEntrepreneurs ? (
           <div className="loading-spinner">Loading...</div>
         ) : pendingEntrepreneurs.length === 0 ? (
           <div className="empty-state">
@@ -118,6 +208,7 @@ const AdminDashboard = () => {
                 <th>Actions</th>
               </tr>
             </thead>
+
             <tbody>
               {pendingEntrepreneurs.map((entrepreneur) => (
                 <tr key={entrepreneur.id}>
@@ -127,17 +218,30 @@ const AdminDashboard = () => {
                   <td className="action-buttons">
                     <button
                       className="btn-approve"
-                      onClick={() => openConfirmDialog('approve', entrepreneur.id, entrepreneur.email)}
-                      disabled={actionLoading === entrepreneur.id}
+                      onClick={() =>
+                        openConfirmDialog(
+                          'approveEntrepreneur',
+                          entrepreneur.id,
+                          entrepreneur.email
+                        )
+                      }
+                      disabled={actionLoadingEntrepreneur === entrepreneur.id}
                     >
-                      {actionLoading === entrepreneur.id ? '...' : 'Approve'}
+                      {actionLoadingEntrepreneur === entrepreneur.id ? '...' : 'Approve'}
                     </button>
+
                     <button
                       className="btn-reject"
-                      onClick={() => openConfirmDialog('reject', entrepreneur.id, entrepreneur.email)}
-                      disabled={actionLoading === entrepreneur.id}
+                      onClick={() =>
+                        openConfirmDialog(
+                          'rejectEntrepreneur',
+                          entrepreneur.id,
+                          entrepreneur.email
+                        )
+                      }
+                      disabled={actionLoadingEntrepreneur === entrepreneur.id}
                     >
-                      {actionLoading === entrepreneur.id ? '...' : 'Reject'}
+                      {actionLoadingEntrepreneur === entrepreneur.id ? '...' : 'Reject'}
                     </button>
                   </td>
                 </tr>
@@ -147,30 +251,112 @@ const AdminDashboard = () => {
         )}
       </div>
 
+      {/* =========================
+          PENDING REVIEWS
+          ========================= */}
+      <div className="table-container" style={{ marginTop: '1.5rem' }}>
+        <h3>Pending Reviews ({pendingReviews.length})</h3>
+
+        {isLoadingReviews ? (
+          <div className="loading-spinner">Loading...</div>
+        ) : pendingReviews.length === 0 ? (
+          <div className="empty-state">
+            <p>No pending reviews.</p>
+          </div>
+        ) : (
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Service</th>
+                <th>Rating</th>
+                <th>Comment</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {pendingReviews.map((r) => (
+                <tr key={r.id}>
+                  <td>{r.clientEmail}</td>
+                  <td>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <strong>{r.serviceName}</strong>
+                      <span style={{ fontSize: '0.85rem', opacity: 0.75 }}>ServiceId: {r.serviceId}</span>
+                    </div>
+                  </td>
+                  <td>{r.rating}/5</td>
+                  <td style={{ maxWidth: 420, whiteSpace: 'pre-wrap' }}>{r.comment}</td>
+                  <td>{new Date(r.createdAt).toLocaleString()}</td>
+                  <td className="action-buttons">
+                    <button
+                      className="btn-approve"
+                      onClick={() => openConfirmDialog('approveReview', r.id, `review #${r.id}`)}
+                      disabled={actionLoadingReview === r.id}
+                    >
+                      {actionLoadingReview === r.id ? '...' : 'Approve'}
+                    </button>
+
+                    <button
+                      className="btn-reject"
+                      onClick={() => openConfirmDialog('rejectReview', r.id, `review #${r.id}`)}
+                      disabled={actionLoadingReview === r.id}
+                    >
+                      {actionLoadingReview === r.id ? '...' : 'Reject'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* =========================
+          CONFIRM MODAL
+          ========================= */}
       {confirmDialog.show && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Confirm {confirmDialog.type === 'approve' ? 'Approval' : 'Rejection'}</h3>
+            <h3>Confirm action</h3>
+
             <p>
-              {confirmDialog.type === 'approve' 
-                ? `Are you sure you want to approve ${confirmDialog.email}? They will be able to log in after this.`
-                : `Are you sure you want to reject ${confirmDialog.email}? This will permanently delete their account.`
-              }
+              {confirmDialog.type === 'approveEntrepreneur' && (
+                <>
+                  Approve entrepreneur <strong>{confirmDialog.label}</strong>?
+                </>
+              )}
+              {confirmDialog.type === 'rejectEntrepreneur' && (
+                <>
+                  Reject entrepreneur <strong>{confirmDialog.label}</strong>? This will delete their account.
+                </>
+              )}
+              {confirmDialog.type === 'approveReview' && (
+                <>
+                  Approve <strong>{confirmDialog.label}</strong>?
+                </>
+              )}
+              {confirmDialog.type === 'rejectReview' && (
+                <>
+                  Reject <strong>{confirmDialog.label}</strong>?
+                </>
+              )}
             </p>
+
             <div className="modal-actions">
-              <button 
-                className="btn-cancel" 
-                onClick={closeConfirmDialog}
-                disabled={actionLoading}
-              >
+              <button className="btn-cancel" onClick={closeConfirmDialog} disabled={isAnyActionLoading}>
                 Cancel
               </button>
-              <button 
-                className={confirmDialog.type === 'approve' ? 'btn-approve' : 'btn-reject'}
+
+              <button
+                className={
+                  confirmDialog.type.includes('approve') ? 'btn-approve' : 'btn-reject'
+                }
                 onClick={confirmAction}
-                disabled={actionLoading}
+                disabled={isAnyActionLoading}
               >
-                {actionLoading ? 'Processing...' : (confirmDialog.type === 'approve' ? 'Approve' : 'Reject')}
+                {isAnyActionLoading ? 'Processing...' : 'Confirm'}
               </button>
             </div>
           </div>

@@ -72,8 +72,34 @@ export const bookingApi = {
   cancel: (id) => api.patch(`/booking/${id}/cancel`),
   complete: (id) => api.patch(`/booking/${id}/complete`),
   getEntrepreneurBookings: () => api.get('/booking/entrepreneur'),
-  updateStatus: (id, status, response) => api.patch(`/booking/${id}/status`, { status, response }),
+  updateStatus: (id, status, response) =>
+    api.patch(`/booking/${id}/status`, { status, response }),
   getById: (id) => api.get(`/booking/${id}`),
+};
+
+// ✅ Gamification (Client only)
+export const gamificationApi = {
+  me: () => api.get('/gamification/me'),
+};
+
+// ✅ Reviews (BOOKING-based)
+export const reviewApi = {
+  // POST /api/review/booking/{bookingId}
+  createForBooking: (bookingId, data) =>
+    api.post(`/review/booking/${bookingId}`, data),
+};
+
+// ✅ Admin reviews moderation
+export const adminReviewApi = {
+  getPending: () => api.get('/admin/reviews/pending'),
+  approve: (id) => api.post(`/admin/reviews/${id}/approve`),
+  reject: (id) => api.post(`/admin/reviews/${id}/reject`),
+};
+
+// ✅ Public entrepreneur profile (ratings + reviews)
+export const publicEntrepreneurApi = {
+  getProfile: (entrepreneurProfileId) =>
+    api.get(`/public/entrepreneurs/${entrepreneurProfileId}`),
 };
 
 export default api;

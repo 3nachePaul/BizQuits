@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { bookingApi } from '../services/api';
+import { bookingApi, reviewApi } from '../services/api';
 import { useToast } from '../components/Toast';
 import './ClientBookings.css';
 
@@ -9,6 +9,13 @@ function ClientBookings() {
   const [filter, setFilter] = useState('all');
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
+
+  // Review modal state
+  const [reviewBooking, setReviewBooking] = useState(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
   const toast = useToast();
   const hasFetched = useRef(false);
 
@@ -71,7 +78,7 @@ function ClientBookings() {
 
   const handleCancelBooking = async (bookingId) => {
     if (!window.confirm('Are you sure you want to cancel this booking?')) return;
-    
+
     setCancellingId(bookingId);
     try {
       await bookingApi.cancel(bookingId);
@@ -87,8 +94,8 @@ function ClientBookings() {
 
   const handleCompleteBooking = async (bookingId) => {
     if (!window.confirm('Confirm that you have received this service and mark it as completed?')) return;
-    
-    setCancellingId(bookingId); // reuse state for loading
+
+    setCancellingId(bookingId);
     try {
       await bookingApi.complete(bookingId);
       toast.success('Booking marked as completed!');
@@ -99,6 +106,72 @@ function ClientBookings() {
     } finally {
       setCancellingId(null);
     }
+  };
+
+  const openReviewModal = (booking) => {
+    setReviewBooking(booking);
+    setReviewRating(5);
+    setReviewComment('');
+  };
+
+  const closeReviewModal = () => {
+    if (reviewSubmitting) return;
+    setReviewBooking(null);
+    setReviewRating(5);
+    setReviewComment('');
+  };
+
+  const submitReview = async () => {
+    if (!reviewBooking) return;
+
+    const rating = Number(reviewRating);
+    if (!rating || rating < 1 || rating > 5) {
+      toast.error('Rating must be between 1 and 5');
+      return;
+    }
+
+    if (!reviewComment.trim() || reviewComment.trim().length < 10) {
+      toast.error('Review must be at least 10 characters');
+      return;
+    }
+
+    setReviewSubmitting(true);
+    try {
+      // ✅ Review by BOOKING (Completed)
+      await reviewApi.createForBooking(reviewBooking.id, {
+        rating,
+        comment: reviewComment.trim()
+      });
+
+      toast.success('Review submitted! It will appear after admin approval.');
+      closeReviewModal();
+      // (optional) refresh bookings, în caz că vrei să ascunzi butonul după submit
+      fetchBookings();
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      toast.error(error.response?.data?.message || 'Failed to submit review');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  const renderStars = (value, onChange) => {
+    const v = Number(value || 0);
+    return (
+      <div className="star-row" role="radiogroup" aria-label="Rating">
+        {[1,2,3,4,5].map((s) => (
+          <button
+            key={s}
+            type="button"
+            className={`star-btn ${s <= v ? 'star-on' : ''}`}
+            onClick={() => onChange(s)}
+            aria-label={`${s} star`}
+          >
+            ★
+          </button>
+        ))}
+      </div>
+    );
   };
 
   if (loading) {
@@ -216,14 +289,25 @@ function ClientBookings() {
               </div>
 
               <div className="booking-actions">
-                <button 
+                <button
                   className="btn btn-outline btn-sm"
                   onClick={() => setSelectedBooking(booking)}
                 >
                   View Details
                 </button>
+
+                {/* ✅ NEW: Write Review (doar pentru Completed) */}
+                {booking.status === 'Completed' && (
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => openReviewModal(booking)}
+                  >
+                    Write Review
+                  </button>
+                )}
+
                 {(booking.status === 'Pending' || booking.status === 'Accepted') && (
-                  <button 
+                  <button
                     className="btn btn-danger btn-sm"
                     onClick={() => handleCancelBooking(booking.id)}
                     disabled={cancellingId === booking.id}
@@ -231,8 +315,9 @@ function ClientBookings() {
                     {cancellingId === booking.id ? 'Cancelling...' : 'Cancel'}
                   </button>
                 )}
+
                 {booking.status === 'InProgress' && (
-                  <button 
+                  <button
                     className="btn btn-success btn-sm"
                     onClick={() => handleCompleteBooking(booking.id)}
                     disabled={cancellingId === booking.id}
@@ -246,6 +331,7 @@ function ClientBookings() {
         </div>
       )}
 
+      {/* DETAILS MODAL */}
       {selectedBooking && (
         <div className="modal-overlay" onClick={() => setSelectedBooking(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -275,6 +361,7 @@ function ClientBookings() {
                   </div>
                 </div>
               </div>
+
               <div className="detail-section">
                 <h4>Provider</h4>
                 <div className="detail-grid">
@@ -284,6 +371,7 @@ function ClientBookings() {
                   </div>
                 </div>
               </div>
+
               <div className="detail-section">
                 <h4>Status</h4>
                 <div className="detail-grid">
@@ -311,6 +399,7 @@ function ClientBookings() {
                   )}
                 </div>
               </div>
+
               {selectedBooking.message && (
                 <div className="detail-section">
                   <h4>Your Message</h4>
@@ -324,9 +413,73 @@ function ClientBookings() {
                 </div>
               )}
             </div>
+
             <div className="modal-footer">
+              {selectedBooking.status === 'Completed' && (
+                <button
+                  className="btn btn-outline"
+                  onClick={() => {
+                    setSelectedBooking(null);
+                    openReviewModal(selectedBooking);
+                  }}
+                >
+                  Write Review
+                </button>
+              )}
               <button className="btn btn-outline" onClick={() => setSelectedBooking(null)}>
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ REVIEW MODAL */}
+      {reviewBooking && (
+        <div className="modal-overlay" onClick={closeReviewModal}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Write a Review</h2>
+              <button className="modal-close" onClick={closeReviewModal}>×</button>
+            </div>
+
+            <div className="modal-body">
+              <div className="detail-section">
+                <h4>Booking</h4>
+                <div className="review-booking-title">
+                  <div className="review-service-name">{reviewBooking.service?.name}</div>
+                  <div className="review-company-name">{reviewBooking.service?.entrepreneurCompanyName}</div>
+                </div>
+              </div>
+
+              <div className="detail-section">
+                <h4>Rating</h4>
+                {renderStars(reviewRating, setReviewRating)}
+                <div className="rating-hint">{reviewRating}/5</div>
+              </div>
+
+              <div className="detail-section">
+                <h4>Review</h4>
+                <textarea
+                  className="review-textarea"
+                  rows={5}
+                  placeholder="Write your feedback (min 10 characters)..."
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  disabled={reviewSubmitting}
+                />
+                <div className="review-note">
+                  Your review will be visible after admin approval.
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn btn-outline" onClick={closeReviewModal} disabled={reviewSubmitting}>
+                Cancel
+              </button>
+              <button className="btn btn-success" onClick={submitReview} disabled={reviewSubmitting}>
+                {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
               </button>
             </div>
           </div>

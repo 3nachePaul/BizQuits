@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { serviceApi, bookingApi } from '../services/api';
 import { useToast } from '../components/Toast';
 import './ClientServices.css';
 
 function ClientServices() {
+  const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,24 +20,18 @@ function ClientServices() {
   const fetchServices = useCallback(async () => {
     setLoading(true);
     try {
-      // Build filter params
       const params = {};
-      if (selectedCategory !== 'all') {
-        params.category = selectedCategory;
-      }
+      if (selectedCategory !== 'all') params.category = selectedCategory;
+
       if (priceRange !== 'all') {
-        if (priceRange === '0-200') {
-          params.maxPrice = 200;
-        } else if (priceRange === '200-500') {
+        if (priceRange === '0-200') params.maxPrice = 200;
+        else if (priceRange === '200-500') {
           params.minPrice = 200;
           params.maxPrice = 500;
-        } else if (priceRange === '500+') {
-          params.minPrice = 500;
-        }
+        } else if (priceRange === '500+') params.minPrice = 500;
       }
-      if (searchTerm.trim()) {
-        params.search = searchTerm.trim();
-      }
+
+      if (searchTerm.trim()) params.search = searchTerm.trim();
 
       const response = await serviceApi.getAll(params);
       setServices(response.data);
@@ -47,7 +43,6 @@ function ClientServices() {
     }
   }, [selectedCategory, priceRange, searchTerm, toast]);
 
-  // Fetch categories on mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -62,14 +57,13 @@ function ClientServices() {
     fetchCategories();
   }, []);
 
-  // Debounce search and fetch when filters change
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       fetchServices();
     }, 300);
     return () => clearTimeout(timeoutId);
   }, [selectedCategory, priceRange, searchTerm, fetchServices]);
-  
+
   const priceRanges = [
     { value: 'all', label: 'All Prices' },
     { value: '0-200', label: 'Under $200' },
@@ -84,7 +78,7 @@ function ClientServices() {
 
   const confirmBooking = async () => {
     if (!selectedService) return;
-    
+
     setBookingLoading(true);
     try {
       await bookingApi.create(selectedService.id, bookingMessage);
@@ -97,6 +91,14 @@ function ClientServices() {
     } finally {
       setBookingLoading(false);
     }
+  };
+
+  const openCompanyProfile = (entrepreneurProfileId) => {
+    if (!entrepreneurProfileId) {
+      toast.error('Company profile id missing.');
+      return;
+    }
+    navigate(`/companies/${entrepreneurProfileId}`);
   };
 
   if (loading) {
@@ -120,6 +122,7 @@ function ClientServices() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+
         <div className="filter-group">
           <label>Category</label>
           <div className="filter-pills">
@@ -134,6 +137,7 @@ function ClientServices() {
             ))}
           </div>
         </div>
+
         <div className="filter-group">
           <label>Price Range</label>
           <select value={priceRange} onChange={(e) => setPriceRange(e.target.value)}>
@@ -161,15 +165,26 @@ function ClientServices() {
               <div className="service-header">
                 <span className="service-category">{service.category}</span>
               </div>
+
               <h3 className="service-name">{service.name}</h3>
               <p className="service-description">{service.description}</p>
-              
+
               {service.entrepreneur && (
                 <div className="entrepreneur-info">
                   <span className="entrepreneur-avatar">🏢</span>
                   <div className="entrepreneur-details">
                     <span className="entrepreneur-name">{service.entrepreneur.companyName}</span>
                     <span className="entrepreneur-email">{service.entrepreneur.email}</span>
+
+                    {/* ✅ NEW: link to public profile */}
+                    <button
+                      className="btn btn-outline btn-sm"
+                      style={{ marginTop: 8, alignSelf: 'flex-start' }}
+                      onClick={() => openCompanyProfile(service.entrepreneur.id)}
+                      type="button"
+                    >
+                      View Company
+                    </button>
                   </div>
                 </div>
               )}
@@ -184,6 +199,7 @@ function ClientServices() {
                     {service.duration}
                   </div>
                 </div>
+
                 <button className="btn btn-primary" onClick={() => handleBookService(service)}>
                   Book Now
                 </button>
@@ -200,6 +216,7 @@ function ClientServices() {
               <h2>Confirm Booking</h2>
               <button className="modal-close" onClick={() => setSelectedService(null)}>×</button>
             </div>
+
             <div className="modal-body">
               <div className="booking-summary">
                 <div className="booking-service">
@@ -207,6 +224,7 @@ function ClientServices() {
                   <h3>{selectedService.name}</h3>
                   <p>{selectedService.description}</p>
                 </div>
+
                 <div className="booking-details">
                   <div className="booking-detail">
                     <span className="detail-label">Provider</span>
@@ -221,6 +239,7 @@ function ClientServices() {
                     <span className="detail-value price">${selectedService.price}</span>
                   </div>
                 </div>
+
                 <div className="booking-message-field">
                   <label htmlFor="bookingMessage">Message to entrepreneur (optional)</label>
                   <textarea
@@ -233,6 +252,7 @@ function ClientServices() {
                 </div>
               </div>
             </div>
+
             <div className="modal-footer">
               <button className="btn btn-outline" onClick={() => setSelectedService(null)} disabled={bookingLoading}>
                 Cancel
