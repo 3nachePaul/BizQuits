@@ -15,19 +15,33 @@ public class AppDbContext : DbContext
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
 
+    // Gamification
+    public DbSet<ClientStats> ClientStats { get; set; }
+    public DbSet<Achievement> Achievements { get; set; }
+    public DbSet<UserAchievement> UserAchievements { get; set; }
+
+    // Reviews
+    public DbSet<Review> Reviews { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
+        // --------------------
+        // User <-> EntrepreneurProfile (1:1)
+        // --------------------
         modelBuilder.Entity<User>()
             .HasOne(u => u.EntrepreneurProfile)
             .WithOne(p => p.User)
             .HasForeignKey<EntrepreneurProfile>(p => p.UserId);
-        
+
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
 
+        // --------------------
+        // Service -> EntrepreneurProfile (many:1)
+        // --------------------
         modelBuilder.Entity<Service>()
             .HasOne(s => s.EntrepreneurProfile)
             .WithMany()
@@ -40,7 +54,9 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Service>()
             .HasIndex(s => s.IsActive);
 
+        // --------------------
         // Booking relationships
+        // --------------------
         modelBuilder.Entity<Booking>()
             .HasOne(b => b.Client)
             .WithMany()
@@ -62,7 +78,9 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Booking>()
             .HasIndex(b => b.ServiceId);
 
+        // --------------------
         // RefreshToken relationships
+        // --------------------
         modelBuilder.Entity<RefreshToken>()
             .HasOne(rt => rt.User)
             .WithMany()
@@ -75,5 +93,68 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<RefreshToken>()
             .HasIndex(rt => rt.UserId);
+
+        // --------------------
+        // Gamification: ClientStats
+        // 1 stats row per client user
+        // --------------------
+        modelBuilder.Entity<ClientStats>()
+            .HasIndex(cs => cs.UserId)
+            .IsUnique();
+
+        // (optional but recommended) if you want an explicit relationship
+        modelBuilder.Entity<ClientStats>()
+            .HasOne(cs => cs.User)
+            .WithMany()
+            .HasForeignKey(cs => cs.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // --------------------
+        // Gamification: Achievements
+        // unique code per achievement
+        // --------------------
+        modelBuilder.Entity<Achievement>()
+            .HasIndex(a => a.Code)
+            .IsUnique();
+
+        // --------------------
+        // Gamification: UserAchievements
+        // no duplicate unlocks per user+achievement
+        // --------------------
+        modelBuilder.Entity<UserAchievement>()
+            .HasIndex(ua => new { ua.UserId, ua.AchievementId })
+            .IsUnique();
+
+        modelBuilder.Entity<UserAchievement>()
+            .HasOne(ua => ua.User)
+            .WithMany()
+            .HasForeignKey(ua => ua.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserAchievement>()
+            .HasOne(ua => ua.Achievement)
+            .WithMany()
+            .HasForeignKey(ua => ua.AchievementId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // --------------------
+        // Reviews
+        // one review per client per service
+        // --------------------
+        modelBuilder.Entity<Review>()
+            .HasIndex(r => new { r.ServiceId, r.ClientId })
+            .IsUnique();
+
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.Service)
+            .WithMany()
+            .HasForeignKey(r => r.ServiceId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.Client)
+            .WithMany()
+            .HasForeignKey(r => r.ClientId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

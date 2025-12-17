@@ -262,3 +262,112 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================
+   Public rating + reviews
+========================= */
+
+.company-rating-row {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.company-stars {
+  display: flex;
+  gap: 0.2rem;
+  font-size: 1.1rem;
+}
+
+.company-star {
+  color: #cbd5e1;
+}
+
+.company-star.on {
+  color: #f59e0b;
+}
+
+.company-rating-meta {
+  color: var(--text-color);
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.company-rating-count {
+  color: var(--text-muted);
+  margin-left: 0.25rem;
+}
+
+.reviews-empty {
+  color: var(--text-muted);
+  padding: 1rem 0;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.review-item {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  background: var(--white-color);
+}
+
+.review-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.review-service {
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.review-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.review-score {
+  font-weight: 700;
+  color: var(--text-color);
+  font-size: 0.95rem;
+}
+
+.review-comment {
+  margin-top: 0.6rem;
+  color: var(--text-color);
+  line-height: 1.5;
+}
+
+.review-date {
+  margin-top: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.public-rating-mini {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.public-rating-label {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.public-rating-value {
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-top: 0.25rem;
+}

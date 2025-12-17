@@ -254,4 +254,29 @@ export const bookingApi = {
   getById: (id) => api.get(`/booking/${encodeURIComponent(id)}`),
 };
 
+// ✅ Gamification (Client only)
+export const gamificationApi = {
+  me: () => api.get('/gamification/me'),
+};
+
+// ✅ Reviews (BOOKING-based)
+export const reviewApi = {
+  // POST /api/review/booking/{bookingId}
+  createForBooking: (bookingId, data) =>
+    api.post(`/review/booking/${bookingId}`, data),
+};
+
+// ✅ Admin reviews moderation
+export const adminReviewApi = {
+  getPending: () => api.get('/admin/reviews/pending'),
+  approve: (id) => api.post(`/admin/reviews/${id}/approve`),
+  reject: (id) => api.post(`/admin/reviews/${id}/reject`),
+};
+
+// ✅ Public entrepreneur profile (ratings + reviews)
+export const publicEntrepreneurApi = {
+  getProfile: (entrepreneurProfileId) =>
+    api.get(`/public/entrepreneurs/${entrepreneurProfileId}`),
+};
+
 export default api;

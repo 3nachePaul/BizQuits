@@ -28,6 +28,9 @@ try
     var allowedOrigins = builder.Configuration.GetSection("Security:AllowedOrigins").Get<string[]>() 
         ?? ["http://localhost:5173"];
 
+    // --------------------
+    // CORS (Frontend Vite)
+    // --------------------
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowFrontend", policy =>
@@ -40,6 +43,9 @@ try
         });
     });
 
+    // --------------------
+    // Rate Limiting
+    // --------------------
     builder.Services.AddRateLimiter(options =>
     {
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -78,11 +84,23 @@ try
         };
     });
 
+    // --------------------
+    // Database
+    // --------------------
     builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+    // --------------------
+    // DI Services
+    // --------------------
     builder.Services.AddScoped<IAuthService, AuthService>();
 
+    // Gamification
+    builder.Services.AddScoped<GamificationService>();
+
+    // --------------------
+    // Controllers + JSON
+    // --------------------
     builder.Services.AddControllers()
         .AddJsonOptions(options =>
         {
@@ -90,6 +108,9 @@ try
             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         });
 
+    // --------------------
+    // JWT Authentication
+    // --------------------
     var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not found.");
     var jwtKeyBytes = Encoding.UTF8.GetBytes(jwtKey);
     
@@ -139,6 +160,9 @@ try
         };
     });
 
+    // --------------------
+    // Swagger + Bearer Auth
+    // --------------------
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo 
@@ -186,6 +210,21 @@ try
 
     app.UseSecurityHeaders();
 
+    // --------------------
+    // Seed Achievements (Development)
+    // --------------------
+    if (app.Environment.IsDevelopment())
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var gamification = scope.ServiceProvider.GetRequiredService<GamificationService>();
+            await gamification.EnsureSeedAchievements();
+        }
+    }
+
+    // --------------------
+    // Middleware pipeline
+    // --------------------
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();

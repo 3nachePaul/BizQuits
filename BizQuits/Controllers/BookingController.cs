@@ -75,6 +75,9 @@ public class BookingController : ControllerBase
 
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync();
+        var gamification = HttpContext.RequestServices.GetRequiredService<BizQuits.Services.GamificationService>();
+        await gamification.AwardFirstBooking(client.Id);
+
 
         return CreatedAtAction(nameof(GetBooking), new { id = booking.Id }, MapToDto(booking, service, client));
     }
@@ -333,6 +336,9 @@ public class BookingController : ControllerBase
         booking.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+        var gamification = HttpContext.RequestServices.GetRequiredService<BizQuits.Services.GamificationService>();
+        await gamification.AwardBookingCompleted(client.Id);
+
 
         return Ok(MapToDto(booking, booking.Service!, client));
     }
