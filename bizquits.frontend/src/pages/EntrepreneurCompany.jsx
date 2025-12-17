@@ -4,6 +4,35 @@ import { useAuth } from '../context/AuthContext';
 import { userService, publicEntrepreneurApi } from '../services/api';
 import './EntrepreneurCompany.css';
 
+const Icons = {
+  building: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+      <path d="M9 22v-4h6v4"/>
+      <path d="M8 6h.01"/>
+      <path d="M16 6h.01"/>
+      <path d="M12 6h.01"/>
+      <path d="M12 10h.01"/>
+      <path d="M12 14h.01"/>
+      <path d="M16 10h.01"/>
+      <path d="M16 14h.01"/>
+      <path d="M8 10h.01"/>
+      <path d="M8 14h.01"/>
+    </svg>
+  ),
+  check: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  ),
+  clock: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+  )
+};
+
 const EntrepreneurCompany = () => {
   const { user } = useAuth();
   const { id } = useParams(); // ✅ dacă există => pagină publică
@@ -92,7 +121,7 @@ const EntrepreneurCompany = () => {
           <div className="card company-profile-card">
             <div className="company-header">
               <div className="company-logo">
-                <span>🏢</span>
+                <span>{Icons.building}</span>
               </div>
               <div className="company-info">
                 <h2>{companyInfo?.companyName || 'Company Name'}</h2>
@@ -112,7 +141,7 @@ const EntrepreneurCompany = () => {
 
               {!isPublic && (
                 <div className={`status-badge ${companyInfo?.isApproved ? 'status-approved' : 'status-pending'}`}>
-                  {companyInfo?.isApproved ? '✓ Approved' : '⏳ Pending Approval'}
+                  {companyInfo?.isApproved ? <><span className="status-icon">{Icons.check}</span> Approved</> : <><span className="status-icon">{Icons.clock}</span> Pending Approval</>}
                 </div>
               )}
             </div>
@@ -141,7 +170,7 @@ const EntrepreneurCompany = () => {
 
           {!isPublic && !companyInfo?.isApproved && (
             <div className="alert alert-warning">
-              <div className="alert-icon">⏳</div>
+              <div className="alert-icon">{Icons.clock}</div>
               <div className="alert-content">
                 <h4>Account Pending Approval</h4>
                 <p>Your entrepreneur account is currently being reviewed by our administrators. You will be notified once your account is approved.</p>

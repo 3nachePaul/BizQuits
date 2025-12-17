@@ -3,6 +3,29 @@ import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/api';
 import '../styles/Form.css';
 
+// SVG Icons
+const Icons = {
+  alertTriangle: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+  ),
+  check: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  ),
+  info: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="16" x2="12" y2="12"/>
+      <line x1="12" y1="8" x2="12.01" y2="8"/>
+    </svg>
+  )
+};
+
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -99,13 +122,13 @@ const Register = () => {
       <h2>Register</h2>
       {errors.general && (
         <div className="alert alert-danger">
-          <span className="alert-icon">⚠️</span>
+          <span className="alert-icon">{Icons.alertTriangle}</span>
           <span>{errors.general}</span>
         </div>
       )}
       {success && (
         <div className="alert alert-success">
-          <span className="alert-icon">✅</span>
+          <span className="alert-icon">{Icons.check}</span>
           <span>{success}</span>
         </div>
       )}
@@ -120,7 +143,7 @@ const Register = () => {
             required
             disabled={isLoading}
           />
-          {errors.email && <span className="field-error">⚠️ {errors.email}</span>}
+          {errors.email && <span className="field-error">{Icons.alertTriangle} {errors.email}</span>}
         </div>
         <div className="form-group">
           <label className="form-label">Password</label>
@@ -134,7 +157,7 @@ const Register = () => {
             minLength={6}
           />
           {errors.password ? (
-            <span className="field-error">⚠️ {errors.password}</span>
+            <span className="field-error">{Icons.alertTriangle} {errors.password}</span>
           ) : (
             <small className="form-hint">Minimum 6 characters</small>
           )}
@@ -149,7 +172,7 @@ const Register = () => {
             required
             disabled={isLoading}
           />
-          {errors.confirmPassword && <span className="field-error">⚠️ {errors.confirmPassword}</span>}
+          {errors.confirmPassword && <span className="field-error">{Icons.alertTriangle} {errors.confirmPassword}</span>}
         </div>
         <div className="form-group">
           <label className="form-label">Role</label>
@@ -166,7 +189,8 @@ const Register = () => {
         {role === 1 && (
           <div className="entrepreneur-fields">
             <div className="info-box">
-              <p>ℹ️ Entrepreneur accounts require admin approval before you can log in.</p>
+              {Icons.info}
+              <p>Entrepreneur accounts require admin approval before you can log in.</p>
             </div>
             <div className="form-group">
               <label className="form-label">Company Name</label>
@@ -178,7 +202,7 @@ const Register = () => {
                 required
                 disabled={isLoading}
               />
-              {errors.companyName && <span className="field-error">⚠️ {errors.companyName}</span>}
+              {errors.companyName && <span className="field-error">{Icons.alertTriangle} {errors.companyName}</span>}
             </div>
             <div className="form-group">
               <label className="form-label">CUI (Company Registration Number)</label>
@@ -191,7 +215,7 @@ const Register = () => {
                 disabled={isLoading}
                 placeholder="e.g., RO12345678"
               />
-              {errors.cui && <span className="field-error">⚠️ {errors.cui}</span>}
+              {errors.cui && <span className="field-error">{Icons.alertTriangle} {errors.cui}</span>}
             </div>
           </div>
         )}

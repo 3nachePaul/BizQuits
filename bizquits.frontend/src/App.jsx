@@ -10,8 +10,10 @@ import Profile from './pages/Profile';
 import EntrepreneurCompany from './pages/EntrepreneurCompany';
 import EntrepreneurServices from './pages/EntrepreneurServices';
 import EntrepreneurBookings from './pages/EntrepreneurBookings';
+import EntrepreneurOffers from './pages/EntrepreneurOffers';
 import ClientServices from './pages/ClientServices';
 import ClientBookings from './pages/ClientBookings';
+import ClientOffers from './pages/ClientOffers';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import CompanyPublicProfile from './pages/CompanyPublicProfile';
@@ -56,10 +58,12 @@ const AppLayout = () => {
           <Route path="/entrepreneur/company" element={<PrivateRoute roles={['Entrepreneur']}><EntrepreneurCompany /></PrivateRoute>} />
           <Route path="/entrepreneur/services" element={<PrivateRoute roles={['Entrepreneur']}><EntrepreneurServices /></PrivateRoute>} />
           <Route path="/entrepreneur/bookings" element={<PrivateRoute roles={['Entrepreneur']}><EntrepreneurBookings /></PrivateRoute>} />
+          <Route path="/entrepreneur/offers" element={<PrivateRoute roles={['Entrepreneur']}><EntrepreneurOffers /></PrivateRoute>} />
 
           {/* Client */}
           <Route path="/client/services" element={<PrivateRoute roles={['Client']}><ClientServices /></PrivateRoute>} />
           <Route path="/client/bookings" element={<PrivateRoute roles={['Client']}><ClientBookings /></PrivateRoute>} />
+          <Route path="/client/offers" element={<PrivateRoute roles={['Client']}><ClientOffers /></PrivateRoute>} />
 
           {/* ⚠️ MUST BE LAST */}
           <Route path="*" element={<Home />} />

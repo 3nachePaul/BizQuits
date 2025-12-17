@@ -4,6 +4,7 @@ using BizQuits.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BizQuits.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251217140527_AddOffersTable")]
+    partial class AddOffersTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,7 +183,6 @@ namespace BizQuits.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal?>("BonusValue")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -192,7 +194,6 @@ namespace BizQuits.Data.Migrations
                         .HasColumnType("nvarchar(2000)");
 
                     b.Property<decimal?>("DiscountPercentage")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("EarlyCompletionDays")
@@ -237,49 +238,6 @@ namespace BizQuits.Data.Migrations
                     b.HasIndex("Type");
 
                     b.ToTable("Offers");
-                });
-
-            modelBuilder.Entity("BizQuits.Models.OfferClaim", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("ClaimedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("OfferId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UsedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClaimCode");
-
-                    b.HasIndex("OfferId");
-
-                    b.HasIndex("UserId", "OfferId")
-                        .IsUnique();
-
-                    b.ToTable("OfferClaims");
                 });
 
             modelBuilder.Entity("BizQuits.Models.RefreshToken", b =>
@@ -523,25 +481,6 @@ namespace BizQuits.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("EntrepreneurProfile");
-                });
-
-            modelBuilder.Entity("BizQuits.Models.OfferClaim", b =>
-                {
-                    b.HasOne("BizQuits.Models.Offer", "Offer")
-                        .WithMany()
-                        .HasForeignKey("OfferId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BizQuits.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Offer");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BizQuits.Models.RefreshToken", b =>

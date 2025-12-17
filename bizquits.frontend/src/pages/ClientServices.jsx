@@ -4,6 +4,42 @@ import { serviceApi, bookingApi } from '../services/api';
 import { useToast } from '../components/Toast';
 import './ClientServices.css';
 
+const Icons = {
+  search: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+  ),
+  building: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+      <path d="M9 22v-4h6v4"/>
+      <path d="M8 6h.01"/>
+      <path d="M16 6h.01"/>
+      <path d="M12 6h.01"/>
+      <path d="M12 10h.01"/>
+      <path d="M12 14h.01"/>
+      <path d="M16 10h.01"/>
+      <path d="M16 14h.01"/>
+      <path d="M8 10h.01"/>
+      <path d="M8 14h.01"/>
+    </svg>
+  ),
+  clock: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+  ),
+  close: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  )
+};
+
 function ClientServices() {
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
@@ -115,7 +151,7 @@ function ClientServices() {
 
       <div className="filters-section card">
         <div className="search-box">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon">{Icons.search}</span>
           <input
             type="text"
             placeholder="Search services, entrepreneurs..."
@@ -124,38 +160,40 @@ function ClientServices() {
           />
         </div>
 
-        <div className="filter-group">
-          <label>Category</label>
-          <div className="filter-pills">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                className={`filter-pill ${selectedCategory === cat ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(cat)}
-              >
-                {cat === 'all' ? 'All' : cat}
-              </button>
-            ))}
+        <div className="filter-row">
+          <div className="filter-group">
+            <label>Category</label>
+            <div className="filter-pills">
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  className={`filter-pill ${selectedCategory === cat ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory(cat)}
+                >
+                  {cat === 'all' ? 'All' : cat}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div className="filter-group">
-          <label>Price Range</label>
-          <select value={priceRange} onChange={(e) => setPriceRange(e.target.value)}>
-            {priceRanges.map(range => (
-              <option key={range.value} value={range.value}>{range.label}</option>
-            ))}
-          </select>
+          <div className="filter-group">
+            <label>Price Range</label>
+            <select value={priceRange} onChange={(e) => setPriceRange(e.target.value)}>
+              {priceRanges.map(range => (
+                <option key={range.value} value={range.value}>{range.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
       <div className="results-info">
-        <span>{services.length} services found</span>
+        <span>{services.length} service{services.length !== 1 ? 's' : ''} found</span>
       </div>
 
       {services.length === 0 ? (
         <div className="empty-state card">
-          <div className="empty-icon">🔍</div>
+          <div className="empty-icon">{Icons.search}</div>
           <h3>No services found</h3>
           <p>Try adjusting your filters or search term</p>
         </div>
@@ -172,21 +210,18 @@ function ClientServices() {
 
               {service.entrepreneur && (
                 <div className="entrepreneur-info">
-                  <span className="entrepreneur-avatar">🏢</span>
+                  <span className="entrepreneur-avatar">{Icons.building}</span>
                   <div className="entrepreneur-details">
                     <span className="entrepreneur-name">{service.entrepreneur.companyName}</span>
                     <span className="entrepreneur-email">{service.entrepreneur.email}</span>
-
-                    {/* ✅ NEW: link to public profile */}
-                    <button
-                      className="btn btn-outline btn-sm"
-                      style={{ marginTop: 8, alignSelf: 'flex-start' }}
-                      onClick={() => openCompanyProfile(service.entrepreneur.id)}
-                      type="button"
-                    >
-                      View Company
-                    </button>
                   </div>
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => openCompanyProfile(service.entrepreneur.id)}
+                    type="button"
+                  >
+                    View
+                  </button>
                 </div>
               )}
 
@@ -196,7 +231,7 @@ function ClientServices() {
                     <span className="price-value">${service.price}</span>
                   </div>
                   <div className="service-duration">
-                    <span className="duration-icon">⏱️</span>
+                    <span className="duration-icon">{Icons.clock}</span>
                     {service.duration}
                   </div>
                 </div>
@@ -215,7 +250,7 @@ function ClientServices() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Confirm Booking</h2>
-              <button className="modal-close" onClick={() => setSelectedService(null)}>×</button>
+              <button className="modal-close" onClick={() => setSelectedService(null)}>{Icons.close}</button>
             </div>
 
             <div className="modal-body">

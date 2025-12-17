@@ -210,10 +210,15 @@ export const authService = {
 
 export const userService = {
   getProfile: () => api.get('/user/profile'),
+  updateProfile: (data) => api.put('/user/profile', sanitizeObject(data)),
+  deleteAccount: (password) => api.delete('/user/account', { data: { password } }),
 };
 
 export const adminService = {
   getAllUsers: () => api.get('/admin/users'),
+  getUser: (id) => api.get(`/admin/users/${encodeURIComponent(id)}`),
+  updateUser: (id, data) => api.put(`/admin/users/${encodeURIComponent(id)}`, sanitizeObject(data)),
+  deleteUser: (id) => api.delete(`/admin/users/${encodeURIComponent(id)}`),
   getPendingEntrepreneurs: () => api.get('/admin/pending'),
   approveEntrepreneur: (id) => api.post(`/admin/approve/${encodeURIComponent(id)}`),
   rejectEntrepreneur: (id) => api.post(`/admin/reject/${encodeURIComponent(id)}`),
@@ -277,6 +282,30 @@ export const adminReviewApi = {
 export const publicEntrepreneurApi = {
   getProfile: (entrepreneurProfileId) =>
     api.get(`/public/entrepreneurs/${entrepreneurProfileId}`),
+};
+
+// ✅ Offers API
+export const offerApi = {
+  getAll: (params = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.type) queryParams.append('type', encodeURIComponent(params.type));
+    if (params.search) queryParams.append('search', encodeURIComponent(params.search));
+    const queryString = queryParams.toString();
+    return api.get(`/offer${queryString ? `?${queryString}` : ''}`);
+  },
+  getById: (id) => api.get(`/offer/${encodeURIComponent(id)}`),
+  getTypes: () => api.get('/offer/types'),
+  getMyOffers: () => api.get('/offer/my'),
+  create: (data) => api.post('/offer', sanitizeObject(data)),
+  update: (id, data) => api.put(`/offer/${encodeURIComponent(id)}`, sanitizeObject(data)),
+  toggle: (id) => api.patch(`/offer/${encodeURIComponent(id)}/toggle`),
+  delete: (id) => api.delete(`/offer/${encodeURIComponent(id)}`),
+  // Claims
+  claim: (id, data = {}) => api.post(`/offer/${encodeURIComponent(id)}/claim`, data),
+  getMyClaims: () => api.get('/offer/claims/my'),
+  cancelClaim: (claimId) => api.delete(`/offer/claims/${encodeURIComponent(claimId)}`),
+  getOfferClaims: (offerId) => api.get(`/offer/${encodeURIComponent(offerId)}/claims`),
+  markClaimUsed: (claimId) => api.patch(`/offer/claims/${encodeURIComponent(claimId)}/use`),
 };
 
 export default api;

@@ -23,6 +23,10 @@ public class AppDbContext : DbContext
     // Reviews
     public DbSet<Review> Reviews { get; set; }
 
+    // Offers
+    public DbSet<Offer> Offers { get; set; }
+    public DbSet<OfferClaim> OfferClaims { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -156,5 +160,43 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(r => r.ClientId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // --------------------
+        // Offers
+        // --------------------
+        modelBuilder.Entity<Offer>()
+            .HasOne(o => o.EntrepreneurProfile)
+            .WithMany()
+            .HasForeignKey(o => o.EntrepreneurProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Offer>()
+            .HasIndex(o => o.Type);
+
+        modelBuilder.Entity<Offer>()
+            .HasIndex(o => o.IsActive);
+
+        // --------------------
+        // OfferClaims
+        // one claim per user per offer
+        // --------------------
+        modelBuilder.Entity<OfferClaim>()
+            .HasIndex(oc => new { oc.UserId, oc.OfferId })
+            .IsUnique();
+
+        modelBuilder.Entity<OfferClaim>()
+            .HasOne(oc => oc.Offer)
+            .WithMany()
+            .HasForeignKey(oc => oc.OfferId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<OfferClaim>()
+            .HasOne(oc => oc.User)
+            .WithMany()
+            .HasForeignKey(oc => oc.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<OfferClaim>()
+            .HasIndex(oc => oc.ClaimCode);
     }
 }

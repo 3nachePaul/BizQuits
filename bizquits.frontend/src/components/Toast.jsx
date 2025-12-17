@@ -1,6 +1,41 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import './Toast.css';
 
+// SVG Icons for toast
+const Icons = {
+  success: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  ),
+  error: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  ),
+  warning: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+  ),
+  info: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="16" x2="12" y2="12"/>
+      <line x1="12" y1="8" x2="12.01" y2="8"/>
+    </svg>
+  ),
+  close: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  )
+};
+
 const ToastContext = createContext(null);
 
 export const useToast = () => {
@@ -39,13 +74,7 @@ export const ToastProvider = ({ children }) => {
   const info = useCallback((message, duration) => addToast(message, 'info', duration), [addToast]);
 
   const getIcon = (type) => {
-    switch (type) {
-      case 'success': return '✓';
-      case 'error': return '✕';
-      case 'warning': return '⚠';
-      case 'info': return 'ℹ';
-      default: return 'ℹ';
-    }
+    return Icons[type] || Icons.info;
   };
 
   return (
@@ -56,7 +85,7 @@ export const ToastProvider = ({ children }) => {
           <div key={toast.id} className={`toast toast-${toast.type}`}>
             <span className="toast-icon">{getIcon(toast.type)}</span>
             <span className="toast-message">{toast.message}</span>
-            <button className="toast-close" onClick={() => removeToast(toast.id)}>×</button>
+            <button className="toast-close" onClick={() => removeToast(toast.id)}>{Icons.close}</button>
           </div>
         ))}
       </div>

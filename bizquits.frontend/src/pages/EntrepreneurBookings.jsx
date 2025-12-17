@@ -3,6 +3,63 @@ import { bookingApi } from '../services/api';
 import { useToast } from '../components/Toast';
 import './ClientBookings.css';
 
+const Icons = {
+  clock: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+  ),
+  check: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  ),
+  refresh: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+      <path d="M21 3v5h-5"/>
+    </svg>
+  ),
+  checkCircle: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+      <polyline points="22 4 12 14.01 9 11.01"/>
+    </svg>
+  ),
+  xCircle: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="15" y1="9" x2="9" y2="15"/>
+      <line x1="9" y1="9" x2="15" y2="15"/>
+    </svg>
+  ),
+  ban: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+    </svg>
+  ),
+  clipboard: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+    </svg>
+  ),
+  user: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+  ),
+  close: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  )
+};
+
 function EntrepreneurBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,13 +109,13 @@ function EntrepreneurBookings() {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'Pending': return '⏳';
-      case 'Accepted': return '✓';
-      case 'InProgress': return '🔄';
-      case 'Completed': return '✅';
-      case 'Rejected': return '❌';
-      case 'Cancelled': return '🚫';
-      default: return '📋';
+      case 'Pending': return Icons.clock;
+      case 'Accepted': return Icons.check;
+      case 'InProgress': return Icons.refresh;
+      case 'Completed': return Icons.checkCircle;
+      case 'Rejected': return Icons.xCircle;
+      case 'Cancelled': return Icons.ban;
+      default: return Icons.clipboard;
     }
   };
 
@@ -141,7 +198,7 @@ function EntrepreneurBookings() {
 
       {filteredBookings.length === 0 ? (
         <div className="empty-state card">
-          <div className="empty-icon">📋</div>
+          <div className="empty-icon">{Icons.clipboard}</div>
           <h3>No booking requests</h3>
           <p>{filter === 'all' ? "You haven't received any booking requests yet" : `No ${filter.toLowerCase()} requests`}</p>
         </div>
@@ -162,7 +219,7 @@ function EntrepreneurBookings() {
                 </div>
 
                 <div className="entrepreneur-row">
-                  <span className="entrepreneur-avatar">👤</span>
+                  <span className="entrepreneur-avatar">{Icons.user}</span>
                   <div className="entrepreneur-details">
                     <span className="entrepreneur-name">Client #{booking.client.id}</span>
                     <span className="entrepreneur-email">{booking.client.email}</span>
@@ -259,7 +316,7 @@ function EntrepreneurBookings() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{responseModal.status === 'Accepted' ? 'Accept' : 'Reject'} Booking</h2>
-              <button className="modal-close" onClick={() => setResponseModal(null)}>×</button>
+              <button className="modal-close" onClick={() => setResponseModal(null)}>{Icons.close}</button>
             </div>
             <div className="modal-body">
               <div className="detail-section">
@@ -302,7 +359,7 @@ function EntrepreneurBookings() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Booking Details</h2>
-              <button className="modal-close" onClick={() => setSelectedBooking(null)}>×</button>
+              <button className="modal-close" onClick={() => setSelectedBooking(null)}>{Icons.close}</button>
             </div>
             <div className="modal-body">
               <div className="detail-section">
