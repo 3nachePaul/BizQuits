@@ -101,6 +101,38 @@ public class GamificationService
     }
 
     // =========================
+    // CHALLENGES (Sprint 4)
+    // =========================
+    public async Task AwardChallengeCompleted(int userId, int xpAmount, string? badgeCode)
+    {
+        // XP de la challenge
+        await AddXp(userId, xpAmount);
+
+        // Unlock achievement special dacă există
+        if (!string.IsNullOrWhiteSpace(badgeCode))
+        {
+            await Unlock(userId, badgeCode);
+        }
+
+        // Check milestone-uri pentru challenges finalizate
+        var stats = await EnsureClientStats(userId);
+        var completedChallenges = await _context.ChallengeParticipations
+            .CountAsync(cp => cp.UserId == userId && cp.Status == Models.ParticipationStatus.Completed);
+
+        // Unlock achievements bazate pe număr challenges
+        if (completedChallenges == 1)
+            await Unlock(userId, "first_challenge");
+        else if (completedChallenges == 5)
+            await Unlock(userId, "challenges_5");
+        else if (completedChallenges == 10)
+            await Unlock(userId, "challenges_10");
+        else if (completedChallenges == 25)
+            await Unlock(userId, "challenges_25");
+
+        await _context.SaveChangesAsync();
+    }
+
+    // =========================
     // REVIEWS (DOAR DUPĂ APPROVE)
     // =========================
     public async Task AwardReviewApproved(int userId)
@@ -215,6 +247,39 @@ public class GamificationService
                 Description = "You left 10 approved reviews.",
                 XpReward = 150,
                 BadgeIcon = "🗣️"
+            },
+            // Challenge achievements (Sprint 4)
+            new()
+            {
+                Code = "first_challenge",
+                Name = "Challenge Accepted",
+                Description = "You completed your first challenge.",
+                XpReward = 50,
+                BadgeIcon = "🎯"
+            },
+            new()
+            {
+                Code = "challenges_5",
+                Name = "Challenge Hunter",
+                Description = "You completed 5 challenges.",
+                XpReward = 100,
+                BadgeIcon = "🏹"
+            },
+            new()
+            {
+                Code = "challenges_10",
+                Name = "Challenge Master",
+                Description = "You completed 10 challenges.",
+                XpReward = 200,
+                BadgeIcon = "⚔️"
+            },
+            new()
+            {
+                Code = "challenges_25",
+                Name = "Challenge Legend",
+                Description = "You completed 25 challenges.",
+                XpReward = 400,
+                BadgeIcon = "🛡️"
             }
         };
 

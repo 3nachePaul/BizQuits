@@ -325,4 +325,245 @@ public class AdminController : ControllerBase
 
         return Ok(new { rejected = true });
     }
+
+    // =========================
+    // MODERATION: OFFERS
+    // =========================
+    [HttpGet("offers")]
+    public async Task<IActionResult> GetAllOffers()
+    {
+        var offers = await _context.Offers
+            .Include(o => o.EntrepreneurProfile)
+                .ThenInclude(p => p.User)
+            .OrderByDescending(o => o.CreatedAt)
+            .Select(o => new
+            {
+                o.Id,
+                o.Title,
+                o.Description,
+                Type = o.Type.ToString(),
+                o.IsActive,
+                o.ValidFrom,
+                o.ValidUntil,
+                o.DiscountPercentage,
+                o.BonusValue,
+                o.CreatedAt,
+                Entrepreneur = new
+                {
+                    o.EntrepreneurProfile.Id,
+                    o.EntrepreneurProfile.CompanyName,
+                    Email = o.EntrepreneurProfile.User.Email
+                }
+            })
+            .ToListAsync();
+
+        return Ok(offers);
+    }
+
+    public class AdminUpdateOfferDto
+    {
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public bool? IsActive { get; set; }
+    }
+
+    [HttpPut("offers/{id}")]
+    public async Task<IActionResult> UpdateOffer(int id, [FromBody] AdminUpdateOfferDto dto)
+    {
+        var offer = await _context.Offers.FindAsync(id);
+        if (offer == null)
+            return NotFound("Offer not found.");
+
+        if (!string.IsNullOrWhiteSpace(dto.Title))
+            offer.Title = dto.Title.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.Description))
+            offer.Description = dto.Description.Trim();
+        if (dto.IsActive.HasValue)
+            offer.IsActive = dto.IsActive.Value;
+
+        offer.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { updated = true });
+    }
+
+    [HttpDelete("offers/{id}")]
+    public async Task<IActionResult> DeleteOffer(int id)
+    {
+        var offer = await _context.Offers.FindAsync(id);
+        if (offer == null)
+            return NotFound("Offer not found.");
+
+        _context.Offers.Remove(offer);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { deleted = true });
+    }
+
+    // =========================
+    // MODERATION: SERVICES
+    // =========================
+    [HttpGet("services")]
+    public async Task<IActionResult> GetAllServices()
+    {
+        var services = await _context.Services
+            .Include(s => s.EntrepreneurProfile)
+                .ThenInclude(p => p.User)
+            .OrderByDescending(s => s.CreatedAt)
+            .Select(s => new
+            {
+                s.Id,
+                s.Name,
+                s.Description,
+                s.Category,
+                s.Duration,
+                s.Price,
+                s.IsActive,
+                s.CreatedAt,
+                Entrepreneur = new
+                {
+                    s.EntrepreneurProfile.Id,
+                    s.EntrepreneurProfile.CompanyName,
+                    Email = s.EntrepreneurProfile.User.Email
+                }
+            })
+            .ToListAsync();
+
+        return Ok(services);
+    }
+
+    public class AdminUpdateServiceDto
+    {
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public bool? IsActive { get; set; }
+    }
+
+    [HttpPut("services/{id}")]
+    public async Task<IActionResult> UpdateService(int id, [FromBody] AdminUpdateServiceDto dto)
+    {
+        var service = await _context.Services.FindAsync(id);
+        if (service == null)
+            return NotFound("Service not found.");
+
+        if (!string.IsNullOrWhiteSpace(dto.Name))
+            service.Name = dto.Name.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.Description))
+            service.Description = dto.Description.Trim();
+        if (dto.IsActive.HasValue)
+            service.IsActive = dto.IsActive.Value;
+
+        service.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { updated = true });
+    }
+
+    [HttpDelete("services/{id}")]
+    public async Task<IActionResult> DeleteService(int id)
+    {
+        var service = await _context.Services.FindAsync(id);
+        if (service == null)
+            return NotFound("Service not found.");
+
+        // Check for active bookings
+        var hasActiveBookings = await _context.Bookings.AnyAsync(b =>
+            b.ServiceId == id &&
+            b.Status != BookingStatus.Cancelled &&
+            b.Status != BookingStatus.Rejected &&
+            b.Status != BookingStatus.Completed);
+
+        if (hasActiveBookings)
+            return BadRequest("Cannot delete service with active bookings.");
+
+        _context.Services.Remove(service);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { deleted = true });
+    }
+
+    // =========================
+    // MODERATION: CHALLENGES
+    // =========================
+    [HttpGet("challenges")]
+    public async Task<IActionResult> GetAllChallenges()
+    {
+        var challenges = await _context.Challenges
+            .Include(c => c.EntrepreneurProfile)
+                .ThenInclude(p => p.User)
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new
+            {
+                c.Id,
+                c.Title,
+                c.Description,
+                Type = c.Type.ToString(),
+                Status = c.Status.ToString(),
+                c.XpReward,
+                c.StartDate,
+                c.EndDate,
+                c.MaxParticipants,
+                c.CreatedAt,
+                Entrepreneur = new
+                {
+                    c.EntrepreneurProfile.Id,
+                    c.EntrepreneurProfile.CompanyName,
+                    Email = c.EntrepreneurProfile.User.Email
+                },
+                ParticipantsCount = _context.ChallengeParticipations
+                    .Count(cp => cp.ChallengeId == c.Id)
+            })
+            .ToListAsync();
+
+        return Ok(challenges);
+    }
+
+    public class AdminUpdateChallengeDto
+    {
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public string? Status { get; set; }
+    }
+
+    [HttpPut("challenges/{id}")]
+    public async Task<IActionResult> UpdateChallenge(int id, [FromBody] AdminUpdateChallengeDto dto)
+    {
+        var challenge = await _context.Challenges.FindAsync(id);
+        if (challenge == null)
+            return NotFound("Challenge not found.");
+
+        if (!string.IsNullOrWhiteSpace(dto.Title))
+            challenge.Title = dto.Title.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.Description))
+            challenge.Description = dto.Description.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.Status) &&
+            Enum.TryParse<ChallengeStatus>(dto.Status, true, out var newStatus))
+            challenge.Status = newStatus;
+
+        challenge.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { updated = true });
+    }
+
+    [HttpDelete("challenges/{id}")]
+    public async Task<IActionResult> DeleteChallenge(int id)
+    {
+        var challenge = await _context.Challenges.FindAsync(id);
+        if (challenge == null)
+            return NotFound("Challenge not found.");
+
+        // Check for active participants
+        var hasActiveParticipants = await _context.ChallengeParticipations.AnyAsync(cp =>
+            cp.ChallengeId == id &&
+            (cp.Status == ParticipationStatus.Accepted || cp.Status == ParticipationStatus.InProgress));
+
+        if (hasActiveParticipants)
+            return BadRequest("Cannot delete challenge with active participants.");
+
+        _context.Challenges.Remove(challenge);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { deleted = true });
+    }
 }

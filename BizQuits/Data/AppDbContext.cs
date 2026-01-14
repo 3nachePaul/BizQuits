@@ -27,6 +27,10 @@ public class AppDbContext : DbContext
     public DbSet<Offer> Offers { get; set; }
     public DbSet<OfferClaim> OfferClaims { get; set; }
 
+    // Challenges (Sprint 4)
+    public DbSet<Challenge> Challenges { get; set; }
+    public DbSet<ChallengeParticipation> ChallengeParticipations { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -198,5 +202,43 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<OfferClaim>()
             .HasIndex(oc => oc.ClaimCode);
+
+        // --------------------
+        // Challenges (Sprint 4)
+        // --------------------
+        modelBuilder.Entity<Challenge>()
+            .HasOne(c => c.EntrepreneurProfile)
+            .WithMany()
+            .HasForeignKey(c => c.EntrepreneurProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Challenge>()
+            .HasIndex(c => c.Type);
+
+        modelBuilder.Entity<Challenge>()
+            .HasIndex(c => c.Status);
+
+        // --------------------
+        // ChallengeParticipations
+        // one participation per user per challenge
+        // --------------------
+        modelBuilder.Entity<ChallengeParticipation>()
+            .HasIndex(cp => new { cp.UserId, cp.ChallengeId })
+            .IsUnique();
+
+        modelBuilder.Entity<ChallengeParticipation>()
+            .HasOne(cp => cp.Challenge)
+            .WithMany()
+            .HasForeignKey(cp => cp.ChallengeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ChallengeParticipation>()
+            .HasOne(cp => cp.User)
+            .WithMany()
+            .HasForeignKey(cp => cp.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ChallengeParticipation>()
+            .HasIndex(cp => cp.Status);
     }
 }

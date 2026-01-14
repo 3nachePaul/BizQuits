@@ -1,10 +1,9 @@
 #!/bin/bash
 
-# Colors for output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 echo -e "${BLUE}🚀 Starting BizQuits...${NC}"
 
@@ -12,7 +11,6 @@ echo -e "${BLUE}🚀 Starting BizQuits...${NC}"
 echo -e "${YELLOW}Starting database...${NC}"
 docker-compose up -d
 
-# Wait for SQL Server
 echo -e "${YELLOW}Waiting for SQL Server to be ready...${NC}"
 sleep 30
 
@@ -27,7 +25,6 @@ dotnet run &
 BACKEND_PID=$!
 cd ..
 
-# Wait for backend to start
 sleep 5
 
 # Start frontend
@@ -38,11 +35,10 @@ npm run dev &
 FRONTEND_PID=$!
 cd ..
 
-# Wait a moment for services to initialize
 sleep 3
 
 echo ""
-echo -e "${GREEN}✅ BizQuits is running!${NC}"
+echo -e "${GREEN} BizQuits is running!${NC}"
 echo ""
 echo -e "  ${BLUE}Frontend:${NC} http://localhost:5173"
 echo -e "  ${BLUE}Backend:${NC}  http://localhost:5204"

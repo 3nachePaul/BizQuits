@@ -14,6 +14,9 @@ import EntrepreneurOffers from './pages/EntrepreneurOffers';
 import ClientServices from './pages/ClientServices';
 import ClientBookings from './pages/ClientBookings';
 import ClientOffers from './pages/ClientOffers';
+import ClientChallenges from './pages/ClientChallenges';
+import EntrepreneurChallenges from './pages/EntrepreneurChallenges';
+import AdminModeration from './pages/AdminModeration';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import CompanyPublicProfile from './pages/CompanyPublicProfile';
@@ -53,17 +56,20 @@ const AppLayout = () => {
           {/* Admin */}
           <Route path="/admin" element={<PrivateRoute roles={['Admin']}><AdminDashboard /></PrivateRoute>} />
           <Route path="/admin/users" element={<PrivateRoute roles={['Admin']}><AdminUsers /></PrivateRoute>} />
+          <Route path="/admin/moderation" element={<PrivateRoute roles={['Admin']}><AdminModeration /></PrivateRoute>} />
 
           {/* Entrepreneur */}
           <Route path="/entrepreneur/company" element={<PrivateRoute roles={['Entrepreneur']}><EntrepreneurCompany /></PrivateRoute>} />
           <Route path="/entrepreneur/services" element={<PrivateRoute roles={['Entrepreneur']}><EntrepreneurServices /></PrivateRoute>} />
           <Route path="/entrepreneur/bookings" element={<PrivateRoute roles={['Entrepreneur']}><EntrepreneurBookings /></PrivateRoute>} />
           <Route path="/entrepreneur/offers" element={<PrivateRoute roles={['Entrepreneur']}><EntrepreneurOffers /></PrivateRoute>} />
+          <Route path="/entrepreneur/challenges" element={<PrivateRoute roles={['Entrepreneur']}><EntrepreneurChallenges /></PrivateRoute>} />
 
           {/* Client */}
           <Route path="/client/services" element={<PrivateRoute roles={['Client']}><ClientServices /></PrivateRoute>} />
           <Route path="/client/bookings" element={<PrivateRoute roles={['Client']}><ClientBookings /></PrivateRoute>} />
           <Route path="/client/offers" element={<PrivateRoute roles={['Client']}><ClientOffers /></PrivateRoute>} />
+          <Route path="/client/challenges" element={<PrivateRoute roles={['Client']}><ClientChallenges /></PrivateRoute>} />
 
           {/* ⚠️ MUST BE LAST */}
           <Route path="*" element={<Home />} />

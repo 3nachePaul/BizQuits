@@ -308,4 +308,56 @@ export const offerApi = {
   markClaimUsed: (claimId) => api.patch(`/offer/claims/${encodeURIComponent(claimId)}/use`),
 };
 
+// ✅ Challenges API (Sprint 4)
+export const challengeApi = {
+  // Public
+  getAll: (params = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.type) queryParams.append('type', encodeURIComponent(params.type));
+    if (params.search) queryParams.append('search', encodeURIComponent(params.search));
+    const queryString = queryParams.toString();
+    return api.get(`/challenge${queryString ? `?${queryString}` : ''}`);
+  },
+  getById: (id) => api.get(`/challenge/${encodeURIComponent(id)}`),
+  getTypes: () => api.get('/challenge/types'),
+
+  // Entrepreneur
+  getMyChallenges: () => api.get('/challenge/my'),
+  create: (data) => api.post('/challenge', sanitizeObject(data)),
+  update: (id, data) => api.put(`/challenge/${encodeURIComponent(id)}`, sanitizeObject(data)),
+  activate: (id) => api.patch(`/challenge/${encodeURIComponent(id)}/activate`),
+  delete: (id) => api.delete(`/challenge/${encodeURIComponent(id)}`),
+  getParticipants: (id) => api.get(`/challenge/${encodeURIComponent(id)}/participants`),
+  respondParticipation: (participationId, data) =>
+    api.patch(`/challenge/participations/${encodeURIComponent(participationId)}/respond`, data),
+  updateProgress: (participationId, data) =>
+    api.patch(`/challenge/participations/${encodeURIComponent(participationId)}/progress`, data),
+  markFailed: (participationId) =>
+    api.patch(`/challenge/participations/${encodeURIComponent(participationId)}/fail`),
+
+  // Client
+  join: (id, data = {}) => api.post(`/challenge/${encodeURIComponent(id)}/join`, data),
+  getMyParticipations: () => api.get('/challenge/my/participations'),
+  withdraw: (participationId) =>
+    api.delete(`/challenge/participations/${encodeURIComponent(participationId)}`),
+};
+
+// ✅ Admin Moderation API (Sprint 4)
+export const adminModerationApi = {
+  // Offers
+  getAllOffers: () => api.get('/admin/offers'),
+  updateOffer: (id, data) => api.put(`/admin/offers/${encodeURIComponent(id)}`, data),
+  deleteOffer: (id) => api.delete(`/admin/offers/${encodeURIComponent(id)}`),
+
+  // Services
+  getAllServices: () => api.get('/admin/services'),
+  updateService: (id, data) => api.put(`/admin/services/${encodeURIComponent(id)}`, data),
+  deleteService: (id) => api.delete(`/admin/services/${encodeURIComponent(id)}`),
+
+  // Challenges
+  getAllChallenges: () => api.get('/admin/challenges'),
+  updateChallenge: (id, data) => api.put(`/admin/challenges/${encodeURIComponent(id)}`, data),
+  deleteChallenge: (id) => api.delete(`/admin/challenges/${encodeURIComponent(id)}`),
+};
+
 export default api;
