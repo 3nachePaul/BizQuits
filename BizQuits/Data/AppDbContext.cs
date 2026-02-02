@@ -9,30 +9,49 @@ public class AppDbContext : DbContext
     {
     }
 
+
+
+
     public DbSet<User> Users { get; set; }
-    public DbSet<EntrepreneurProfile> EntrepreneurProfiles { get; set; }
-    public DbSet<Service> Services { get; set; }
+    public DbSet<Message> Messages { get; set; }
     public DbSet<Booking> Bookings { get; set; }
-    public DbSet<RefreshToken> RefreshTokens { get; set; }
-
-    // Gamification
-    public DbSet<ClientStats> ClientStats { get; set; }
-    public DbSet<Achievement> Achievements { get; set; }
-    public DbSet<UserAchievement> UserAchievements { get; set; }
-
-    // Reviews
+    public DbSet<Service> Services { get; set; }
     public DbSet<Review> Reviews { get; set; }
-
-    // Offers
     public DbSet<Offer> Offers { get; set; }
+    public DbSet<EntrepreneurProfile> EntrepreneurProfiles { get; set; }
+    public DbSet<ClientStats> ClientStats { get; set; }
+    public DbSet<UserAchievement> UserAchievements { get; set; }
+    public DbSet<ChallengeParticipation> ChallengeParticipations { get; set; }
+    public DbSet<Challenge> Challenges { get; set; }
     public DbSet<OfferClaim> OfferClaims { get; set; }
 
-    // Challenges (Sprint 4)
-    public DbSet<Challenge> Challenges { get; set; }
-    public DbSet<ChallengeParticipation> ChallengeParticipations { get; set; }
+    public DbSet<Achievement> Achievements { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // --------------------
+        // Message relationships
+        // --------------------
+        modelBuilder.Entity<Message>()
+            .HasOne(m => m.Sender)
+            .WithMany()
+            .HasForeignKey(m => m.SenderId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Message>()
+            .HasOne(m => m.Recipient)
+            .WithMany()
+            .HasForeignKey(m => m.RecipientId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Message>()
+            .HasIndex(m => m.SenderId);
+        modelBuilder.Entity<Message>()
+            .HasIndex(m => m.RecipientId);
+        modelBuilder.Entity<Message>()
+            .HasIndex(m => m.SentAt);
+
         base.OnModelCreating(modelBuilder);
 
         // --------------------

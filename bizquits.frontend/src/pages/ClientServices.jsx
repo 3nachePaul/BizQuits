@@ -37,6 +37,11 @@ const Icons = {
       <line x1="18" y1="6" x2="6" y2="18"/>
       <line x1="6" y1="6" x2="18" y2="18"/>
     </svg>
+  ),
+  message: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
   )
 };
 
@@ -236,9 +241,18 @@ function ClientServices() {
                   </div>
                 </div>
 
-                <button className="btn btn-primary" onClick={() => handleBookService(service)}>
-                  Book Now
-                </button>
+                <div className="service-actions">
+                  <button 
+                    className="btn btn-outline btn-icon" 
+                    onClick={() => navigate(`/chat?serviceId=${service.id}`)}
+                    title="Ask a question"
+                  >
+                    {Icons.message}
+                  </button>
+                  <button className="btn btn-primary" onClick={() => handleBookService(service)}>
+                    Book Now
+                  </button>
+                </div>
               </div>
             </div>
           ))}

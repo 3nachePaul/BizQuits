@@ -27,10 +27,21 @@ public class ServiceController : ControllerBase
         [FromQuery] decimal? maxPrice = null,
         [FromQuery] string? search = null)
     {
+        // Get service IDs that have active bookings (Accepted, InProgress)
+        var servicesWithActiveBookings = await _context.Bookings
+            .Where(b => b.Status == BookingStatus.Accepted || 
+                       b.Status == BookingStatus.InProgress ||
+                       b.Status == BookingStatus.Completed)
+            .Select(b => b.ServiceId)
+            .Distinct()
+            .ToListAsync();
+
         var query = _context.Services
             .Include(s => s.EntrepreneurProfile!)
                 .ThenInclude(ep => ep.User)
-            .Where(s => s.IsActive && s.EntrepreneurProfile!.IsApproved)
+            .Where(s => s.IsActive && 
+                       s.EntrepreneurProfile!.IsApproved &&
+                       !servicesWithActiveBookings.Contains(s.Id))
             .AsQueryable();
 
         // Apply filters
@@ -74,6 +85,7 @@ public class ServiceController : ControllerBase
                 Entrepreneur = new EntrepreneurInfoDto
                 {
                     Id = s.EntrepreneurProfile!.Id,
+                    UserId = s.EntrepreneurProfile.UserId,
                     CompanyName = s.EntrepreneurProfile.CompanyName,
                     Email = s.EntrepreneurProfile.User.Email
                 }
@@ -125,6 +137,7 @@ public class ServiceController : ControllerBase
             Entrepreneur = service.EntrepreneurProfile != null ? new EntrepreneurInfoDto
             {
                 Id = service.EntrepreneurProfile.Id,
+                UserId = service.EntrepreneurProfile.UserId,
                 CompanyName = service.EntrepreneurProfile.CompanyName,
                 Email = service.EntrepreneurProfile.User.Email
             } : null

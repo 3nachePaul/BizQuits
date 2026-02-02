@@ -1,14 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { bookingApi, reviewApi } from '../services/api';
 import { useToast } from '../components/Toast';
 import './ClientBookings.css';
 
 function ClientBookings() {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   // Review modal state
   const [reviewBooking, setReviewBooking] = useState(null);
@@ -89,6 +92,21 @@ function ClientBookings() {
       toast.error(error.response?.data?.message || 'Failed to cancel booking');
     } finally {
       setCancellingId(null);
+    }
+  };
+
+  const handleDeleteBooking = async (bookingId) => {
+    if (!window.confirm('Are you sure you want to permanently delete this booking? This cannot be undone.')) return;
+    setDeletingId(bookingId);
+    try {
+      await bookingApi.delete(bookingId);
+      toast.success('Booking deleted successfully');
+      fetchBookings();
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      toast.error(error.response?.data?.message || 'Failed to delete booking');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -296,6 +314,17 @@ function ClientBookings() {
                   View Details
                 </button>
 
+                {/* Chat with Entrepreneur */}
+                {['Accepted', 'InProgress', 'Completed'].includes(booking.status) && (
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => navigate(`/chat?serviceId=${booking.service.id}`)}
+                    title="Chat with entrepreneur"
+                  >
+                    💬 Chat
+                  </button>
+                )}
+
                 {/* ✅ NEW: Write Review (doar pentru Completed) */}
                 {booking.status === 'Completed' && (
                   <button
@@ -306,6 +335,7 @@ function ClientBookings() {
                   </button>
                 )}
 
+
                 {(booking.status === 'Pending' || booking.status === 'Accepted') && (
                   <button
                     className="btn btn-danger btn-sm"
@@ -313,6 +343,16 @@ function ClientBookings() {
                     disabled={cancellingId === booking.id}
                   >
                     {cancellingId === booking.id ? 'Cancelling...' : 'Cancel'}
+                  </button>
+                )}
+
+                {(booking.status === 'Pending' || booking.status === 'Rejected' || booking.status === 'Cancelled') && (
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => handleDeleteBooking(booking.id)}
+                    disabled={deletingId === booking.id}
+                  >
+                    {deletingId === booking.id ? 'Deleting...' : 'Delete'}
                   </button>
                 )}
 

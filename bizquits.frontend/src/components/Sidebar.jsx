@@ -24,6 +24,15 @@ const Sidebar = () => {
         {isAuthenticated && (
           <>
             <div className="nav-section">
+              <NavLink to="/chat" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="22" height="22">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75v-1.5A8.25 8.25 0 0 1 10.5 3.06v0a8.25 8.25 0 0 1 8.25 8.19v1.5a8.25 8.25 0 0 1-8.25 8.19v0a8.25 8.25 0 0 1-8.25-8.19z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15.75h7.5" />
+                </svg>
+                Chat
+              </NavLink>
+            </div>
+            <div className="nav-section">
               <div className="nav-section-title">Main</div>
               <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -95,6 +104,12 @@ const Sidebar = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
                   </svg>
                   Challenges
+                </NavLink>
+                <NavLink to="/entrepreneur/reports" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                  </svg>
+                  Reports
                 </NavLink>
               </div>
             )}

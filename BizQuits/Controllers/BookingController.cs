@@ -20,6 +20,50 @@ public class BookingController : ControllerBase
         _context = context;
     }
 
+    // DELETE: api/booking/{id} - Delete a booking (Client or Entrepreneur, only if allowed)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteBooking(int id)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email))
+        {
+            return Unauthorized();
+        }
+
+        var user = await _context.Users
+            .Include(u => u.EntrepreneurProfile)
+            .FirstOrDefaultAsync(u => u.Email == email);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var booking = await _context.Bookings
+            .Include(b => b.Service)
+            .FirstOrDefaultAsync(b => b.Id == id);
+        if (booking == null)
+        {
+            return NotFound();
+        }
+
+        bool isClient = booking.ClientId == user.Id;
+        bool isEntrepreneur = user.EntrepreneurProfile != null && booking.Service?.EntrepreneurProfileId == user.EntrepreneurProfile.Id;
+        if (!isClient && !isEntrepreneur)
+        {
+            return Forbid();
+        }
+
+        // Only allow delete if booking is Pending, Rejected, or Cancelled
+        if (booking.Status != BookingStatus.Pending && booking.Status != BookingStatus.Rejected && booking.Status != BookingStatus.Cancelled)
+        {
+            return BadRequest("Can only delete bookings that are pending, rejected, or cancelled");
+        }
+
+        _context.Bookings.Remove(booking);
+        await _context.SaveChangesAsync();
+        return Ok(new { deleted = true });
+    }
+
     // POST: api/booking - Create a new booking (Client only)
     [HttpPost]
     [Authorize(Roles = nameof(Role.Client))]

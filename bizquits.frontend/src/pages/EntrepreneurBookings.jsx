@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { bookingApi } from '../services/api';
 import { useToast } from '../components/Toast';
 import './ClientBookings.css';
@@ -61,6 +62,7 @@ const Icons = {
 };
 
 function EntrepreneurBookings() {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -271,6 +273,17 @@ function EntrepreneurBookings() {
                 >
                   View Details
                 </button>
+
+                {/* Chat with Client */}
+                {['Accepted', 'InProgress', 'Completed'].includes(booking.status) && (
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => navigate(`/chat?serviceId=${booking.service.id}`)}
+                    title="Chat with client"
+                  >
+                    💬 Chat
+                  </button>
+                )}
                 
                 {booking.status === 'Pending' && (
                   <>

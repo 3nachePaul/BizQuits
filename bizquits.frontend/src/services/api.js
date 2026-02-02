@@ -257,6 +257,7 @@ export const bookingApi = {
     response: sanitizeInput(response) 
   }),
   getById: (id) => api.get(`/booking/${encodeURIComponent(id)}`),
+  delete: (id) => api.delete(`/booking/${encodeURIComponent(id)}`),
 };
 
 // ✅ Gamification (Client only)

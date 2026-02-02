@@ -39,21 +39,11 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const initializeAuth = useCallback(async () => {
-    const token = getAccessToken();
-    
-    if (token && !isTokenExpired()) {
-      const decoded = decodeToken(token);
-      if (decoded) {
-        setUser({ 
-          id: decoded.id,
-          email: decoded.email, 
-          role: decoded.role 
-        });
-      }
-    } else if (token) {
-      try {
-        const response = await authService.refresh();
-        const decoded = decodeToken(response.data.accessToken);
+    try {
+      const token = getAccessToken();
+      
+      if (token && !isTokenExpired()) {
+        const decoded = decodeToken(token);
         if (decoded) {
           setUser({ 
             id: decoded.id,
@@ -61,13 +51,28 @@ export const AuthProvider = ({ children }) => {
             role: decoded.role 
           });
         }
-      } catch (error) {
-        clearAccessToken();
-        setUser(null);
+      } else if (token) {
+        try {
+          const response = await authService.refresh();
+          const decoded = decodeToken(response.data.accessToken);
+          if (decoded) {
+            setUser({ 
+              id: decoded.id,
+              email: decoded.email, 
+              role: decoded.role 
+            });
+          }
+        } catch (error) {
+          clearAccessToken();
+          setUser(null);
+        }
       }
+    } catch (error) {
+      console.error('Auth initialization error:', error);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   }, []);
 
   useEffect(() => {

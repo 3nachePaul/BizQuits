@@ -313,6 +313,39 @@
   height: 14px;
 }
 
+/* Service Actions */
+.service-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-icon:hover {
+  background: var(--sage-50);
+  border-color: var(--sage-300);
+  color: var(--sage-600);
+}
+
+.btn-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* Book Now Button */
 .service-footer .btn-primary {
   padding: var(--space-2) var(--space-4);
