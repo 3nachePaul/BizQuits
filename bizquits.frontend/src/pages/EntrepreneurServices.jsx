@@ -163,7 +163,7 @@ function EntrepreneurServices() {
 
       {services.length === 0 ? (
         <div className="empty-state card">
-          <div className="empty-icon">📦</div>
+          <div className="empty-icon"></div>
           <h3>No services yet</h3>
           <p>Start by adding your first service to offer clients</p>
           <button className="btn btn-primary" onClick={handleAddService}>

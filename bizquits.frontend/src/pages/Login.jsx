@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import BiscuitMascot from '../components/BiscuitMascot';
 import '../styles/Form.css';
 
 // SVG Icons
@@ -81,9 +82,14 @@ const Login = () => {
   };
 
   return (
-    <div className="form-container">
-      <h2>Login</h2>
-      {isPendingApproval && (
+    <div className="auth-page">
+      <div className="form-container">
+        <div className="form-logo">
+          <BiscuitMascot size="lg" showLabel={true} />
+        </div>
+        <h2>Welcome Back</h2>
+        <p className="form-subtitle">Sign in to your account</p>
+        {isPendingApproval && (
         <div className="alert alert-warning">
           <span className="alert-icon">{Icons.clock}</span>
           <div>
@@ -130,6 +136,7 @@ const Login = () => {
       <p className="form-text">
         Don't have an account? <Link to="/register">Register</Link>
       </p>
+      </div>
     </div>
   );
 };

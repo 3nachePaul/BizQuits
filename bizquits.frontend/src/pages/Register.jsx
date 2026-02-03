@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/api';
+import BiscuitMascot from '../components/BiscuitMascot';
 import '../styles/Form.css';
 
 // SVG Icons
@@ -118,9 +119,14 @@ const Register = () => {
   };
 
   return (
-    <div className="form-container">
-      <h2>Register</h2>
-      {errors.general && (
+    <div className="auth-page">
+      <div className="form-container">
+        <div className="form-logo">
+          <BiscuitMascot size="lg" showLabel={true} />
+        </div>
+        <h2>Create Account</h2>
+        <p className="form-subtitle">Join BizQuits today</p>
+        {errors.general && (
         <div className="alert alert-danger">
           <span className="alert-icon">{Icons.alertTriangle}</span>
           <span>{errors.general}</span>
@@ -226,6 +232,7 @@ const Register = () => {
       <p className="form-text">
         Already have an account? <Link to="/login">Login</Link>
       </p>
+      </div>
     </div>
   );
 };

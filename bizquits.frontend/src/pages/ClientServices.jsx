@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { serviceApi, bookingApi } from '../services/api';
 import { useToast } from '../components/Toast';
+import BiscuitMascot from '../components/BiscuitMascot';
 import './ClientServices.css';
 
 const Icons = {
@@ -41,6 +42,41 @@ const Icons = {
   message: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  ),
+  sparkle: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/>
+      <path d="M5 19l1 3 1-3"/>
+      <path d="M18 16l1 3 1-3"/>
+    </svg>
+  ),
+  filter: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+    </svg>
+  ),
+  coin: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 6v12"/>
+      <path d="M15 9.5c0-1.5-1.5-2.5-3-2.5s-3 1-3 2.5 1.5 2.5 3 2.5 3 1 3 2.5-1.5 2.5-3 2.5"/>
+    </svg>
+  ),
+  star: (
+    <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+  ),
+  starEmpty: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+  ),
+  compass: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
     </svg>
   )
 };
@@ -144,22 +180,48 @@ function ClientServices() {
   };
 
   if (loading) {
-    return <div className="loading-state">Loading services...</div>;
+    return (
+      <div className="loading-state">
+        <div className="loading-spinner"></div>
+        <BiscuitMascot size="lg" />
+        <p>Finding the best quests for you...</p>
+      </div>
+    );
   }
 
   return (
     <div className="client-services-container">
       <div className="page-header">
-        <h1>Browse Services</h1>
-        <p>Find the perfect service for your needs</p>
+        <div className="page-header-content">
+          <div className="page-header-text">
+            <div className="page-badge">
+              <span className="badge-icon">{Icons.compass}</span>
+              Quest Board
+            </div>
+            <h1>Discover Quests</h1>
+            <p>Find your next adventure and connect with local businesses</p>
+          </div>
+          <div className="page-header-mascot">
+            <BiscuitMascot size="lg" />
+          </div>
+        </div>
+        <div className="page-header-decorations">
+          <span className="deco deco-coin">{Icons.coin}</span>
+          <span className="deco deco-star">{Icons.star}</span>
+          <span className="deco deco-sparkle">{Icons.sparkle}</span>
+        </div>
       </div>
 
-      <div className="filters-section card">
+      <div className="filters-section">
+        <div className="filters-header">
+          <span className="filters-icon">{Icons.filter}</span>
+          <span>Refine Your Quest</span>
+        </div>
         <div className="search-box">
           <span className="search-icon">{Icons.search}</span>
           <input
             type="text"
-            placeholder="Search services, entrepreneurs..."
+            placeholder="Search quests, entrepreneurs, skills..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -182,7 +244,7 @@ function ClientServices() {
           </div>
 
           <div className="filter-group">
-            <label>Price Range</label>
+            <label>Reward Range</label>
             <select value={priceRange} onChange={(e) => setPriceRange(e.target.value)}>
               {priceRanges.map(range => (
                 <option key={range.value} value={range.value}>{range.label}</option>
@@ -193,21 +255,40 @@ function ClientServices() {
       </div>
 
       <div className="results-info">
-        <span>{services.length} service{services.length !== 1 ? 's' : ''} found</span>
+        <span className="results-count">{services.length}</span>
+        <span>quest{services.length !== 1 ? 's' : ''} available</span>
+        {selectedCategory !== 'all' && (
+          <span className="results-filter-tag">
+            in {selectedCategory}
+            <button onClick={() => setSelectedCategory('all')}>×</button>
+          </span>
+        )}
       </div>
 
       {services.length === 0 ? (
-        <div className="empty-state card">
-          <div className="empty-icon">{Icons.search}</div>
-          <h3>No services found</h3>
-          <p>Try adjusting your filters or search term</p>
+        <div className="empty-state">
+          <BiscuitMascot size="xl" />
+          <h3>No quests found</h3>
+          <p>Try adjusting your filters or check back later for new adventures!</p>
+          <button className="btn btn-primary" onClick={() => { setSelectedCategory('all'); setPriceRange('all'); setSearchTerm(''); }}>
+            Clear All Filters
+          </button>
         </div>
       ) : (
         <div className="services-grid">
-          {services.map(service => (
-            <div key={service.id} className="service-card card">
+          {services.map((service, index) => (
+            <div 
+              key={service.id} 
+              className="service-card"
+              style={{ animationDelay: `${index * 0.05}s` }}
+            >
+              <div className="service-card-glow"></div>
               <div className="service-header">
                 <span className="service-category">{service.category}</span>
+                <div className="service-reward-badge">
+                  <span className="reward-icon">{Icons.coin}</span>
+                  <span className="reward-amount">${service.price}</span>
+                </div>
               </div>
 
               <h3 className="service-name">{service.name}</h3>
@@ -232,25 +313,23 @@ function ClientServices() {
 
               <div className="service-footer">
                 <div className="service-meta">
-                  <div className="service-price">
-                    <span className="price-value">${service.price}</span>
-                  </div>
                   <div className="service-duration">
                     <span className="duration-icon">{Icons.clock}</span>
-                    {service.duration}
+                    <span>{service.duration}</span>
                   </div>
                 </div>
 
                 <div className="service-actions">
                   <button 
-                    className="btn btn-outline btn-icon" 
+                    className="btn btn-ghost btn-icon" 
                     onClick={() => navigate(`/chat?serviceId=${service.id}`)}
                     title="Ask a question"
                   >
                     {Icons.message}
                   </button>
-                  <button className="btn btn-primary" onClick={() => handleBookService(service)}>
-                    Book Now
+                  <button className="btn btn-primary btn-book" onClick={() => handleBookService(service)}>
+                    <span className="btn-sparkle">{Icons.sparkle}</span>
+                    Accept Quest
                   </button>
                 </div>
               </div>

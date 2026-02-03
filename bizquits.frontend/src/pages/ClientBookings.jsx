@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { bookingApi, reviewApi } from '../services/api';
 import { useToast } from '../components/Toast';
+import BiscuitMascot from '../components/BiscuitMascot';
 import './ClientBookings.css';
 
 function ClientBookings() {
@@ -60,13 +61,13 @@ function ClientBookings() {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'Pending': return '⏳';
-      case 'Accepted': return '✓';
-      case 'InProgress': return '🔄';
-      case 'Completed': return '✅';
-      case 'Rejected': return '❌';
-      case 'Cancelled': return '🚫';
-      default: return '📋';
+      case 'Pending': return '';
+      case 'Accepted': return '';
+      case 'InProgress': return '';
+      case 'Completed': return '';
+      case 'Rejected': return '';
+      case 'Cancelled': return '';
+      default: return '';
     }
   };
 
@@ -155,7 +156,7 @@ function ClientBookings() {
 
     setReviewSubmitting(true);
     try {
-      // ✅ Review by BOOKING (Completed)
+      //  Review by BOOKING (Completed)
       await reviewApi.createForBooking(reviewBooking.id, {
         rating,
         comment: reviewComment.trim()
@@ -185,7 +186,7 @@ function ClientBookings() {
             onClick={() => onChange(s)}
             aria-label={`${s} star`}
           >
-            ★
+            *
           </button>
         ))}
       </div>
@@ -193,32 +194,61 @@ function ClientBookings() {
   };
 
   if (loading) {
-    return <div className="loading-state">Loading bookings...</div>;
+    return (
+      <div className="loading-state">
+        <div className="loading-spinner"></div>
+        <BiscuitMascot size="lg" />
+        <p>Loading your quest log...</p>
+      </div>
+    );
   }
 
   return (
     <div className="client-bookings-container">
       <div className="page-header">
-        <h1>My Bookings</h1>
-        <p>Track and manage your service bookings</p>
+        <div className="page-header-content">
+          <div className="page-header-text">
+            <div className="page-badge">
+              <span className="badge-icon"></span>
+              Quest Log
+            </div>
+            <h1>My Quests</h1>
+            <p>Track your adventures and completed missions</p>
+          </div>
+          <div className="page-header-mascot">
+            <BiscuitMascot size="md" />
+          </div>
+        </div>
       </div>
 
       <div className="bookings-stats">
-        <div className="stat-card">
-          <div className="stat-value">{bookings.length}</div>
-          <div className="stat-label">Total Bookings</div>
+        <div className="stat-card stat-card--total">
+          <div className="stat-icon"></div>
+          <div className="stat-content">
+            <div className="stat-value">{bookings.length}</div>
+            <div className="stat-label">Total Quests</div>
+          </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-value">{bookings.filter(b => b.status === 'Pending').length}</div>
-          <div className="stat-label">Pending</div>
+        <div className="stat-card stat-card--pending">
+          <div className="stat-icon"></div>
+          <div className="stat-content">
+            <div className="stat-value">{bookings.filter(b => b.status === 'Pending').length}</div>
+            <div className="stat-label">Awaiting</div>
+          </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-value">{bookings.filter(b => b.status === 'InProgress').length}</div>
-          <div className="stat-label">In Progress</div>
+        <div className="stat-card stat-card--progress">
+          <div className="stat-icon"></div>
+          <div className="stat-content">
+            <div className="stat-value">{bookings.filter(b => b.status === 'InProgress').length}</div>
+            <div className="stat-label">In Progress</div>
+          </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-value">{bookings.filter(b => b.status === 'Completed').length}</div>
-          <div className="stat-label">Completed</div>
+        <div className="stat-card stat-card--completed">
+          <div className="stat-icon"></div>
+          <div className="stat-content">
+            <div className="stat-value">{bookings.filter(b => b.status === 'Completed').length}</div>
+            <div className="stat-label">Completed</div>
+          </div>
         </div>
       </div>
 
@@ -240,15 +270,23 @@ function ClientBookings() {
       </div>
 
       {filteredBookings.length === 0 ? (
-        <div className="empty-state card">
-          <div className="empty-icon">📋</div>
-          <h3>No bookings found</h3>
-          <p>{filter === 'all' ? "You haven't made any bookings yet" : `No ${filter} bookings`}</p>
+        <div className="empty-state">
+          <BiscuitMascot size="xl" />
+          <h3>No quests found</h3>
+          <p>{filter === 'all' ? "You haven't embarked on any quests yet!" : `No ${filter.toLowerCase()} quests`}</p>
+          <button className="btn btn-primary" onClick={() => navigate('/services')}>
+            Discover Quests
+          </button>
         </div>
       ) : (
         <div className="bookings-list">
-          {filteredBookings.map(booking => (
-            <div key={booking.id} className={`booking-card card status-${booking.status.toLowerCase()}`}>
+          {filteredBookings.map((booking, index) => (
+            <div 
+              key={booking.id} 
+              className={`booking-card status-${booking.status.toLowerCase()}`}
+              style={{ animationDelay: `${index * 0.05}s` }}
+            >
+              <div className="booking-card-glow"></div>
               <div className="booking-main">
                 <div className="booking-header">
                   <div className="service-info">
@@ -262,7 +300,7 @@ function ClientBookings() {
                 </div>
 
                 <div className="entrepreneur-row">
-                  <span className="entrepreneur-avatar">🏢</span>
+                  <span className="entrepreneur-avatar"></span>
                   <div className="entrepreneur-details">
                     <span className="entrepreneur-name">{booking.service.entrepreneurCompanyName || 'N/A'}</span>
                   </div>
@@ -321,11 +359,11 @@ function ClientBookings() {
                     onClick={() => navigate(`/chat?serviceId=${booking.service.id}`)}
                     title="Chat with entrepreneur"
                   >
-                    💬 Chat
+                    Chat
                   </button>
                 )}
 
-                {/* ✅ NEW: Write Review (doar pentru Completed) */}
+                {/*  NEW: Write Review (doar pentru Completed) */}
                 {booking.status === 'Completed' && (
                   <button
                     className="btn btn-outline btn-sm"
@@ -474,7 +512,7 @@ function ClientBookings() {
         </div>
       )}
 
-      {/* ✅ REVIEW MODAL */}
+      {/*  REVIEW MODAL */}
       {reviewBooking && (
         <div className="modal-overlay" onClick={closeReviewModal}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>

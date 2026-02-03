@@ -1,0 +1,400 @@
+/* ═══════════════════════════════════════════════════════
+    ANIMATED BACKGROUND - Claymorphism Floating Blobs
+   ═══════════════════════════════════════════════════════
+   Dreamy floating clay blobs with candy-shop gradients
+   and soft organic movement.
+*/
+
+.animated-bg {
+  position: relative;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════
+    GRADIENT BACKGROUND LAYER
+   ═══════════════════════════════════════════════════════ */
+
+.bg-gradient-layer {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 20% 10%, rgba(45, 125, 84, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 90%, rgba(13, 148, 136, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(90, 159, 121, 0.05) 0%, transparent 40%),
+    linear-gradient(180deg, var(--canvas) 0%, var(--canvas-soft) 100%);
+  z-index: -2;
+}
+
+/* Subtle noise texture for depth */
+.bg-noise-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   🫧 FLOATING CLAY BLOBS
+   ═══════════════════════════════════════════════════════ */
+
+.floating-elements {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.floating-element {
+  position: absolute;
+  opacity: 0.12;
+  transition: opacity 0.3s ease;
+}
+
+.floating-element svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════
+    VIOLET BLOBS
+   ═══════════════════════════════════════════════════════ */
+
+.blob-violet {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, 
+    var(--violet-300) 0%, 
+    var(--violet-400) 50%,
+    var(--violet-500) 100%
+  );
+  border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%;
+  filter: blur(1px);
+  box-shadow: 
+    inset 0 -8px 16px rgba(0, 0, 0, 0.1),
+    inset 0 8px 16px rgba(255, 255, 255, 0.4),
+    0 8px 24px rgba(45, 125, 84, 0.2);
+}
+
+.blob-violet-1 { animation: float-blob-1 15s ease-in-out infinite; }
+.blob-violet-2 { animation: float-blob-2 18s ease-in-out infinite reverse; }
+.blob-violet-3 { animation: float-blob-1 20s ease-in-out infinite 3s; }
+.blob-violet-4 { animation: float-blob-2 16s ease-in-out infinite reverse 5s; }
+
+/* ═══════════════════════════════════════════════════════
+    PINK BLOBS
+   ═══════════════════════════════════════════════════════ */
+
+.blob-pink {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, 
+    var(--pink-300) 0%, 
+    var(--pink-400) 50%,
+    var(--pink-500) 100%
+  );
+  border-radius: 50% 60% 40% 50% / 40% 50% 60% 50%;
+  filter: blur(1px);
+  box-shadow: 
+    inset 0 -8px 16px rgba(0, 0, 0, 0.1),
+    inset 0 8px 16px rgba(255, 255, 255, 0.4),
+    0 8px 24px rgba(13, 148, 136, 0.2);
+}
+
+.blob-pink-1 { animation: float-blob-2 17s ease-in-out infinite; }
+.blob-pink-2 { animation: float-blob-1 14s ease-in-out infinite reverse 2s; }
+.blob-pink-3 { animation: float-blob-2 19s ease-in-out infinite 4s; }
+
+/* ═══════════════════════════════════════════════════════
+   🩵 SKY BLOBS
+   ═══════════════════════════════════════════════════════ */
+
+.blob-sky {
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, 
+    var(--sky-300) 0%, 
+    var(--sky-400) 50%,
+    var(--sky-500) 100%
+  );
+  border-radius: 40% 60% 50% 50% / 60% 40% 50% 50%;
+  filter: blur(1px);
+  box-shadow: 
+    inset 0 -8px 16px rgba(0, 0, 0, 0.1),
+    inset 0 8px 16px rgba(255, 255, 255, 0.4),
+    0 8px 24px rgba(90, 159, 121, 0.2);
+}
+
+.blob-sky-1 { animation: float-blob-1 16s ease-in-out infinite 1s; }
+.blob-sky-2 { animation: float-blob-2 13s ease-in-out infinite reverse 3s; }
+.blob-sky-3 { animation: float-blob-1 21s ease-in-out infinite 6s; }
+
+/* ═══════════════════════════════════════════════════════
+    EMERALD BLOBS (Small accents)
+   ═══════════════════════════════════════════════════════ */
+
+.blob-emerald {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, 
+    var(--emerald-300) 0%, 
+    var(--emerald-400) 50%,
+    var(--emerald-500) 100%
+  );
+  border-radius: 50% 50% 40% 60% / 60% 40% 50% 50%;
+  filter: blur(1px);
+  box-shadow: 
+    inset 0 -6px 12px rgba(0, 0, 0, 0.1),
+    inset 0 6px 12px rgba(255, 255, 255, 0.4),
+    0 6px 16px rgba(16, 185, 129, 0.2);
+}
+
+.blob-emerald-1 { animation: float-blob-2 12s ease-in-out infinite 2s; }
+.blob-emerald-2 { animation: float-blob-1 15s ease-in-out infinite reverse 4s; }
+
+/* ═══════════════════════════════════════════════════════
+    AMBER BLOBS (Small accents)
+   ═══════════════════════════════════════════════════════ */
+
+.blob-amber {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, 
+    var(--amber-300) 0%, 
+    var(--amber-400) 50%,
+    var(--amber-500) 100%
+  );
+  border-radius: 60% 40% 50% 50% / 40% 60% 50% 50%;
+  filter: blur(1px);
+  box-shadow: 
+    inset 0 -5px 10px rgba(0, 0, 0, 0.1),
+    inset 0 5px 10px rgba(255, 255, 255, 0.4),
+    0 5px 12px rgba(245, 158, 11, 0.2);
+}
+
+.blob-amber-1 { animation: float-blob-1 11s ease-in-out infinite 1s; }
+.blob-amber-2 { animation: float-blob-2 14s ease-in-out infinite reverse 3s; }
+
+/* ═══════════════════════════════════════════════════════
+    FLOATING ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
+
+@keyframes float-blob-1 {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1) rotate(0deg);
+    opacity: 0.12;
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) scale(1.05) rotate(5deg);
+  }
+  50% {
+    transform: translateY(-35px) translateX(-5px) scale(1.1) rotate(0deg);
+    opacity: 0.18;
+  }
+  75% {
+    transform: translateY(-15px) translateX(-10px) scale(1.02) rotate(-5deg);
+  }
+}
+
+@keyframes float-blob-2 {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1) rotate(0deg);
+    opacity: 0.1;
+  }
+  33% {
+    transform: translateY(-25px) translateX(-15px) scale(1.08) rotate(-8deg);
+    opacity: 0.16;
+  }
+  66% {
+    transform: translateY(-40px) translateX(10px) scale(1.12) rotate(5deg);
+    opacity: 0.2;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+    SPARKLE STARS
+   ═══════════════════════════════════════════════════════ */
+
+.sparkle {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 
+    0 0 4px 1px rgba(255, 255, 255, 0.8),
+    0 0 8px 2px rgba(45, 125, 84, 0.4);
+}
+
+.sparkle-1 {
+  top: 15%;
+  left: 8%;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+.sparkle-2 {
+  top: 25%;
+  right: 12%;
+  animation: twinkle 4s ease-in-out infinite 0.5s;
+}
+
+.sparkle-3 {
+  bottom: 30%;
+  left: 15%;
+  animation: twinkle 3.5s ease-in-out infinite 1s;
+}
+
+.sparkle-4 {
+  bottom: 20%;
+  right: 8%;
+  animation: twinkle 4.5s ease-in-out infinite 1.5s;
+}
+
+.sparkle-5 {
+  top: 50%;
+  left: 25%;
+  animation: twinkle 5s ease-in-out infinite 2s;
+}
+
+.sparkle-6 {
+  top: 70%;
+  right: 20%;
+  animation: twinkle 4s ease-in-out infinite 2.5s;
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.1;
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+    DECORATIVE GRADIENT ORBS
+   ═══════════════════════════════════════════════════════ */
+
+.decorative-circles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.deco-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.05;
+  filter: blur(60px);
+}
+
+.circle-1 {
+  width: 500px;
+  height: 500px;
+  background: linear-gradient(135deg, var(--violet-400), var(--pink-400));
+  top: -150px;
+  right: -150px;
+  animation: pulse-orb 10s ease-in-out infinite;
+}
+
+.circle-2 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, var(--sky-400), var(--emerald-400));
+  bottom: -100px;
+  left: -100px;
+  animation: pulse-orb 12s ease-in-out infinite reverse;
+}
+
+.circle-3 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, var(--pink-400), var(--amber-400));
+  top: 40%;
+  left: 20%;
+  animation: pulse-orb 14s ease-in-out infinite 3s;
+}
+
+@keyframes pulse-orb {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.05;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.08;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+    CONTENT LAYER
+   ═══════════════════════════════════════════════════════ */
+
+.bg-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════════════════════════════
+    VARIANT: HERO (More prominent effects)
+   ═══════════════════════════════════════════════════════ */
+
+.animated-bg--hero .bg-gradient-layer {
+  background: 
+    radial-gradient(ellipse at 30% 0%, rgba(45, 125, 84, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 100%, rgba(13, 148, 136, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 0% 50%, rgba(90, 159, 121, 0.08) 0%, transparent 40%),
+    linear-gradient(135deg, var(--canvas) 0%, var(--canvas-soft) 50%, var(--violet-50) 100%);
+}
+
+.animated-bg--hero .floating-element {
+  opacity: 0.18;
+}
+
+.animated-bg--hero .blob-violet {
+  width: 150px;
+  height: 150px;
+}
+
+.animated-bg--hero .blob-pink {
+  width: 120px;
+  height: 120px;
+}
+
+.animated-bg--hero .deco-circle {
+  opacity: 0.08;
+}
+
+/* ═══════════════════════════════════════════════════════
+    VARIANT: MINIMAL (Subtle, no floating elements)
+   ═══════════════════════════════════════════════════════ */
+
+.animated-bg--minimal .floating-elements {
+  display: none;
+}
+
+.animated-bg--minimal .decorative-circles {
+  display: none;
+}
+
+.animated-bg--minimal .bg-gradient-layer {
+  background: linear-gradient(180deg, var(--canvas) 0%, var(--canvas-soft) 100%);
+}
+
+/* ═══════════════════════════════════════════════════════
+    REDUCED MOTION
+   ═══════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-element,
+  .deco-circle,
+  .sparkle {
+    animation: none !important;
+  }
+}

@@ -139,22 +139,22 @@ function EntrepreneurReports() {
 
       <div className="reports-stats-grid">
         <div className="reports-stat-card primary">
-          <div className="stat-icon">👥</div>
+          <div className="stat-icon"></div>
           <div className="stat-label">Active Users</div>
           <div className="stat-value">{activeUsers?.activeUsers ?? 0}</div>
         </div>
         <div className="reports-stat-card success">
-          <div className="stat-icon">📅</div>
+          <div className="stat-icon"></div>
           <div className="stat-label">Total Bookings</div>
           <div className="stat-value">{totalBookings}</div>
         </div>
         <div className="reports-stat-card warning">
-          <div className="stat-icon">✓</div>
+          <div className="stat-icon"></div>
           <div className="stat-label">Completed</div>
           <div className="stat-value">{completedBookings}</div>
         </div>
         <div className="reports-stat-card">
-          <div className="stat-icon">📈</div>
+          <div className="stat-icon"></div>
           <div className="stat-label">Completion Rate</div>
           <div className="stat-value">{completionRate}%</div>
         </div>
@@ -249,7 +249,7 @@ function EntrepreneurReports() {
               {sorted.map((u) => (
                 <tr key={u.email}>
                   <td>{u.email}</td>
-                  <td><span className="xp-value">⭐ {u.xp}</span></td>
+                  <td><span className="xp-value">{u.xp}</span></td>
                   <td><span className="level-badge">Lv. {u.level}</span></td>
                   <td>{u.totalBookingsCreated}</td>
                   <td>{u.totalBookingsCompleted}</td>

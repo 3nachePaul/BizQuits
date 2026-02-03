@@ -1,0 +1,306 @@
+/* 🎨 Animated Background - Quest-themed decorative elements */
+
+.animated-bg {
+  position: relative;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+/* Gradient Background Layer */
+.bg-gradient-layer {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 20% 20%, rgba(253, 231, 199, 0.5) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(254, 249, 195, 0.4) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(220, 252, 231, 0.3) 0%, transparent 40%),
+    linear-gradient(180deg, var(--cream-50) 0%, var(--biscuit-50) 100%);
+  z-index: -2;
+}
+
+/* Subtle noise texture */
+.bg-noise-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Floating Elements Container */
+.floating-elements {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Base Floating Element */
+.floating-element {
+  position: absolute;
+  opacity: 0.15;
+  transition: opacity 0.3s ease;
+}
+
+.floating-element svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* === COINS === */
+.coin {
+  width: 32px;
+  height: 32px;
+  color: var(--gold-400);
+  filter: drop-shadow(0 2px 4px rgba(234, 179, 8, 0.3));
+}
+
+.coin-1 { animation: float-coin 8s ease-in-out infinite; }
+.coin-2 { animation: float-coin 9s ease-in-out infinite reverse; }
+.coin-3 { animation: float-coin 7s ease-in-out infinite; }
+.coin-4 { animation: float-coin 10s ease-in-out infinite reverse; }
+.coin-5 { animation: float-coin 8.5s ease-in-out infinite; }
+.coin-6 { animation: float-coin 9.5s ease-in-out infinite reverse; }
+.coin-7 { animation: float-coin 7.5s ease-in-out infinite; }
+.coin-8 { animation: float-coin 11s ease-in-out infinite reverse; }
+
+@keyframes float-coin {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.15;
+  }
+  25% {
+    transform: translateY(-15px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(-25px) rotate(0deg);
+    opacity: 0.25;
+  }
+  75% {
+    transform: translateY(-10px) rotate(-5deg);
+  }
+}
+
+/* === CHECKMARKS === */
+.check {
+  width: 28px;
+  height: 28px;
+  color: var(--forest-500);
+}
+
+.check-1 { animation: float-check 10s ease-in-out infinite; }
+.check-2 { animation: float-check 11s ease-in-out infinite reverse; }
+.check-3 { animation: float-check 9s ease-in-out infinite; }
+.check-4 { animation: float-check 12s ease-in-out infinite reverse; }
+.check-5 { animation: float-check 8s ease-in-out infinite; }
+
+@keyframes float-check {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.12;
+  }
+  50% {
+    transform: translateY(-20px) scale(1.1);
+    opacity: 0.2;
+  }
+}
+
+/* === TOOLS/BRIEFCASES === */
+.tool {
+  width: 36px;
+  height: 36px;
+  color: var(--coral-500);
+}
+
+.tool-1 { animation: float-tool 12s ease-in-out infinite; }
+.tool-2 { animation: float-tool 14s ease-in-out infinite reverse; }
+.tool-3 { animation: float-tool 11s ease-in-out infinite; }
+.tool-4 { animation: float-tool 13s ease-in-out infinite reverse; }
+
+@keyframes float-tool {
+  0%, 100% {
+    transform: translateY(0) rotate(-5deg);
+    opacity: 0.1;
+  }
+  50% {
+    transform: translateY(-18px) rotate(5deg);
+    opacity: 0.18;
+  }
+}
+
+/* === FLAGS === */
+.flag {
+  width: 30px;
+  height: 30px;
+  color: var(--biscuit-500);
+}
+
+.flag-1 { animation: float-flag 9s ease-in-out infinite; }
+.flag-2 { animation: float-flag 11s ease-in-out infinite reverse; }
+.flag-3 { animation: float-flag 10s ease-in-out infinite; }
+.flag-4 { animation: float-flag 8s ease-in-out infinite reverse; }
+.flag-5 { animation: float-flag 12s ease-in-out infinite; }
+
+@keyframes float-flag {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.12;
+  }
+  25% {
+    transform: translateY(-12px) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-22px) rotate(0deg);
+    opacity: 0.2;
+  }
+  75% {
+    transform: translateY(-8px) rotate(3deg);
+  }
+}
+
+/* === STARS === */
+.star {
+  font-size: 20px;
+  color: var(--gold-400);
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+.star-1 {
+  top: 15%;
+  left: 8%;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+.star-2 {
+  top: 25%;
+  right: 12%;
+  animation: twinkle 4s ease-in-out infinite 0.5s;
+}
+
+.star-3 {
+  bottom: 30%;
+  left: 15%;
+  animation: twinkle 3.5s ease-in-out infinite 1s;
+}
+
+.star-4 {
+  bottom: 20%;
+  right: 8%;
+  animation: twinkle 4.5s ease-in-out infinite 1.5s;
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.1;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.2);
+  }
+}
+
+/* === DECORATIVE CIRCLES === */
+.decorative-circles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.deco-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.06;
+}
+
+.circle-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, var(--biscuit-300) 0%, transparent 70%);
+  top: -100px;
+  right: -100px;
+  animation: pulse-circle 8s ease-in-out infinite;
+}
+
+.circle-2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, var(--gold-300) 0%, transparent 70%);
+  bottom: -50px;
+  left: -50px;
+  animation: pulse-circle 10s ease-in-out infinite reverse;
+}
+
+.circle-3 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, var(--coral-300) 0%, transparent 70%);
+  top: 40%;
+  left: 30%;
+  animation: pulse-circle 12s ease-in-out infinite 2s;
+}
+
+@keyframes pulse-circle {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.06;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.1;
+  }
+}
+
+/* Content Layer */
+.bg-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* === VARIANT: HERO === */
+.animated-bg--hero .bg-gradient-layer {
+  background: 
+    radial-gradient(ellipse at 30% 0%, rgba(253, 231, 199, 0.7) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 100%, rgba(254, 249, 195, 0.5) 0%, transparent 50%),
+    radial-gradient(ellipse at 0% 50%, rgba(254, 215, 170, 0.4) 0%, transparent 40%),
+    linear-gradient(135deg, var(--cream-50) 0%, var(--biscuit-100) 50%, var(--gold-50) 100%);
+}
+
+.animated-bg--hero .floating-element {
+  opacity: 0.2;
+}
+
+.animated-bg--hero .coin {
+  width: 40px;
+  height: 40px;
+}
+
+.animated-bg--hero .deco-circle {
+  opacity: 0.1;
+}
+
+/* === VARIANT: MINIMAL === */
+.animated-bg--minimal .floating-elements {
+  display: none;
+}
+
+.animated-bg--minimal .decorative-circles {
+  display: none;
+}
+
+.animated-bg--minimal .bg-gradient-layer {
+  background: linear-gradient(180deg, var(--cream-50) 0%, var(--biscuit-50) 100%);
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .floating-element,
+  .deco-circle,
+  .star {
+    animation: none !important;
+  }
+}

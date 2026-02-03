@@ -35,7 +35,7 @@ const Icons = {
 
 const EntrepreneurCompany = () => {
   const { user } = useAuth();
-  const { id } = useParams(); // ✅ dacă există => pagină publică
+  const { id } = useParams(); //  dacă există => pagină publică
   const isPublic = !!id;
 
   const [companyInfo, setCompanyInfo] = useState(null);
@@ -95,7 +95,7 @@ const EntrepreneurCompany = () => {
     return (
       <div className="company-stars" aria-label={`Rating ${r} out of 5`}>
         {[1,2,3,4,5].map((s) => (
-          <span key={s} className={`company-star ${s <= Math.round(r) ? 'on' : ''}`}>★</span>
+          <span key={s} className={`company-star ${s <= Math.round(r) ? 'on' : ''}`}>*</span>
         ))}
       </div>
     );
@@ -127,7 +127,7 @@ const EntrepreneurCompany = () => {
                 <h2>{companyInfo?.companyName || 'Company Name'}</h2>
                 <p className="company-cui">CUI: {companyInfo?.cui || 'N/A'}</p>
 
-                {/* ✅ PUBLIC: rating mediu */}
+                {/*  PUBLIC: rating mediu */}
                 {isPublic && (
                   <div className="company-rating-row">
                     {renderStars(reviewsData.averageRating)}
@@ -178,7 +178,7 @@ const EntrepreneurCompany = () => {
             </div>
           )}
 
-          {/* ✅ PUBLIC: lista reviews */}
+          {/*  PUBLIC: lista reviews */}
           {isPublic && (
             <div className="card">
               <div className="card-header">

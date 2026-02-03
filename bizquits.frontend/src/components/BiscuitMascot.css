@@ -1,0 +1,102 @@
+/* ═══════════════════════════════════════════════════════
+   BizQuits Logo - Image-based
+   ═══════════════════════════════════════════════════════ */
+
+.biscuit-mascot {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SIZE VARIANTS
+   ═══════════════════════════════════════════════════════ */
+.biscuit-sm .biscuit-logo-img {
+  width: 40px;
+  height: auto;
+}
+
+.biscuit-md .biscuit-logo-img {
+  width: 64px;
+  height: auto;
+}
+
+.biscuit-lg .biscuit-logo-img {
+  width: 96px;
+  height: auto;
+}
+
+.biscuit-xl .biscuit-logo-img {
+  width: 140px;
+  height: auto;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LOGO IMAGE
+   ═══════════════════════════════════════════════════════ */
+.biscuit-logo-img {
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+}
+
+.biscuit-mascot.animate .biscuit-logo-img {
+  animation: logo-float 4s ease-in-out infinite;
+}
+
+@keyframes logo-float {
+  0%, 100% { 
+    transform: translateY(0); 
+  }
+  50% { 
+    transform: translateY(-6px); 
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   LABEL
+   ═══════════════════════════════════════════════════════ */
+.biscuit-label {
+  margin-top: 12px;
+  font-family: var(--font-display, 'Nunito', sans-serif);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--foreground, #1F2D24);
+  letter-spacing: -0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.biscuit-sm .biscuit-label {
+  font-size: 0.875rem;
+  margin-top: 6px;
+}
+
+.biscuit-md .biscuit-label {
+  font-size: 1.125rem;
+  margin-top: 8px;
+}
+
+.biscuit-lg .biscuit-label {
+  font-size: 1.5rem;
+  margin-top: 12px;
+}
+
+.biscuit-xl .biscuit-label {
+  font-size: 2rem;
+  margin-top: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   HOVER EFFECTS
+   ═══════════════════════════════════════════════════════ */
+.biscuit-mascot:hover .biscuit-logo-img {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+.biscuit-mascot.animate:hover .biscuit-logo-img {
+  animation: none;
+  transform: scale(1.05);
+}

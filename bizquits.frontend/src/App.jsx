@@ -60,7 +60,7 @@ const AppLayout = () => {
       <main className="main-content">
         <Routes>
 
-          {/* ✅ PUBLIC COMPANY PROFILE – MUST BE ABOVE * */}
+          {/*  PUBLIC COMPANY PROFILE – MUST BE ABOVE * */}
           <Route path="/companies/:id" element={<CompanyPublicProfile />} />
 
           <Route path="/" element={<Home />} />
@@ -89,7 +89,7 @@ const AppLayout = () => {
           <Route path="/client/offers" element={<PrivateRoute roles={['Client']}><ClientOffers /></PrivateRoute>} />
           <Route path="/client/challenges" element={<PrivateRoute roles={['Client']}><ClientChallenges /></PrivateRoute>} />
 
-          {/* ⚠️ MUST BE LAST */}
+          {/* ️ MUST BE LAST */}
           <Route path="*" element={<Home />} />
         </Routes>
       </main>

@@ -9,7 +9,7 @@ const CompanyPublicProfile = () => {
 
   const stars = (rating) => {
     const r = Math.max(0, Math.min(5, Math.round(Number(rating ?? 0))));
-    return '★'.repeat(r) + '☆'.repeat(5 - r);
+    return '*'.repeat(r) + '-'.repeat(5 - r);
   };
 
   useEffect(() => {

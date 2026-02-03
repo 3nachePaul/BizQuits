@@ -281,7 +281,7 @@ function EntrepreneurBookings() {
                     onClick={() => navigate(`/chat?serviceId=${booking.service.id}`)}
                     title="Chat with client"
                   >
-                    💬 Chat
+                    Chat
                   </button>
                 )}
                 

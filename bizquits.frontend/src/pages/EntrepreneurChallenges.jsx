@@ -146,6 +146,7 @@ export default function EntrepreneurChallenges() {
   const [selectedChallenge, setSelectedChallenge] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [loadingParticipants, setLoadingParticipants] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   // Form state
   const [formMode, setFormMode] = useState(null); // 'create' | 'edit'
@@ -212,7 +213,7 @@ export default function EntrepreneurChallenges() {
       endDate: '',
       maxParticipants: ''
     });
-    setActiveTab('form');
+    setShowModal(true);
   };
 
   const openEditForm = (challenge) => {
@@ -232,7 +233,12 @@ export default function EntrepreneurChallenges() {
       endDate: challenge.endDate ? challenge.endDate.split('T')[0] : '',
       maxParticipants: challenge.maxParticipants || ''
     });
-    setActiveTab('form');
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setFormMode(null);
   };
 
   const viewParticipants = (challenge) => {
@@ -275,8 +281,7 @@ export default function EntrepreneurChallenges() {
       }
 
       await loadChallenges();
-      setActiveTab('list');
-      setFormMode(null);
+      closeModal();
     } catch (err) {
       const msg = err.response?.data || 'Error saving challenge';
       toast.error(typeof msg === 'string' ? msg : 'Error saving challenge');
@@ -416,12 +421,6 @@ export default function EntrepreneurChallenges() {
           Challenges
           <span className="badge">{challenges.length}</span>
         </button>
-        {activeTab === 'form' && (
-          <button className="tab-btn active">
-            <span className="tab-icon">{formMode === 'create' ? Icons.plus : Icons.edit}</span>
-            {formMode === 'create' ? 'New Challenge' : 'Edit Challenge'}
-          </button>
-        )}
         {activeTab === 'participants' && selectedChallenge && (
           <button className="tab-btn active">
             <span className="tab-icon">{Icons.users}</span>
@@ -538,191 +537,192 @@ export default function EntrepreneurChallenges() {
         </div>
       )}
 
-      {/* Challenge Form */}
-      {activeTab === 'form' && (
-        <div className="challenge-form-container">
-          <form onSubmit={handleSubmit} className="challenge-form">
-            <div className="form-group">
-              <label htmlFor="title">Title *</label>
-              <input
-                type="text"
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Challenge title"
-                maxLength={200}
-                required
-              />
+      {/* Challenge Modal */}
+      {showModal && (
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && closeModal()}>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>{formMode === 'create' ? 'Create New Challenge' : 'Edit Challenge'}</h2>
+              <button className="btn-close" onClick={closeModal}>
+                {Icons.x}
+              </button>
             </div>
-
-            <div className="form-group">
-              <label htmlFor="description">Description *</label>
-              <textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe the challenge..."
-                maxLength={2000}
-                rows={4}
-                required
-              />
-            </div>
-
-            <div className="form-row">
+            <form onSubmit={handleSubmit} className="modal-body">
               <div className="form-group">
-                <label htmlFor="type">Type</label>
-                <select
-                  id="type"
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: parseInt(e.target.value) })}
-                >
+                <label htmlFor="title">Title *</label>
+                <input
+                  type="text"
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Challenge title"
+                  maxLength={200}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="description">Description *</label>
+                <textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Describe the challenge..."
+                  maxLength={2000}
+                  rows={4}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Challenge Type</label>
+                <div className="challenge-type-grid">
                   {CHALLENGE_TYPES.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
+                    <div
+                      key={type.value}
+                      className={`challenge-type-card ${formData.type === type.value ? 'selected' : ''}`}
+                      onClick={() => setFormData({ ...formData, type: type.value })}
+                    >
+                      <span className="type-icon">{type.icon}</span>
+                      <span className="type-label">{type.label}</span>
+                    </div>
                   ))}
-                </select>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="xpReward">XP Reward</label>
+                  <input
+                    type="number"
+                    id="xpReward"
+                    value={formData.xpReward}
+                    onChange={(e) => setFormData({ ...formData, xpReward: parseInt(e.target.value) || 0 })}
+                    min={0}
+                    max={10000}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="targetCount">Target Count</label>
+                  <input
+                    type="number"
+                    id="targetCount"
+                    value={formData.targetCount}
+                    onChange={(e) => setFormData({ ...formData, targetCount: e.target.value })}
+                    placeholder="e.g., 5 bookings"
+                    min={1}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="timeLimitDays">Time Limit (days)</label>
+                  <input
+                    type="number"
+                    id="timeLimitDays"
+                    value={formData.timeLimitDays}
+                    onChange={(e) => setFormData({ ...formData, timeLimitDays: e.target.value })}
+                    placeholder="Days to complete"
+                    min={1}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="maxParticipants">Max Participants</label>
+                  <input
+                    type="number"
+                    id="maxParticipants"
+                    value={formData.maxParticipants}
+                    onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
+                    placeholder="Unlimited"
+                    min={1}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="startDate">Start Date</label>
+                  <input
+                    type="date"
+                    id="startDate"
+                    value={formData.startDate}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="endDate">End Date</label>
+                  <input
+                    type="date"
+                    id="endDate"
+                    value={formData.endDate}
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="bonusValue">Bonus Value (RON)</label>
+                  <input
+                    type="number"
+                    id="bonusValue"
+                    value={formData.bonusValue}
+                    onChange={(e) => setFormData({ ...formData, bonusValue: e.target.value })}
+                    placeholder="Optional bonus"
+                    step="0.01"
+                    min={0}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="badgeCode">Badge Code</label>
+                  <input
+                    type="text"
+                    id="badgeCode"
+                    value={formData.badgeCode}
+                    onChange={(e) => setFormData({ ...formData, badgeCode: e.target.value })}
+                    placeholder="Achievement code"
+                    maxLength={100}
+                  />
+                </div>
               </div>
 
               <div className="form-group">
-                <label htmlFor="xpReward">XP Reward</label>
+                <label htmlFor="rewardDescription">Reward Description</label>
                 <input
-                  type="number"
-                  id="xpReward"
-                  value={formData.xpReward}
-                  onChange={(e) => setFormData({ ...formData, xpReward: parseInt(e.target.value) || 0 })}
-                  min={0}
-                  max={10000}
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="targetCount">Target Count</label>
-                <input
-                  type="number"
-                  id="targetCount"
-                  value={formData.targetCount}
-                  onChange={(e) => setFormData({ ...formData, targetCount: e.target.value })}
-                  placeholder="e.g., 5 bookings"
-                  min={1}
+                  type="text"
+                  id="rewardDescription"
+                  value={formData.rewardDescription}
+                  onChange={(e) => setFormData({ ...formData, rewardDescription: e.target.value })}
+                  placeholder="What will the participant receive?"
+                  maxLength={500}
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="timeLimitDays">Time Limit (days)</label>
-                <input
-                  type="number"
-                  id="timeLimitDays"
-                  value={formData.timeLimitDays}
-                  onChange={(e) => setFormData({ ...formData, timeLimitDays: e.target.value })}
-                  placeholder="Days to complete"
-                  min={1}
-                />
+              <div className="modal-footer">
+                <button type="button" className="btn-cancel" onClick={closeModal}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-save" disabled={saving}>
+                  {saving ? (
+                    <>
+                      <span className="btn-icon animate-spin">{Icons.loader}</span>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <span className="btn-icon">{Icons.check}</span>
+                      {formMode === 'create' ? 'Create Challenge' : 'Save Changes'}
+                    </>
+                  )}
+                </button>
               </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="startDate">Start Date</label>
-                <input
-                  type="date"
-                  id="startDate"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="endDate">End Date</label>
-                <input
-                  type="date"
-                  id="endDate"
-                  value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="maxParticipants">Max Participants</label>
-                <input
-                  type="number"
-                  id="maxParticipants"
-                  value={formData.maxParticipants}
-                  onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
-                  placeholder="Leave empty for unlimited"
-                  min={1}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="bonusValue">Bonus Value (RON)</label>
-                <input
-                  type="number"
-                  id="bonusValue"
-                  value={formData.bonusValue}
-                  onChange={(e) => setFormData({ ...formData, bonusValue: e.target.value })}
-                  placeholder="Optional bonus"
-                  step="0.01"
-                  min={0}
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="rewardDescription">Reward Description</label>
-              <input
-                type="text"
-                id="rewardDescription"
-                value={formData.rewardDescription}
-                onChange={(e) => setFormData({ ...formData, rewardDescription: e.target.value })}
-                placeholder="What will the participant receive?"
-                maxLength={500}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="badgeCode">Badge Code (optional)</label>
-              <input
-                type="text"
-                id="badgeCode"
-                value={formData.badgeCode}
-                onChange={(e) => setFormData({ ...formData, badgeCode: e.target.value })}
-                placeholder="Special achievement code"
-                maxLength={100}
-              />
-              <small>If provided, a special achievement will be unlocked on completion.</small>
-            </div>
-
-            <div className="form-actions">
-              <button
-                type="button"
-                className="btn-cancel"
-                onClick={() => {
-                  setActiveTab('list');
-                  setFormMode(null);
-                }}
-              >
-                Cancel
-              </button>
-              <button type="submit" className="btn-save" disabled={saving}>
-                {saving ? (
-                  <>
-                    <span className="btn-icon animate-spin">{Icons.loader}</span>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <span className="btn-icon">{Icons.check}</span>
-                    {formMode === 'create' ? 'Create Challenge' : 'Save Changes'}
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       )}
 
