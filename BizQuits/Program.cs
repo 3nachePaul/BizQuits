@@ -25,7 +25,7 @@ try
         .Enrich.FromLogContext()
         .Enrich.WithProperty("Application", "BizQuits"));
 
-    var allowedOrigins = builder.Configuration.GetSection("Security:AllowedOrigins").Get<string[]>() 
+    var allowedOrigins = builder.Configuration.GetSection("Security:AllowedOrigins").Get<string[]>()
         ?? ["http://localhost:5173"];
 
     // --------------------
@@ -49,7 +49,7 @@ try
     builder.Services.AddRateLimiter(options =>
     {
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-        
+
         options.AddFixedWindowLimiter("global", opt =>
         {
             opt.PermitLimit = builder.Configuration.GetValue<int>("Security:RateLimiting:PermitLimit", 100);
@@ -57,7 +57,7 @@ try
             opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
             opt.QueueLimit = 5;
         });
-        
+
         options.AddFixedWindowLimiter("auth", opt =>
         {
             opt.PermitLimit = builder.Configuration.GetValue<int>("Security:RateLimiting:AuthPermitLimit", 5);
@@ -69,16 +69,16 @@ try
         options.OnRejected = async (context, token) =>
         {
             context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-            
-            Log.Warning("Rate limit exceeded for {Path} from {IP}", 
+
+            Log.Warning("Rate limit exceeded for {Path} from {IP}",
                 context.HttpContext.Request.Path,
                 context.HttpContext.Connection.RemoteIpAddress);
-            
+
             await context.HttpContext.Response.WriteAsJsonAsync(new
             {
                 error = "Too many requests. Please try again later.",
-                retryAfter = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter) 
-                    ? retryAfter.TotalSeconds 
+                retryAfter = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter)
+                    ? retryAfter.TotalSeconds
                     : 60
             }, cancellationToken: token);
         };
@@ -113,7 +113,7 @@ try
     // --------------------
     var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key not found.");
     var jwtKeyBytes = Encoding.UTF8.GetBytes(jwtKey);
-    
+
     if (jwtKeyBytes.Length < 64)
     {
         throw new InvalidOperationException("Jwt:Key must be at least 64 characters (512 bits) for HS512 algorithm.");
@@ -148,7 +148,7 @@ try
                 {
                     context.Response.Headers["Token-Expired"] = "true";
                 }
-                
+
                 Log.Warning("Authentication failed: {Message}", context.Exception.Message);
                 return Task.CompletedTask;
             },
@@ -165,12 +165,13 @@ try
     // --------------------
     builder.Services.AddSwaggerGen(c =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo 
-        { 
-            Title = "BizQuits API", 
+        c.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Title = "BizQuits API",
             Version = "v1",
             Description = "Secure API for BizQuits platform"
         });
+
         c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
             In = ParameterLocation.Header,
@@ -180,7 +181,8 @@ try
             BearerFormat = "JWT",
             Scheme = "Bearer"
         });
-        c.AddSecurityRequirement(new OpenApiSecurityRequirement 
+
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
         {
             {
                 new OpenApiSecurityScheme
@@ -208,20 +210,6 @@ try
         };
     });
 
-    app.UseSecurityHeaders();
-
-    // --------------------
-    // Seed Achievements (Development)
-    // --------------------
-    if (app.Environment.IsDevelopment())
-    {
-        using (var scope = app.Services.CreateScope())
-        {
-            var gamification = scope.ServiceProvider.GetRequiredService<GamificationService>();
-            await gamification.EnsureSeedAchievements();
-        }
-    }
-
     // --------------------
     // Middleware pipeline
     // --------------------
@@ -234,6 +222,21 @@ try
     {
         // Enable HSTS in production (HTTP Strict Transport Security)
         app.UseHsts();
+
+        // Apply strict security headers only outside Development
+        app.UseSecurityHeaders();
+    }
+
+    // --------------------
+    // Seed Achievements (Development)
+    // --------------------
+    if (app.Environment.IsDevelopment())
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var gamification = scope.ServiceProvider.GetRequiredService<GamificationService>();
+            await gamification.EnsureSeedAchievements();
+        }
     }
 
     app.UseHttpsRedirection();

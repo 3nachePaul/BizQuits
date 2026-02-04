@@ -23,6 +23,9 @@ import AdminModeration from './pages/AdminModeration';
 import PrivateRoute from './components/PrivateRoute';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import CompanyPublicProfile from './pages/CompanyPublicProfile';
+import BugReportPage from "./pages/BugReportPage";
+import AdminBugReportsPage from "./pages/AdminBugReportsPage";
+import AdminMonitoringPage from "./pages/AdminMonitoringPage"; // ✅ NEW
 import './App.css';
 
 const ChatPage = lazy(() => import('./pages/ChatPage'));
@@ -71,6 +74,8 @@ const AppLayout = () => {
           <Route path="/admin/users" element={<PrivateRoute roles={['Admin']}><AdminUsers /></PrivateRoute>} />
           <Route path="/admin/moderation" element={<PrivateRoute roles={['Admin']}><AdminModeration /></PrivateRoute>} />
 
+          {/* ✅ NEW: Admin monitoring dashboard */}
+          <Route path="/admin/monitoring" element={<PrivateRoute roles={['Admin']}><AdminMonitoringPage /></PrivateRoute>} />
 
           {/* Entrepreneur */}
           <Route path="/entrepreneur/company" element={<PrivateRoute roles={['Entrepreneur']}><EntrepreneurCompany /></PrivateRoute>} />
@@ -88,6 +93,10 @@ const AppLayout = () => {
           <Route path="/client/bookings" element={<PrivateRoute roles={['Client']}><ClientBookings /></PrivateRoute>} />
           <Route path="/client/offers" element={<PrivateRoute roles={['Client']}><ClientOffers /></PrivateRoute>} />
           <Route path="/client/challenges" element={<PrivateRoute roles={['Client']}><ClientChallenges /></PrivateRoute>} />
+
+          {/* Sprint 6 */}
+          <Route path="/bug-report" element={<BugReportPage />} />
+          <Route path="/admin/bug-reports" element={<AdminBugReportsPage />} />
 
           {/* ⚠️ MUST BE LAST */}
           <Route path="*" element={<Home />} />

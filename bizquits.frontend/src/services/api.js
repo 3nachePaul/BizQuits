@@ -50,10 +50,11 @@ const onRefreshFailed = () => {
 
 api.interceptors.request.use(
   async (config) => {
-    const isAuthEndpoint = config.url?.includes('/auth/') && 
-      !config.url?.includes('/logout') && 
+    const isAuthEndpoint =
+      config.url?.includes('/auth/') &&
+      !config.url?.includes('/logout') &&
       !config.url?.includes('/revoke');
-    
+
     if (!isAuthEndpoint && accessToken) {
       if (isTokenExpired() && !config.url?.includes('/refresh')) {
         if (!isRefreshing) {
@@ -71,7 +72,7 @@ api.interceptors.request.use(
             isRefreshing = false;
           }
         }
-        
+
         return new Promise((resolve) => {
           subscribeTokenRefresh((newToken) => {
             if (newToken) {
@@ -81,10 +82,10 @@ api.interceptors.request.use(
           });
         });
       }
-      
+
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
-    
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -94,7 +95,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
+
     if (error.response?.status === 429) {
       const retryAfter = error.response.data?.retryAfter || 60;
       console.warn(`Rate limited. Retry after ${retryAfter} seconds.`);
@@ -102,21 +103,21 @@ api.interceptors.response.use(
         ...error,
         message: `Too many requests. Please wait ${retryAfter} seconds.`,
         isRateLimited: true,
-        retryAfter
+        retryAfter,
       });
     }
-    
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (error.response.headers['token-expired'] === 'true') {
         originalRequest._retry = true;
-        
+
         if (!isRefreshing) {
           isRefreshing = true;
           try {
             const response = await authService.refresh();
             setAccessToken(response.data.accessToken, response.data.expiresAt);
             onRefreshed(response.data.accessToken);
-            
+
             originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
             return api(originalRequest);
           } catch (refreshError) {
@@ -128,7 +129,7 @@ api.interceptors.response.use(
             isRefreshing = false;
           }
         }
-        
+
         return new Promise((resolve, reject) => {
           subscribeTokenRefresh((newToken) => {
             if (newToken) {
@@ -140,11 +141,11 @@ api.interceptors.response.use(
           });
         });
       }
-      
+
       clearAccessToken();
       window.location.href = '/login';
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -174,23 +175,27 @@ const sanitizeObject = (obj) => {
   return sanitized;
 };
 
+// --------------------
+// AUTH
+// --------------------
 export const authService = {
   login: async (email, password) => {
-    const response = await api.post('/auth/login', { 
-      email: email.trim().toLowerCase(), 
-      password 
+    const response = await api.post('/auth/login', {
+      email: email.trim().toLowerCase(),
+      password,
     });
     if (response.data.accessToken) {
       setAccessToken(response.data.accessToken, response.data.expiresAt);
     }
     return response;
   },
-  register: (data) => api.post('/auth/register', {
-    ...data,
-    email: data.email?.trim().toLowerCase(),
-    companyName: data.companyName?.trim(),
-    cui: data.cui?.trim().toUpperCase()
-  }),
+  register: (data) =>
+    api.post('/auth/register', {
+      ...data,
+      email: data.email?.trim().toLowerCase(),
+      companyName: data.companyName?.trim(),
+      cui: data.cui?.trim().toUpperCase(),
+    }),
   refresh: () => api.post('/auth/refresh'),
   logout: async () => {
     try {
@@ -205,15 +210,21 @@ export const authService = {
     } finally {
       clearAccessToken();
     }
-  }
+  },
 };
 
+// --------------------
+// USER
+// --------------------
 export const userService = {
   getProfile: () => api.get('/user/profile'),
   updateProfile: (data) => api.put('/user/profile', sanitizeObject(data)),
   deleteAccount: (password) => api.delete('/user/account', { data: { password } }),
 };
 
+// --------------------
+// ADMIN USERS
+// --------------------
 export const adminService = {
   getAllUsers: () => api.get('/admin/users'),
   getUser: (id) => api.get(`/admin/users/${encodeURIComponent(id)}`),
@@ -224,6 +235,9 @@ export const adminService = {
   rejectEntrepreneur: (id) => api.post(`/admin/reject/${encodeURIComponent(id)}`),
 };
 
+// --------------------
+// SERVICES
+// --------------------
 export const serviceApi = {
   getAll: (params = {}) => {
     const queryParams = new URLSearchParams();
@@ -243,19 +257,24 @@ export const serviceApi = {
   delete: (id) => api.delete(`/service/${encodeURIComponent(id)}`),
 };
 
+// --------------------
+// BOOKINGS
+// --------------------
 export const bookingApi = {
-  create: (serviceId, message) => api.post('/booking', { 
-    serviceId: parseInt(serviceId, 10), 
-    message: sanitizeInput(message) 
-  }),
+  create: (serviceId, message) =>
+    api.post('/booking', {
+      serviceId: parseInt(serviceId, 10),
+      message: sanitizeInput(message),
+    }),
   getMyBookings: () => api.get('/booking/my'),
   cancel: (id) => api.patch(`/booking/${encodeURIComponent(id)}/cancel`),
   complete: (id) => api.patch(`/booking/${encodeURIComponent(id)}/complete`),
   getEntrepreneurBookings: () => api.get('/booking/entrepreneur'),
-  updateStatus: (id, status, response) => api.patch(`/booking/${encodeURIComponent(id)}/status`, { 
-    status, 
-    response: sanitizeInput(response) 
-  }),
+  updateStatus: (id, status, response) =>
+    api.patch(`/booking/${encodeURIComponent(id)}/status`, {
+      status,
+      response: sanitizeInput(response),
+    }),
   getById: (id) => api.get(`/booking/${encodeURIComponent(id)}`),
   delete: (id) => api.delete(`/booking/${encodeURIComponent(id)}`),
 };
@@ -267,9 +286,7 @@ export const gamificationApi = {
 
 // ✅ Reviews (BOOKING-based)
 export const reviewApi = {
-  // POST /api/review/booking/{bookingId}
-  createForBooking: (bookingId, data) =>
-    api.post(`/review/booking/${bookingId}`, data),
+  createForBooking: (bookingId, data) => api.post(`/review/booking/${bookingId}`, data),
 };
 
 // ✅ Admin reviews moderation
@@ -281,8 +298,7 @@ export const adminReviewApi = {
 
 // ✅ Public entrepreneur profile (ratings + reviews)
 export const publicEntrepreneurApi = {
-  getProfile: (entrepreneurProfileId) =>
-    api.get(`/public/entrepreneurs/${entrepreneurProfileId}`),
+  getProfile: (entrepreneurProfileId) => api.get(`/public/entrepreneurs/${entrepreneurProfileId}`),
 };
 
 // ✅ Offers API
@@ -360,5 +376,50 @@ export const adminModerationApi = {
   updateChallenge: (id, data) => api.put(`/admin/challenges/${encodeURIComponent(id)}`, data),
   deleteChallenge: (id) => api.delete(`/admin/challenges/${encodeURIComponent(id)}`),
 };
+
+// --------------------
+// ✅ Sprint 6: BUG REPORTING
+// --------------------
+
+export const bugReportApi = {
+  create: (data) => api.post('/bugreport', sanitizeObject(data)),
+  my: () => api.get('/bugreport/my'),
+  myById: (id) => api.get(`/bugreport/my/${encodeURIComponent(id)}`),
+};
+
+// --------------------
+// ✅ Sprint 6: ADMIN BUG MONITORING
+// --------------------
+
+export const adminBugReportApi = {
+  getAll: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.status != null) query.append("status", params.status);
+    if (params.severity != null) query.append("severity", params.severity);
+    if (params.priority != null) query.append("priority", params.priority);
+    return api.get(`/admin/bugreports${query.toString() ? `?${query}` : ""}`);
+  },
+
+  // ✅ send DTO objects
+  updateStatus: (id, status) =>
+    api.patch(`/admin/bugreports/${encodeURIComponent(id)}/status`, { status: Number(status) }),
+
+  updateSeverity: (id, severity) =>
+    api.patch(`/admin/bugreports/${encodeURIComponent(id)}/severity`, { severity: Number(severity) }),
+
+  updatePriority: (id, priority) =>
+    api.patch(`/admin/bugreports/${encodeURIComponent(id)}/priority`, { priority: Number(priority) }),
+};
+
+
+export const adminMonitoringApi = {
+  overview: () => api.get("/admin/monitoring/overview"),
+  bugStats: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.days != null) query.append("days", params.days);
+    return api.get(`/admin/monitoring/bug-stats${query.toString() ? `?${query}` : ""}`);
+  },
+};
+
 
 export default api;
