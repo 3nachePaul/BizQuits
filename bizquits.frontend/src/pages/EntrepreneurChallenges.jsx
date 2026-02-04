@@ -118,7 +118,15 @@ const CHALLENGE_TYPES = [
   { value: 2, name: 'SpeedChallenge', label: 'Speed Challenge', icon: Icons.zap },
   { value: 3, name: 'LoyaltyChallenge', label: 'Loyalty Challenge', icon: Icons.award },
   { value: 4, name: 'ReferralChallenge', label: 'Referral Challenge', icon: Icons.users },
-  { value: 5, name: 'SeasonalChallenge', label: 'Seasonal Challenge', icon: Icons.calendar }
+  { value: 5, name: 'SeasonalChallenge', label: 'Seasonal Challenge', icon: Icons.calendar },
+  { value: 6, name: 'OfferClaimChallenge', label: 'Offer Claim Challenge', icon: Icons.gift },
+  { value: 7, name: 'ProofChallenge', label: 'Proof Challenge', icon: Icons.target }
+];
+
+const TRACKING_MODES = [
+  { value: 0, name: 'Automatic', label: 'Automatic', description: 'Progress tracked automatically when actions are completed' },
+  { value: 1, name: 'ManualVerification', label: 'Manual Verification', description: 'User submits proof, you verify it' },
+  { value: 2, name: 'EntrepreneurManual', label: 'Entrepreneur Manual', description: 'You update progress manually' }
 ];
 
 const STATUS_LABELS = {
@@ -133,6 +141,7 @@ const PARTICIPATION_STATUS = {
   Accepted: { label: 'Accepted', color: 'info' },
   Rejected: { label: 'Rejected', color: 'danger' },
   InProgress: { label: 'In Progress', color: 'primary' },
+  ProofSubmitted: { label: 'Proof Submitted', color: 'info' },
   Completed: { label: 'Completed', color: 'success' },
   Failed: { label: 'Failed', color: 'danger' },
   Withdrawn: { label: 'Withdrawn', color: 'secondary' }
@@ -154,11 +163,14 @@ export default function EntrepreneurChallenges() {
     title: '',
     description: '',
     type: 0,
+    trackingMode: 0,
     targetCount: '',
     timeLimitDays: '',
     xpReward: 50,
+    coinsReward: 0,
     badgeCode: '',
     rewardDescription: '',
+    proofInstructions: '',
     bonusValue: '',
     startDate: '',
     endDate: '',
@@ -166,6 +178,9 @@ export default function EntrepreneurChallenges() {
   });
   const [saving, setSaving] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
+  const [pendingProofs, setPendingProofs] = useState([]);
+  const [loadingProofs, setLoadingProofs] = useState(false);
+  const [verifyingProofId, setVerifyingProofId] = useState(null);
 
   useEffect(() => {
     loadChallenges();
@@ -203,11 +218,14 @@ export default function EntrepreneurChallenges() {
       title: '',
       description: '',
       type: 0,
+      trackingMode: 0,
       targetCount: '',
       timeLimitDays: '',
       xpReward: 50,
+      coinsReward: 0,
       badgeCode: '',
       rewardDescription: '',
+      proofInstructions: '',
       bonusValue: '',
       startDate: '',
       endDate: '',
@@ -223,11 +241,14 @@ export default function EntrepreneurChallenges() {
       title: challenge.title,
       description: challenge.description,
       type: CHALLENGE_TYPES.findIndex(t => t.name === challenge.type) || 0,
+      trackingMode: TRACKING_MODES.findIndex(t => t.name === challenge.trackingMode) || 0,
       targetCount: challenge.targetCount || '',
       timeLimitDays: challenge.timeLimitDays || '',
       xpReward: challenge.xpReward || 50,
+      coinsReward: challenge.coinsReward || 0,
       badgeCode: challenge.badgeCode || '',
       rewardDescription: challenge.rewardDescription || '',
+      proofInstructions: challenge.proofInstructions || '',
       bonusValue: challenge.bonusValue || '',
       startDate: challenge.startDate ? challenge.startDate.split('T')[0] : '',
       endDate: challenge.endDate ? challenge.endDate.split('T')[0] : '',
@@ -239,12 +260,6 @@ export default function EntrepreneurChallenges() {
   const closeModal = () => {
     setShowModal(false);
     setFormMode(null);
-  };
-
-  const viewParticipants = (challenge) => {
-    setSelectedChallenge(challenge);
-    loadParticipants(challenge.id);
-    setActiveTab('participants');
   };
 
   const handleSubmit = async (e) => {
@@ -261,11 +276,14 @@ export default function EntrepreneurChallenges() {
         title: formData.title.trim(),
         description: formData.description.trim(),
         type: formData.type,
+        trackingMode: formData.trackingMode,
         targetCount: formData.targetCount ? parseInt(formData.targetCount) : null,
         timeLimitDays: formData.timeLimitDays ? parseInt(formData.timeLimitDays) : null,
         xpReward: formData.xpReward || 50,
+        coinsReward: formData.coinsReward || 0,
         badgeCode: formData.badgeCode.trim() || null,
         rewardDescription: formData.rewardDescription.trim() || null,
+        proofInstructions: formData.proofInstructions.trim() || null,
         bonusValue: formData.bonusValue ? parseFloat(formData.bonusValue) : null,
         startDate: formData.startDate || null,
         endDate: formData.endDate || null,
@@ -373,6 +391,48 @@ export default function EntrepreneurChallenges() {
     } finally {
       setActionLoading(null);
     }
+  };
+
+  const loadPendingProofs = async (challengeId) => {
+    try {
+      setLoadingProofs(true);
+      const res = await challengeApi.getPendingProofs(challengeId);
+      setPendingProofs(res.data);
+    } catch (err) {
+      toast.error('Could not load pending proofs');
+    } finally {
+      setLoadingProofs(false);
+    }
+  };
+
+  const handleVerifyProof = async (participationId, approved) => {
+    const response = !approved ? prompt('Reason for rejection (optional):') : null;
+    if (!approved && response === null) return; // User cancelled
+
+    try {
+      setVerifyingProofId(participationId);
+      await challengeApi.verifyProof(participationId, { approved, response });
+      toast.success(approved ? 'Proof approved! Challenge completed.' : 'Proof rejected. User can resubmit.');
+      if (selectedChallenge) {
+        await loadPendingProofs(selectedChallenge.id);
+        await loadParticipants(selectedChallenge.id);
+      }
+    } catch (err) {
+      toast.error('Error verifying proof');
+    } finally {
+      setVerifyingProofId(null);
+    }
+  };
+
+  const viewParticipantsAndProofs = (challenge) => {
+    setSelectedChallenge(challenge);
+    loadParticipants(challenge.id);
+    if (challenge.trackingMode === 'ManualVerification') {
+      loadPendingProofs(challenge.id);
+    } else {
+      setPendingProofs([]);
+    }
+    setActiveTab('participants');
   };
 
   const formatDate = (dateString) => {
@@ -510,10 +570,13 @@ export default function EntrepreneurChallenges() {
                       )}
                       <button
                         className="btn-participants"
-                        onClick={() => viewParticipants(challenge)}
+                        onClick={() => viewParticipantsAndProofs(challenge)}
                       >
                         <span className="btn-icon">{Icons.users}</span>
                         Participants
+                        {challenge.proofPendingCount > 0 && (
+                          <span className="proof-badge">{challenge.proofPendingCount}</span>
+                        )}
                       </button>
                       <button
                         className="btn-edit"
@@ -590,6 +653,36 @@ export default function EntrepreneurChallenges() {
                 </div>
               </div>
 
+              <div className="form-group">
+                <label>Tracking Mode</label>
+                <div className="tracking-mode-grid">
+                  {TRACKING_MODES.map((mode) => (
+                    <div
+                      key={mode.value}
+                      className={`tracking-mode-card ${formData.trackingMode === mode.value ? 'selected' : ''}`}
+                      onClick={() => setFormData({ ...formData, trackingMode: mode.value })}
+                    >
+                      <span className="mode-label">{mode.label}</span>
+                      <span className="mode-description">{mode.description}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {formData.trackingMode === 1 && (
+                <div className="form-group">
+                  <label htmlFor="proofInstructions">Proof Instructions</label>
+                  <textarea
+                    id="proofInstructions"
+                    value={formData.proofInstructions}
+                    onChange={(e) => setFormData({ ...formData, proofInstructions: e.target.value })}
+                    placeholder="Tell users what proof they need to submit (e.g., 'Upload a photo of your completed service')"
+                    rows={3}
+                    maxLength={1000}
+                  />
+                </div>
+              )}
+
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="xpReward">XP Reward</label>
@@ -604,6 +697,20 @@ export default function EntrepreneurChallenges() {
                 </div>
 
                 <div className="form-group">
+                  <label htmlFor="coinsReward">Coins Reward</label>
+                  <input
+                    type="number"
+                    id="coinsReward"
+                    value={formData.coinsReward}
+                    onChange={(e) => setFormData({ ...formData, coinsReward: parseInt(e.target.value) || 0 })}
+                    min={0}
+                    max={10000}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
                   <label htmlFor="targetCount">Target Count</label>
                   <input
                     type="number"
@@ -614,9 +721,7 @@ export default function EntrepreneurChallenges() {
                     min={1}
                   />
                 </div>
-              </div>
 
-              <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="timeLimitDays">Time Limit (days)</label>
                   <input
@@ -628,7 +733,9 @@ export default function EntrepreneurChallenges() {
                     min={1}
                   />
                 </div>
+              </div>
 
+              <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="maxParticipants">Max Participants</label>
                   <input
@@ -735,6 +842,62 @@ export default function EntrepreneurChallenges() {
             </button>
             <h2>{selectedChallenge.title} - Participants</h2>
           </div>
+
+          {/* Pending Proofs Section */}
+          {selectedChallenge.trackingMode === 'ManualVerification' && pendingProofs.length > 0 && (
+            <div className="pending-proofs-section">
+              <h3>
+                <span className="section-icon">{Icons.target}</span>
+                Pending Proofs ({pendingProofs.length})
+              </h3>
+              <div className="pending-proofs-list">
+                {pendingProofs.map((proof) => (
+                  <div key={proof.id} className="proof-card">
+                    <div className="proof-header">
+                      <span className="proof-user">{proof.user?.email}</span>
+                      <span className="proof-date">
+                        Submitted: {formatDate(proof.proofSubmittedAt)}
+                      </span>
+                    </div>
+                    <div className="proof-content">
+                      {proof.proofText && (
+                        <div className="proof-text">
+                          <span className="label">Description:</span>
+                          <p>{proof.proofText}</p>
+                        </div>
+                      )}
+                      {proof.proofImageUrl && (
+                        <div className="proof-image">
+                          <span className="label">Image:</span>
+                          <a href={proof.proofImageUrl} target="_blank" rel="noopener noreferrer">
+                            <img src={proof.proofImageUrl} alt="Proof" onError={(e) => e.target.style.display = 'none'} />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                    <div className="proof-actions">
+                      <button
+                        className="btn-approve-proof"
+                        onClick={() => handleVerifyProof(proof.id, true)}
+                        disabled={verifyingProofId === proof.id}
+                      >
+                        <span className="btn-icon">{Icons.check}</span>
+                        Approve
+                      </button>
+                      <button
+                        className="btn-reject-proof"
+                        onClick={() => handleVerifyProof(proof.id, false)}
+                        disabled={verifyingProofId === proof.id}
+                      >
+                        <span className="btn-icon">{Icons.x}</span>
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {loadingParticipants ? (
             <div className="loading-state">

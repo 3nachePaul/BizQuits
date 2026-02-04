@@ -193,11 +193,24 @@ public class MessageController : ControllerBase
         if (me == null) return Unauthorized();
         
         // Get all service IDs where user has messages
-        var serviceIds = await _context.Messages
+        var serviceIdsFromMessages = await _context.Messages
             .Where(m => m.SenderId == me.Id || m.RecipientId == me.Id)
             .Select(m => m.ServiceId)
             .Distinct()
             .ToListAsync();
+        
+        // Also get service IDs from bookings (for conversations that haven't started yet)
+        var serviceIdsFromBookings = await _context.Bookings
+            .Include(b => b.Service)
+            .ThenInclude(s => s!.EntrepreneurProfile)
+            .Where(b => b.ClientId == me.Id || b.Service!.EntrepreneurProfile!.UserId == me.Id)
+            .Where(b => b.Status != BookingStatus.Cancelled && b.Status != BookingStatus.Rejected)
+            .Select(b => b.ServiceId)
+            .Distinct()
+            .ToListAsync();
+        
+        // Combine both lists
+        var serviceIds = serviceIdsFromMessages.Union(serviceIdsFromBookings).ToList();
         
         var conversations = new List<object>();
         
@@ -210,7 +223,7 @@ public class MessageController : ControllerBase
             
             if (service == null) continue;
             
-            // Get the last message
+            // Get the last message (might be null if no messages yet)
             var lastMessage = await _context.Messages
                 .Where(m => m.ServiceId == serviceId && 
                            (m.SenderId == me.Id || m.RecipientId == me.Id))
@@ -223,7 +236,7 @@ public class MessageController : ControllerBase
                                 m.RecipientId == me.Id && 
                                 !m.IsRead);
             
-            // Check if conversation is archived (job completed)
+            // Get the booking for this service
             var booking = await _context.Bookings
                 .Where(b => b.ServiceId == serviceId && 
                            (b.ClientId == me.Id || service.EntrepreneurProfile!.UserId == me.Id))
@@ -233,12 +246,19 @@ public class MessageController : ControllerBase
             bool isArchived = booking?.Status == BookingStatus.Completed;
             
             // Determine the other party in the conversation
-            var otherUserId = me.Id == service.EntrepreneurProfile?.UserId
-                ? await _context.Messages
-                    .Where(m => m.ServiceId == serviceId && m.SenderId != me.Id)
-                    .Select(m => m.SenderId)
-                    .FirstOrDefaultAsync()
-                : service.EntrepreneurProfile?.UserId ?? 0;
+            int otherUserId;
+            if (me.Id == service.EntrepreneurProfile?.UserId)
+            {
+                // I'm the entrepreneur - find the client
+                otherUserId = lastMessage != null 
+                    ? (lastMessage.SenderId == me.Id ? lastMessage.RecipientId : lastMessage.SenderId)
+                    : booking?.ClientId ?? 0;
+            }
+            else
+            {
+                // I'm the client - the other party is the entrepreneur
+                otherUserId = service.EntrepreneurProfile?.UserId ?? 0;
+            }
             
             var otherUser = await _context.Users.FindAsync(otherUserId);
             
@@ -248,8 +268,8 @@ public class MessageController : ControllerBase
                 ServiceName = service.Name,
                 EntrepreneurName = service.EntrepreneurProfile?.User?.Email ?? "Unknown",
                 OtherParty = new { Id = otherUser?.Id ?? 0, Email = otherUser?.Email ?? "Unknown" },
-                LastMessage = lastMessage?.Content,
-                LastMessageAt = lastMessage?.SentAt,
+                LastMessage = lastMessage?.Content ?? "No messages yet",
+                LastMessageAt = lastMessage?.SentAt ?? booking?.CreatedAt,
                 UnreadCount = unreadCount,
                 IsArchived = isArchived,
                 BookingStatus = booking?.Status.ToString()
@@ -280,5 +300,33 @@ public class MessageController : ControllerBase
         await _context.SaveChangesAsync();
         
         return Ok();
+    }
+
+    // POST: api/message/read/service/{serviceId}
+    // Mark all messages in a service conversation as read
+    [HttpPost("read/service/{serviceId}")]
+    public async Task<IActionResult> MarkConversationAsRead(int serviceId)
+    {
+        var myEmail = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(myEmail)) return Unauthorized();
+        
+        var me = await _context.Users.FirstOrDefaultAsync(u => u.Email == myEmail);
+        if (me == null) return Unauthorized();
+        
+        // Mark all unread messages sent TO me in this conversation as read
+        var unreadMessages = await _context.Messages
+            .Where(m => m.ServiceId == serviceId && 
+                       m.RecipientId == me.Id && 
+                       !m.IsRead)
+            .ToListAsync();
+        
+        foreach (var msg in unreadMessages)
+        {
+            msg.IsRead = true;
+        }
+        
+        await _context.SaveChangesAsync();
+        
+        return Ok(new { markedAsRead = unreadMessages.Count });
     }
 }

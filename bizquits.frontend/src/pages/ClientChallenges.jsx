@@ -108,7 +108,15 @@ const CHALLENGE_TYPES = {
   SpeedChallenge: { label: 'Speed Challenge', icon: Icons.zap, color: 'var(--info)' },
   LoyaltyChallenge: { label: 'Loyalty Challenge', icon: Icons.award, color: 'var(--danger)' },
   ReferralChallenge: { label: 'Referral Challenge', icon: Icons.users, color: 'var(--stone-600)' },
-  SeasonalChallenge: { label: 'Seasonal Challenge', icon: Icons.calendar, color: 'var(--success)' }
+  SeasonalChallenge: { label: 'Seasonal Challenge', icon: Icons.calendar, color: 'var(--success)' },
+  OfferClaimChallenge: { label: 'Offer Claim Challenge', icon: Icons.gift, color: 'var(--sage-500)' },
+  ProofChallenge: { label: 'Proof Challenge', icon: Icons.target, color: 'var(--stone-500)' }
+};
+
+const TRACKING_MODE_INFO = {
+  Automatic: { label: 'Auto-tracked', description: 'Progress updates automatically when you complete actions', icon: Icons.zap },
+  ManualVerification: { label: 'Proof Required', description: 'Submit proof for verification', icon: Icons.target },
+  EntrepreneurManual: { label: 'Manual', description: 'Progress updated by entrepreneur', icon: Icons.building }
 };
 
 const STATUS_COLORS = {
@@ -116,6 +124,7 @@ const STATUS_COLORS = {
   Accepted: 'info',
   Rejected: 'danger',
   InProgress: 'primary',
+  ProofSubmitted: 'info',
   Completed: 'success',
   Failed: 'danger',
   Withdrawn: 'secondary'
@@ -132,6 +141,10 @@ export default function ClientChallenges() {
   const [withdrawingId, setWithdrawingId] = useState(null);
   const [joinModal, setJoinModal] = useState({ show: false, challenge: null });
   const [joinMessage, setJoinMessage] = useState('');
+  const [proofModal, setProofModal] = useState({ show: false, participation: null });
+  const [proofText, setProofText] = useState('');
+  const [proofImageUrl, setProofImageUrl] = useState('');
+  const [submittingProof, setSubmittingProof] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -196,6 +209,43 @@ export default function ClientChallenges() {
       toast.error(typeof message === 'string' ? message : 'Error withdrawing');
     } finally {
       setWithdrawingId(null);
+    }
+  };
+
+  const openProofModal = (participation) => {
+    setProofModal({ show: true, participation });
+    setProofText('');
+    setProofImageUrl('');
+  };
+
+  const closeProofModal = () => {
+    setProofModal({ show: false, participation: null });
+    setProofText('');
+    setProofImageUrl('');
+  };
+
+  const handleSubmitProof = async () => {
+    if (!proofModal.participation) return;
+    if (!proofText.trim() && !proofImageUrl.trim()) {
+      toast.error('Please provide proof text or an image URL');
+      return;
+    }
+
+    try {
+      setSubmittingProof(true);
+      await challengeApi.submitProof(proofModal.participation.id, {
+        proofText: proofText.trim() || null,
+        proofImageUrl: proofImageUrl.trim() || null
+      });
+      toast.success('Proof submitted successfully! Waiting for verification.');
+      closeProofModal();
+      const participationsRes = await challengeApi.getMyParticipations();
+      setMyParticipations(participationsRes.data);
+    } catch (err) {
+      const message = err.response?.data || 'Error submitting proof';
+      toast.error(typeof message === 'string' ? message : 'Error submitting proof');
+    } finally {
+      setSubmittingProof(false);
     }
   };
 
@@ -302,13 +352,15 @@ export default function ClientChallenges() {
             </div>
           ) : (
             <div className="challenges-grid">
-              {filteredChallenges.map((challenge) => {
+              {filteredChallenges.map((challenge, index) => {
                 const typeInfo = CHALLENGE_TYPES[challenge.type] || { label: challenge.type, icon: Icons.target };
                 const participating = isParticipating(challenge.id);
                 const participation = getParticipation(challenge.id);
 
                 return (
-                  <div key={challenge.id} className={`challenge-card ${participating ? 'participating' : ''}`}>
+                  <div key={challenge.id} className={`challenge-card ${participating ? 'participating' : ''}`}
+                    {...(index === 0 ? { 'data-tour': 'challenge-card' } : {})}
+                  >
                     {participating && (
                       <div className="participating-badge">
                         <span className="badge-icon">{Icons.check}</span>
@@ -338,10 +390,22 @@ export default function ClientChallenges() {
                             {challenge.timeLimitDays} days limit
                           </div>
                         )}
+                        {challenge.trackingMode && TRACKING_MODE_INFO[challenge.trackingMode] && (
+                          <div className="detail-chip tracking" title={TRACKING_MODE_INFO[challenge.trackingMode].description}>
+                            <span className="chip-icon">{TRACKING_MODE_INFO[challenge.trackingMode].icon}</span>
+                            {TRACKING_MODE_INFO[challenge.trackingMode].label}
+                          </div>
+                        )}
                         {challenge.xpReward > 0 && (
                           <div className="detail-chip xp">
                             <span className="chip-icon">{Icons.sparkles}</span>
                             +{challenge.xpReward} XP
+                          </div>
+                        )}
+                        {challenge.coinsReward > 0 && (
+                          <div className="detail-chip coins">
+                            <span className="chip-icon">{Icons.star}</span>
+                            +{challenge.coinsReward} Coins
                           </div>
                         )}
                         {challenge.bonusValue > 0 && (
@@ -362,12 +426,13 @@ export default function ClientChallenges() {
                       {participation && (
                         <div className="participation-info">
                           <span className={`status-badge ${STATUS_COLORS[participation.status] || 'secondary'}`}>
-                            {participation.status}
+                            {participation.status === 'ProofSubmitted' ? 'Proof Submitted' : participation.status}
                           </span>
                           {participation.currentProgress > 0 && (
                             <span className="progress-text">
                               Progress: {participation.currentProgress}
                               {challenge.targetCount && ` / ${challenge.targetCount}`}
+                              {participation.progressPercentage !== undefined && ` (${participation.progressPercentage}%)`}
                             </span>
                           )}
                         </div>
@@ -415,6 +480,7 @@ export default function ClientChallenges() {
                             className="btn-join"
                             onClick={() => openJoinModal(challenge)}
                             disabled={joiningId === challenge.id}
+                            {...(index === 0 ? { 'data-tour': 'join-button' } : {})}
                           >
                             {joiningId === challenge.id ? (
                               <>
@@ -469,6 +535,7 @@ export default function ClientChallenges() {
                         {participation.status === 'Accepted' && <>{Icons.check} Accepted</>}
                         {participation.status === 'Rejected' && <>{Icons.x} Rejected</>}
                         {participation.status === 'InProgress' && <>{Icons.zap} In Progress</>}
+                        {participation.status === 'ProofSubmitted' && <>{Icons.clock} Proof Submitted</>}
                         {participation.status === 'Completed' && <>{Icons.trophy} Completed</>}
                         {participation.status === 'Failed' && <>{Icons.x} Failed</>}
                         {participation.status === 'Withdrawn' && <>{Icons.x} Withdrawn</>}
@@ -481,18 +548,27 @@ export default function ClientChallenges() {
                         <p className="participation-description">{challenge.description}</p>
                       )}
 
+                      {/* Tracking Mode Info */}
+                      {challenge?.trackingMode && TRACKING_MODE_INFO[challenge.trackingMode] && (
+                        <div className="tracking-mode-info">
+                          <span className="tracking-icon">{TRACKING_MODE_INFO[challenge.trackingMode].icon}</span>
+                          <span className="tracking-label">{TRACKING_MODE_INFO[challenge.trackingMode].label}</span>
+                          <span className="tracking-description">{TRACKING_MODE_INFO[challenge.trackingMode].description}</span>
+                        </div>
+                      )}
+
                       {/* Progress */}
                       {challenge?.targetCount && participation.status !== 'Pending' && (
-                        <div className="progress-section">
+                        <div className="progress-section" data-tour="progress-bar">
                           <div className="progress-header">
                             <span>Progress</span>
-                            <span>{participation.currentProgress} / {challenge.targetCount}</span>
+                            <span>{participation.currentProgress} / {participation.targetProgress || challenge.targetCount} ({participation.progressPercentage || 0}%)</span>
                           </div>
                           <div className="progress-bar">
                             <div
                               className="progress-fill"
                               style={{
-                                width: `${Math.min(100, (participation.currentProgress / challenge.targetCount) * 100)}%`
+                                width: `${participation.progressPercentage || Math.min(100, (participation.currentProgress / (participation.targetProgress || challenge.targetCount)) * 100)}%`
                               }}
                             />
                           </div>
@@ -506,6 +582,29 @@ export default function ClientChallenges() {
                             <span className="reward-icon">{Icons.sparkles}</span>
                             <span>+{participation.xpAwarded} XP awarded!</span>
                           </div>
+                          {participation.coinsAwarded > 0 && (
+                            <div className="reward-badge coins">
+                              <span className="reward-icon">{Icons.star}</span>
+                              <span>+{participation.coinsAwarded} Coins awarded!</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Proof Instructions for Manual Verification */}
+                      {challenge?.trackingMode === 'ManualVerification' && challenge?.proofInstructions && (
+                        <div className="proof-instructions">
+                          <span className="proof-label">{Icons.target} How to complete:</span>
+                          <p>{challenge.proofInstructions}</p>
+                        </div>
+                      )}
+
+                      {/* Proof Submitted Indicator */}
+                      {participation.proofSubmitted && (
+                        <div className="proof-submitted-info">
+                          <span className="proof-icon">{Icons.check}</span>
+                          <span>Proof submitted on {formatDate(participation.proofSubmittedAt)}</span>
+                          <span className="waiting">Waiting for verification...</span>
                         </div>
                       )}
 
@@ -542,25 +641,36 @@ export default function ClientChallenges() {
                         )}
                       </div>
 
-                      {canWithdraw && (
+                      {(canWithdraw || (challenge?.trackingMode === 'ManualVerification' && ['Accepted', 'InProgress'].includes(participation.status) && !participation.proofSubmitted)) && (
                         <div className="participation-actions">
-                          <button
-                            className="btn-withdraw"
-                            onClick={() => handleWithdraw(participation.id)}
-                            disabled={withdrawingId === participation.id}
-                          >
-                            {withdrawingId === participation.id ? (
-                              <>
-                                <span className="btn-icon animate-spin">{Icons.loader}</span>
-                                Withdrawing...
-                              </>
-                            ) : (
-                              <>
-                                <span className="btn-icon">{Icons.x}</span>
-                                Withdraw
-                              </>
-                            )}
-                          </button>
+                          {challenge?.trackingMode === 'ManualVerification' && ['Accepted', 'InProgress'].includes(participation.status) && !participation.proofSubmitted && (
+                            <button
+                              className="btn-submit-proof"
+                              onClick={() => openProofModal(participation)}
+                            >
+                              <span className="btn-icon">{Icons.target}</span>
+                              Submit Proof
+                            </button>
+                          )}
+                          {canWithdraw && (
+                            <button
+                              className="btn-withdraw"
+                              onClick={() => handleWithdraw(participation.id)}
+                              disabled={withdrawingId === participation.id}
+                            >
+                              {withdrawingId === participation.id ? (
+                                <>
+                                  <span className="btn-icon animate-spin">{Icons.loader}</span>
+                                  Withdrawing...
+                                </>
+                              ) : (
+                                <>
+                                  <span className="btn-icon">{Icons.x}</span>
+                                  Withdraw
+                                </>
+                              )}
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
@@ -626,6 +736,85 @@ export default function ClientChallenges() {
                   <>
                     <span className="btn-icon">{Icons.flag}</span>
                     Join Challenge
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Submit Proof Modal */}
+      {proofModal.show && proofModal.participation && (
+        <div className="modal-overlay" onClick={closeProofModal}>
+          <div className="modal-content proof-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Submit Proof</h3>
+              <button className="modal-close" onClick={closeProofModal}>
+                {Icons.x}
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="challenge-preview">
+                <h4>{proofModal.participation.challenge?.title}</h4>
+                {proofModal.participation.challenge?.proofInstructions && (
+                  <div className="proof-instructions-modal">
+                    <span className="instruction-label">{Icons.target} Instructions:</span>
+                    <p>{proofModal.participation.challenge.proofInstructions}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="proofText">Describe your proof</label>
+                <textarea
+                  id="proofText"
+                  value={proofText}
+                  onChange={(e) => setProofText(e.target.value)}
+                  placeholder="Explain how you completed the challenge..."
+                  maxLength={2000}
+                  rows={4}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="proofImageUrl">Image URL (optional)</label>
+                <input
+                  type="url"
+                  id="proofImageUrl"
+                  value={proofImageUrl}
+                  onChange={(e) => setProofImageUrl(e.target.value)}
+                  placeholder="https://example.com/proof-image.jpg"
+                />
+                <small className="form-hint">Paste a link to an image showing proof of completion</small>
+              </div>
+
+              {proofImageUrl && (
+                <div className="proof-image-preview">
+                  <img src={proofImageUrl} alt="Proof preview" onError={(e) => e.target.style.display = 'none'} />
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={closeProofModal}>
+                Cancel
+              </button>
+              <button
+                className="btn-submit-proof"
+                onClick={handleSubmitProof}
+                disabled={submittingProof || (!proofText.trim() && !proofImageUrl.trim())}
+              >
+                {submittingProof ? (
+                  <>
+                    <span className="btn-icon animate-spin">{Icons.loader}</span>
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <span className="btn-icon">{Icons.target}</span>
+                    Submit Proof
                   </>
                 )}
               </button>

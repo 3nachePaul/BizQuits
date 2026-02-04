@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5204/api';
+// In production/ngrok mode, use relative URL to leverage Vite proxy
+// In development, can use VITE_API_URL env var or fallback to relative URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -212,6 +214,8 @@ export const userService = {
   getProfile: () => api.get('/user/profile'),
   updateProfile: (data) => api.put('/user/profile', sanitizeObject(data)),
   deleteAccount: (password) => api.delete('/user/account', { data: { password } }),
+  completeTutorial: () => api.post('/user/tutorial/complete'),
+  resetTutorial: () => api.post('/user/tutorial/reset'),
 };
 
 export const adminService = {
@@ -263,6 +267,8 @@ export const bookingApi = {
 // ✅ Gamification (Client only)
 export const gamificationApi = {
   me: () => api.get('/gamification/me'),
+  getAllAchievements: () => api.get('/gamification/achievements'),
+  getInfo: () => api.get('/gamification/info'),
 };
 
 // ✅ Reviews (BOOKING-based)
@@ -270,6 +276,8 @@ export const reviewApi = {
   // POST /api/review/booking/{bookingId}
   createForBooking: (bookingId, data) =>
     api.post(`/review/booking/${bookingId}`, data),
+  // GET /api/review/entrepreneur/my - Get entrepreneur's reviews
+  getMyReviews: () => api.get('/review/entrepreneur/my'),
 };
 
 // ✅ Admin reviews moderation
@@ -341,6 +349,16 @@ export const challengeApi = {
   getMyParticipations: () => api.get('/challenge/my/participations'),
   withdraw: (participationId) =>
     api.delete(`/challenge/participations/${encodeURIComponent(participationId)}`),
+  getProgress: (participationId) =>
+    api.get(`/challenge/participations/${encodeURIComponent(participationId)}/progress`),
+  submitProof: (participationId, data) =>
+    api.post(`/challenge/participations/${encodeURIComponent(participationId)}/proof`, data),
+
+  // Entrepreneur - proof verification
+  getPendingProofs: (challengeId) =>
+    api.get(`/challenge/${encodeURIComponent(challengeId)}/pending-proofs`),
+  verifyProof: (participationId, data) =>
+    api.patch(`/challenge/participations/${encodeURIComponent(participationId)}/verify`, data),
 };
 
 // ✅ Admin Moderation API (Sprint 4)
@@ -359,6 +377,43 @@ export const adminModerationApi = {
   getAllChallenges: () => api.get('/admin/challenges'),
   updateChallenge: (id, data) => api.put(`/admin/challenges/${encodeURIComponent(id)}`, data),
   deleteChallenge: (id) => api.delete(`/admin/challenges/${encodeURIComponent(id)}`),
+};
+
+// --------------------
+// ✅ Bug Reporting (Sprint 6)
+// --------------------
+export const bugReportApi = {
+  create: (data) => api.post('/bugreport', sanitizeObject(data)),
+  my: () => api.get('/bugreport/my'),
+  myById: (id) => api.get(`/bugreport/my/${encodeURIComponent(id)}`),
+};
+
+// --------------------
+// ✅ Admin Bug Monitoring (Sprint 6)
+// --------------------
+export const adminBugReportApi = {
+  getAll: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.status != null) query.append("status", params.status);
+    if (params.severity != null) query.append("severity", params.severity);
+    if (params.priority != null) query.append("priority", params.priority);
+    return api.get(`/admin/bugreports${query.toString() ? `?${query}` : ""}`);
+  },
+  updateStatus: (id, status) =>
+    api.patch(`/admin/bugreports/${encodeURIComponent(id)}/status`, { status: Number(status) }),
+  updateSeverity: (id, severity) =>
+    api.patch(`/admin/bugreports/${encodeURIComponent(id)}/severity`, { severity: Number(severity) }),
+  updatePriority: (id, priority) =>
+    api.patch(`/admin/bugreports/${encodeURIComponent(id)}/priority`, { priority: Number(priority) }),
+};
+
+export const adminMonitoringApi = {
+  overview: () => api.get("/admin/monitoring/overview"),
+  bugStats: (days = 7) => {
+    const query = new URLSearchParams();
+    if (days != null) query.append("days", days);
+    return api.get(`/admin/monitoring/bug-stats${query.toString() ? `?${query}` : ""}`);
+  },
 };
 
 export default api;

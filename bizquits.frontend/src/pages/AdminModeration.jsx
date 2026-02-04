@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { adminModerationApi } from '../services/api';
+import { adminModerationApi, adminReviewApi } from '../services/api';
 import { useToast } from '../components/Toast';
 import './AdminModeration.css';
 
@@ -20,6 +20,11 @@ const Icons = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
       <line x1="4" y1="22" x2="4" y2="15"/>
+    </svg>
+  ),
+  star: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
     </svg>
   ),
   edit: (
@@ -61,13 +66,14 @@ const Icons = {
 
 export default function AdminModeration() {
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState('offers');
+  const [activeTab, setActiveTab] = useState('reviews');
   const [loading, setLoading] = useState(true);
 
   // Data
   const [offers, setOffers] = useState([]);
   const [services, setServices] = useState([]);
   const [challenges, setChallenges] = useState([]);
+  const [pendingReviews, setPendingReviews] = useState([]);
 
   // Edit modals
   const [editModal, setEditModal] = useState({ show: false, type: '', item: null });
@@ -78,14 +84,16 @@ export default function AdminModeration() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [offersRes, servicesRes, challengesRes] = await Promise.all([
+      const [offersRes, servicesRes, challengesRes, reviewsRes] = await Promise.all([
         adminModerationApi.getAllOffers(),
         adminModerationApi.getAllServices(),
-        adminModerationApi.getAllChallenges()
+        adminModerationApi.getAllChallenges(),
+        adminReviewApi.getPending()
       ]);
       setOffers(offersRes.data);
       setServices(servicesRes.data);
       setChallenges(challengesRes.data);
+      setPendingReviews(reviewsRes.data || []);
     } catch (err) {
       toast.error('Could not load data.');
       console.error(err);
@@ -203,6 +211,34 @@ export default function AdminModeration() {
     }
   };
 
+  // Review handlers
+  const handleApproveReview = async (id) => {
+    try {
+      setActionLoading(`review-${id}`);
+      await adminReviewApi.approve(id);
+      toast.success('Review approved!');
+      await loadData();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRejectReview = async (id) => {
+    if (!confirm('Are you sure you want to reject this review? It will be deleted.')) return;
+    try {
+      setActionLoading(`review-${id}`);
+      await adminReviewApi.reject(id);
+      toast.success('Review rejected!');
+      await loadData();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   // Toggle active status
   const toggleActive = async (type, item) => {
     try {
@@ -253,6 +289,14 @@ export default function AdminModeration() {
       {/* Tab Switcher */}
       <div className="tab-switcher">
         <button
+          className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
+          onClick={() => setActiveTab('reviews')}
+        >
+          <span className="tab-icon">{Icons.star}</span>
+          Reviews
+          {pendingReviews.length > 0 && <span className="badge warning">{pendingReviews.length}</span>}
+        </button>
+        <button
           className={`tab-btn ${activeTab === 'offers' ? 'active' : ''}`}
           onClick={() => setActiveTab('offers')}
         >
@@ -277,6 +321,73 @@ export default function AdminModeration() {
           <span className="badge">{challenges.length}</span>
         </button>
       </div>
+
+      {/* Reviews Tab */}
+      {activeTab === 'reviews' && (
+        <div className="table-container">
+          <h3>Pending Reviews ({pendingReviews.length})</h3>
+
+          {pendingReviews.length === 0 ? (
+            <div className="empty-state">
+              <p>No reviews pending approval.</p>
+            </div>
+          ) : (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Client</th>
+                  <th>Rating</th>
+                  <th>Comment</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingReviews.map((review) => (
+                  <tr key={review.id}>
+                    <td>
+                      <strong>{review.serviceName}</strong>
+                    </td>
+                    <td>
+                      <span className="email">{review.clientEmail}</span>
+                    </td>
+                    <td>
+                      <div className="rating-display">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <span key={s} className={`star ${s <= review.rating ? 'filled' : ''}`}>★</span>
+                        ))}
+                      </div>
+                    </td>
+                    <td>
+                      <small className="description-preview">{review.comment?.substring(0, 60)}{review.comment?.length > 60 ? '...' : ''}</small>
+                    </td>
+                    <td>{formatDate(review.createdAt)}</td>
+                    <td className="action-buttons">
+                      <button
+                        className="btn-toggle activate"
+                        onClick={() => handleApproveReview(review.id)}
+                        disabled={actionLoading === `review-${review.id}`}
+                        title="Approve"
+                      >
+                        {Icons.check}
+                      </button>
+                      <button
+                        className="btn-delete"
+                        onClick={() => handleRejectReview(review.id)}
+                        disabled={actionLoading === `review-${review.id}`}
+                        title="Reject"
+                      >
+                        {Icons.x}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
 
       {/* Offers Tab */}
       {activeTab === 'offers' && (

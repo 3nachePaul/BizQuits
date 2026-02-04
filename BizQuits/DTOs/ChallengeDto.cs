@@ -17,17 +17,34 @@ public class CreateChallengeDto
     [Required]
     public ChallengeType Type { get; set; }
 
+    /// <summary>
+    /// How progress is tracked: Automatic (system tracks), ManualVerification (user submits proof), EntrepreneurManual (entrepreneur updates)
+    /// </summary>
+    public ChallengeTrackingMode TrackingMode { get; set; } = ChallengeTrackingMode.Automatic;
+
     public int? TargetCount { get; set; }
     public int? TimeLimitDays { get; set; }
 
     [Range(0, 10000)]
     public int XpReward { get; set; } = 50;
 
+    /// <summary>
+    /// Coins reward when challenge is completed (in addition to XP)
+    /// </summary>
+    [Range(0, 10000)]
+    public int CoinsReward { get; set; } = 0;
+
     [MaxLength(100)]
     public string? BadgeCode { get; set; }
 
     [MaxLength(500)]
     public string? RewardDescription { get; set; }
+
+    /// <summary>
+    /// Instructions for users on how to submit proof (for ManualVerification tracking mode)
+    /// </summary>
+    [MaxLength(1000)]
+    public string? ProofInstructions { get; set; }
 
     public decimal? BonusValue { get; set; }
 
@@ -49,17 +66,25 @@ public class UpdateChallengeDto
     public ChallengeType? Type { get; set; }
     public ChallengeStatus? Status { get; set; }
 
+    public ChallengeTrackingMode? TrackingMode { get; set; }
+
     public int? TargetCount { get; set; }
     public int? TimeLimitDays { get; set; }
 
     [Range(0, 10000)]
     public int? XpReward { get; set; }
 
+    [Range(0, 10000)]
+    public int? CoinsReward { get; set; }
+
     [MaxLength(100)]
     public string? BadgeCode { get; set; }
 
     [MaxLength(500)]
     public string? RewardDescription { get; set; }
+
+    [MaxLength(1000)]
+    public string? ProofInstructions { get; set; }
 
     public decimal? BonusValue { get; set; }
 

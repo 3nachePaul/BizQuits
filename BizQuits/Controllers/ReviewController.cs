@@ -1,6 +1,7 @@
 using BizQuits.Data;
 using BizQuits.DTOs;
 using BizQuits.Models;
+using BizQuits.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,12 @@ namespace BizQuits.Controllers;
 public class ReviewController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly ChallengeProgressService _challengeProgress;
 
-    public ReviewController(AppDbContext context)
+    public ReviewController(AppDbContext context, ChallengeProgressService challengeProgress)
     {
         _context = context;
+        _challengeProgress = challengeProgress;
     }
 
     // ✅ Public: reviews APPROVED for a service + average
@@ -161,5 +164,93 @@ public class ReviewController : ControllerBase
         await _context.SaveChangesAsync();
 
         return Ok(new { review.Id, pending = true });
+    }
+
+    // ✅ Entrepreneur: Get all reviews for my services
+    [HttpGet("entrepreneur/my")]
+    [Authorize(Roles = nameof(Role.Entrepreneur))]
+    public async Task<IActionResult> GetMyReviews()
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email)) return Unauthorized();
+
+        var user = await _context.Users
+            .Include(u => u.EntrepreneurProfile)
+            .FirstOrDefaultAsync(u => u.Email == email);
+
+        if (user?.EntrepreneurProfile == null) 
+            return BadRequest("Entrepreneur profile not found");
+
+        var myServiceIds = await _context.Services
+            .Where(s => s.EntrepreneurProfileId == user.EntrepreneurProfile.Id)
+            .Select(s => s.Id)
+            .ToListAsync();
+
+        var reviews = await _context.Reviews
+            .Include(r => r.Client)
+            .Include(r => r.Service)
+            .Where(r => myServiceIds.Contains(r.ServiceId))
+            .OrderByDescending(r => r.CreatedAt)
+            .Select(r => new
+            {
+                r.Id,
+                r.Rating,
+                r.Comment,
+                r.CreatedAt,
+                r.IsApproved,
+                r.ApprovedAt,
+                ClientEmail = r.Client.Email,
+                ServiceId = r.ServiceId,
+                ServiceName = r.Service.Name
+            })
+            .ToListAsync();
+
+        // Calculate stats
+        var approvedReviews = reviews.Where(r => r.IsApproved).ToList();
+        var stats = new
+        {
+            totalReviews = reviews.Count,
+            approvedReviews = approvedReviews.Count,
+            pendingReviews = reviews.Count - approvedReviews.Count,
+            averageRating = approvedReviews.Count > 0 ? approvedReviews.Average(r => r.Rating) : 0
+        };
+
+        return Ok(new { stats, reviews });
+    }
+
+    // ✅ Entrepreneur: Approve a pending review
+    [HttpPatch("{reviewId}/approve")]
+    [Authorize(Roles = nameof(Role.Entrepreneur))]
+    public async Task<IActionResult> ApproveReview(int reviewId)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email)) return Unauthorized();
+
+        var user = await _context.Users
+            .Include(u => u.EntrepreneurProfile)
+            .FirstOrDefaultAsync(u => u.Email == email);
+
+        if (user?.EntrepreneurProfile == null) 
+            return BadRequest("Entrepreneur profile not found");
+
+        var review = await _context.Reviews
+            .Include(r => r.Service)
+            .FirstOrDefaultAsync(r => r.Id == reviewId && r.Service.EntrepreneurProfileId == user.EntrepreneurProfile.Id);
+
+        if (review == null)
+            return NotFound("Review not found or you don't have permission.");
+
+        if (review.IsApproved)
+            return BadRequest("Review is already approved.");
+
+        review.IsApproved = true;
+        review.ApprovedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        // Update challenge progress for review-related challenges
+        await _challengeProgress.OnReviewApproved(review.ClientId, review.ServiceId);
+
+        return Ok(new { approved = true, review.Id });
     }
 }

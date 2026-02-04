@@ -1,6 +1,7 @@
 using BizQuits.Data;
 using BizQuits.DTOs;
 using BizQuits.Models;
+using BizQuits.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,10 +15,12 @@ namespace BizQuits.Controllers;
 public class BookingController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly ChallengeProgressService _challengeProgress;
 
-    public BookingController(AppDbContext context)
+    public BookingController(AppDbContext context, ChallengeProgressService challengeProgress)
     {
         _context = context;
+        _challengeProgress = challengeProgress;
     }
 
     // DELETE: api/booking/{id} - Delete a booking (Client or Entrepreneur, only if allowed)
@@ -379,10 +382,15 @@ public class BookingController : ControllerBase
         booking.CompletedDate = DateTime.UtcNow;
         booking.UpdatedAt = DateTime.UtcNow;
 
+        // Award coins for completing a booking (10 coins per completed booking)
+        client.Coins += 10;
+
         await _context.SaveChangesAsync();
         var gamification = HttpContext.RequestServices.GetRequiredService<BizQuits.Services.GamificationService>();
         await gamification.AwardBookingCompleted(client.Id);
 
+        // Update challenge progress for booking-related challenges
+        await _challengeProgress.OnBookingCompleted(client.Id, booking.ServiceId);
 
         return Ok(MapToDto(booking, booking.Service!, client));
     }

@@ -98,6 +98,9 @@ try
     // Gamification
     builder.Services.AddScoped<GamificationService>();
 
+    // Challenge Progress Tracking
+    builder.Services.AddScoped<ChallengeProgressService>();
+
     // --------------------
     // Controllers + JSON
     // --------------------

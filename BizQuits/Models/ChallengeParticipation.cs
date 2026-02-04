@@ -4,13 +4,14 @@ namespace BizQuits.Models;
 
 public enum ParticipationStatus
 {
-    Pending,        // Cerere de înscriere trimisă
-    Accepted,       // Acceptat de antreprenor
-    Rejected,       // Respins de antreprenor
-    InProgress,     // Lucrează la provocare
-    Completed,      // Finalizat cu succes - recompensă acordată
-    Failed,         // Nu a reușit în timp
-    Withdrawn       // S-a retras singur
+    Pending,           // Signup request sent
+    Accepted,          // Accepted by entrepreneur
+    Rejected,          // Rejected by entrepreneur
+    InProgress,        // Working on the challenge
+    ProofSubmitted,    // User submitted proof, awaiting verification
+    Completed,         // Successfully completed - reward awarded
+    Failed,            // Did not complete in time
+    Withdrawn          // User withdrew
 }
 
 public class ChallengeParticipation
@@ -27,14 +28,24 @@ public class ChallengeParticipation
 
     public ParticipationStatus Status { get; set; } = ParticipationStatus.Pending;
 
-    // Progres
-    public int CurrentProgress { get; set; } = 0;   // Ex: 3 din 5 rezervări finalizate
+    // Progress tracking
+    public int CurrentProgress { get; set; } = 0;   // E.g., 3 out of 5 bookings completed
+    public int TargetProgress { get; set; } = 0;    // Copied from challenge at acceptance
+
+    // For proof-based challenges
+    [MaxLength(2000)]
+    public string? ProofText { get; set; }          // Text proof/description from user
+
+    [MaxLength(500)]
+    public string? ProofImageUrl { get; set; }      // URL to proof image (if applicable)
+    
+    public DateTime? ProofSubmittedAt { get; set; } // When proof was submitted
 
     [MaxLength(1000)]
-    public string? UserMessage { get; set; }        // Mesaj de la utilizator la înscriere
+    public string? UserMessage { get; set; }        // Message from user at signup
 
     [MaxLength(1000)]
-    public string? EntrepreneurResponse { get; set; } // Răspuns antreprenor
+    public string? EntrepreneurResponse { get; set; } // Entrepreneur response
 
     // Timestamps
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -42,10 +53,11 @@ public class ChallengeParticipation
     public DateTime? CompletedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 
-    // Deadline personalizat (calculat din Challenge.TimeLimitDays la accept)
+    // Custom deadline (calculated from Challenge.TimeLimitDays at acceptance)
     public DateTime? Deadline { get; set; }
 
-    // Recompense acordate
+    // Rewards awarded
     public bool RewardAwarded { get; set; } = false;
     public int XpAwarded { get; set; } = 0;
+    public int CoinsAwarded { get; set; } = 0;
 }

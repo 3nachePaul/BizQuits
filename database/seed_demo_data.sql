@@ -1,5 +1,6 @@
 -- BizQuits Demo Data for Presentation
 -- =====================================
+-- App Purpose: Temporary one-day jobs (HORECA, Events, Figuration, Promotions)
 -- Universal Password: Demo123!
 -- BCrypt Hash: $2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO
 
@@ -42,20 +43,24 @@ GO
 INSERT INTO Users (Email, PasswordHash, Role) VALUES
 ('admin@bizquits.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 2);
 
--- Entrepreneur Users (Real Romanian Companies)
+-- Entrepreneur Users (Companies needing temporary workers)
 INSERT INTO Users (Email, PasswordHash, Role) VALUES
-('contact@emag.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
-('servicii@dedeman.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
-('support@altex.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
-('office@autonom.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
-('contact@freshful.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
-('hello@tazz.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
-('office@regina-maria.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
-('contact@worldclass.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
-('servicii@bitdefender.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
-('contact@uipath.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1);
+-- HORECA
+('hr@hardrockcafe.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
+('jobs@citygrillbucharest.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
+('angajari@grandhotelcontinental.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
+('contact@cateringexpert.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
+-- Events & Conferences
+('staff@romexpo.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
+('hr@evenimentebucuresti.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
+-- Figuration & Casting
+('casting@castelfilm.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
+('figuranti@mediapro.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
+-- Retail & Promotions
+('promotii@mccann.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1),
+('sampling@streetpromo.ro', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 1);
 
--- Client Users
+-- Client Users (People looking for temporary work)
 INSERT INTO Users (Email, PasswordHash, Role) VALUES
 ('ion.popescu@gmail.com', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 0),
 ('maria.ionescu@yahoo.com', '$2a$12$oQ8Lu9v.xzCw5hy.dGpB8.o2aBttrGgcwB5n..xoheIIhUrOqPYrO', 0),
@@ -72,99 +77,97 @@ GO
 -- ENTREPRENEUR PROFILES
 -- ═══════════════════════════════════════════════════════════════════════════════
 INSERT INTO EntrepreneurProfiles (UserId, CompanyName, CUI, IsApproved) VALUES
-(2, 'eMAG', 'RO14399840', 1),
-(3, 'Dedeman', 'RO4192717', 1),
-(4, 'Altex Romania', 'RO6779023', 1),
-(5, 'Autonom Rent a Car', 'RO14520250', 1),
-(6, 'Freshful by eMAG', 'RO41890760', 1),
-(7, 'Tazz by eMAG', 'RO40958013', 1),
-(8, 'Regina Maria', 'RO15575940', 1),
-(9, 'World Class Romania', 'RO16441025', 1),
-(10, 'Bitdefender', 'RO18189442', 1),
-(11, 'UiPath', 'RO33358606', 1);
+(2, 'Hard Rock Cafe București', 'RO16529870', 1),
+(3, 'City Grill', 'RO14307432', 1),
+(4, 'Grand Hotel Continental', 'RO1590430', 1),
+(5, 'Catering Expert SRL', 'RO28456123', 1),
+(6, 'Romexpo SA', 'RO1555301', 1),
+(7, 'Evenimente București SRL', 'RO31245678', 1),
+(8, 'Castel Film Studios', 'RO6789054', 1),
+(9, 'MediaPro Pictures', 'RO9423870', 1),
+(10, 'McCann România', 'RO1572506', 1),
+(11, 'Street Promo Agency', 'RO35678901', 1);
 
 GO
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- SERVICES
+-- SERVICES (Temporary job opportunities)
 -- ═══════════════════════════════════════════════════════════════════════════════
 
--- eMAG Services (EntrepreneurProfileId = 1)
+-- Hard Rock Cafe (EntrepreneurProfileId = 1)
 INSERT INTO Services (Name, Description, Category, Duration, Price, IsActive, CreatedAt, EntrepreneurProfileId) VALUES
-('Instalare Electrocasnice', 'Serviciu profesional de instalare pentru mașini de spălat, frigidere, cuptoare și alte electrocasnice mari. Include conectare la utilități și testare completă.', 'Instalari', '2-3 ore', 149.00, 1, DATEADD(day, -60, GETUTCDATE()), 1),
-('Montaj TV pe Perete', 'Montaj profesional pentru televizoare de orice dimensiune. Include ascunderea cablurilor și configurarea inițială.', 'Instalari', '1-2 ore', 99.00, 1, DATEADD(day, -55, GETUTCDATE()), 1),
-('Configurare Smart Home', 'Setup complet pentru dispozitive smart home: becuri inteligente, prize smart, asistenți vocali. Include integrare în ecosistem.', 'Tehnologie', '2-4 ore', 249.00, 1, DATEADD(day, -45, GETUTCDATE()), 1);
+('Ospătar Weekend', 'Căutăm ospătari pentru ture de weekend (V-D). Experiență preferată dar nu obligatorie. Oferim training la început de tură. Uniformă asigurată.', 'HORECA', '8 ore', 180.00, 1, DATEADD(day, -60, GETUTCDATE()), 1),
+('Barman Evenimente Speciale', 'Barman pentru evenimente tematice și concerte live. Experiență minimă 6 luni necesară. Bonus pentru cunoașterea cocktail-urilor clasice.', 'HORECA', '6-10 ore', 220.00, 1, DATEADD(day, -55, GETUTCDATE()), 1),
+('Runner Bucătărie', 'Ajutor bucătărie pentru transport preparate și menținere curățenie. Fără experiență necesară. Energie și viteză sunt esențiale!', 'HORECA', '8 ore', 150.00, 1, DATEADD(day, -45, GETUTCDATE()), 1);
 
--- Dedeman Services (EntrepreneurProfileId = 2)
+-- City Grill (EntrepreneurProfileId = 2)
 INSERT INTO Services (Name, Description, Category, Duration, Price, IsActive, CreatedAt, EntrepreneurProfileId) VALUES
-('Montaj Mobilier', 'Asamblare și montaj profesional pentru orice tip de mobilier: dulapuri, paturi, birouri, bucătării modulare.', 'Montaj', '3-6 ore', 199.00, 1, DATEADD(day, -50, GETUTCDATE()), 2),
-('Instalare Gresie și Faianță', 'Serviciu complet de montaj pentru gresie și faianță în băi și bucătării. Include pregătirea suprafeței și rostuire.', 'Constructii', '1-3 zile', 45.00, 1, DATEADD(day, -48, GETUTCDATE()), 2),
-('Montaj Uși și Ferestre', 'Instalare profesională pentru uși interioare, exterioare și ferestre termopan. Include etanșare și finisare.', 'Constructii', '4-8 ore', 299.00, 1, DATEADD(day, -40, GETUTCDATE()), 2),
-('Consultanță Renovare', 'Sesiune de consultanță pentru proiecte de renovare. Include măsurători, recomandări materiale și estimare buget.', 'Consultanta', '1-2 ore', 0.00, 1, DATEADD(day, -35, GETUTCDATE()), 2);
+('Ospătar Restaurant', 'Personal ospătari pentru locațiile din centru. Ture disponibile: prânz (11-17) sau seară (17-24). Experiență în HoReCa preferată.', 'HORECA', '6-7 ore', 160.00, 1, DATEADD(day, -50, GETUTCDATE()), 2),
+('Hostess Restaurant', 'Hostess pentru întâmpinare clienți și gestionare rezervări. Aspect îngrijit, comunicare excelentă. Training asigurat.', 'HORECA', '8 ore', 170.00, 1, DATEADD(day, -48, GETUTCDATE()), 2),
+('Ajutor Bucătar Linie', 'Pregătire ingrediente și asistență bucătari la linia caldă. Experiență de bază în bucătărie necesară.', 'HORECA', '8 ore', 175.00, 1, DATEADD(day, -40, GETUTCDATE()), 2);
 
--- Altex Services (EntrepreneurProfileId = 3)
+-- Grand Hotel Continental (EntrepreneurProfileId = 3)
 INSERT INTO Services (Name, Description, Category, Duration, Price, IsActive, CreatedAt, EntrepreneurProfileId) VALUES
-('Reparații Laptop', 'Diagnosticare și reparare laptopuri: înlocuire componente, curățare termică, reinstalare sistem de operare.', 'Reparatii', '1-3 zile', 149.00, 1, DATEADD(day, -42, GETUTCDATE()), 3),
-('Transfer Date', 'Migrare completă de date între dispozitive: documente, fotografii, contacte, aplicații. Include backup în cloud.', 'Tehnologie', '2-4 ore', 79.00, 1, DATEADD(day, -38, GETUTCDATE()), 3),
-('Configurare PC Gaming', 'Setup complet pentru sisteme gaming: instalare componente, optimizare BIOS, instalare drivere și software dedicat.', 'Tehnologie', '3-5 ore', 199.00, 1, DATEADD(day, -30, GETUTCDATE()), 3);
+('Ospătar Banchet', 'Personal pentru banchete și evenimente corporate. Experiență în servire la masă formală. Ținută elegantă asigurată.', 'HORECA', '8-10 ore', 200.00, 1, DATEADD(day, -42, GETUTCDATE()), 3),
+('Room Service', 'Personal pentru livrare room service. Discreție și profesionalism. Program flexibil, ture de 8 ore.', 'HORECA', '8 ore', 165.00, 1, DATEADD(day, -38, GETUTCDATE()), 3),
+('Bell Boy / Concierge Asistent', 'Asistență la recepție și bagaje. Engleză conversațională obligatorie. Aspect profesional.', 'HORECA', '8 ore', 160.00, 1, DATEADD(day, -30, GETUTCDATE()), 3);
 
--- Autonom Services (EntrepreneurProfileId = 4)
+-- Catering Expert (EntrepreneurProfileId = 4)
 INSERT INTO Services (Name, Description, Category, Duration, Price, IsActive, CreatedAt, EntrepreneurProfileId) VALUES
-('Închiriere Auto Weekend', 'Pachet weekend pentru închiriere auto: Vineri ora 14:00 - Luni ora 10:00. Include asigurare completă și km nelimitați.', 'Transport', '3 zile', 189.00, 1, DATEADD(day, -45, GETUTCDATE()), 4),
-('Transfer Aeroport', 'Serviciu de transfer de la/către aeroporturile din București, Cluj, Timișoara. Șofer profesionist și mașină premium.', 'Transport', '1-2 ore', 149.00, 1, DATEADD(day, -40, GETUTCDATE()), 4),
-('Închiriere cu Șofer', 'Serviciu de închiriere auto cu șofer dedicat pentru evenimente, întâlniri de afaceri sau tururi private.', 'Transport', 'Per zi', 399.00, 1, DATEADD(day, -32, GETUTCDATE()), 4);
+('Ospătar Catering Evenimente', 'Personal pentru evenimente private și corporate (nunți, botezuri, gale). Transport asigurat. Masă inclusă.', 'HORECA', '6-12 ore', 190.00, 1, DATEADD(day, -45, GETUTCDATE()), 4),
+('Ajutor Bucătărie Catering', 'Preparare aperitive, porționare, împachetare. Nu e necesară experiență, doar viteză și atenție.', 'HORECA', '8 ore', 145.00, 1, DATEADD(day, -40, GETUTCDATE()), 4),
+('Barista Evenimente', 'Preparare cafea la stație mobilă pentru evenimente corporate. Experiență ca barista necesară.', 'HORECA', '6-8 ore', 180.00, 1, DATEADD(day, -32, GETUTCDATE()), 4);
 
--- Freshful Services (EntrepreneurProfileId = 5)
+-- Romexpo (EntrepreneurProfileId = 5)
 INSERT INTO Services (Name, Description, Category, Duration, Price, IsActive, CreatedAt, EntrepreneurProfileId) VALUES
-('Coș Săptămânal Premium', 'Abonament săptămânal cu fructe și legume proaspete de sezon, produse lactate și pâine artizanală. Livrare gratuită.', 'Abonamente', 'Săptămânal', 249.00, 1, DATEADD(day, -50, GETUTCDATE()), 5),
-('Catering Eveniment', 'Serviciu catering pentru evenimente: cocktail party, prânz de lucru, aniversări. Meniu personalizat și servire inclusă.', 'Evenimente', 'Per persoană', 89.00, 1, DATEADD(day, -35, GETUTCDATE()), 5),
-('Livrare Express', 'Livrare în 60 de minute pentru cumpărături urgente. Disponibil în București și zonele limitrofe.', 'Livrare', '1 ora', 19.90, 1, DATEADD(day, -28, GETUTCDATE()), 5);
+('Staff Informații Expoziție', 'Personal pentru ghidare vizitatori și informații generale la târguri și expoziții. Training inclus.', 'Evenimente', '8 ore', 155.00, 1, DATEADD(day, -50, GETUTCDATE()), 5),
+('Hostess Stand Expozanți', 'Hostess pentru standuri expozanți. Aspect plăcut, comunicare excelentă. Engleză este un plus.', 'Evenimente', '8 ore', 175.00, 1, DATEADD(day, -35, GETUTCDATE()), 5),
+('Personal Acreditări & Check-in', 'Scanare badge-uri, verificare liste, distribuire materiale. Atenție la detalii esențială.', 'Evenimente', '10 ore', 160.00, 1, DATEADD(day, -28, GETUTCDATE()), 5);
 
--- Tazz Services (EntrepreneurProfileId = 6)
+-- Evenimente București (EntrepreneurProfileId = 6)
 INSERT INTO Services (Name, Description, Category, Duration, Price, IsActive, CreatedAt, EntrepreneurProfileId) VALUES
-('Abonament Tazz Plus', 'Livrare gratuită nelimitată de la toate restaurantele partenere. Include acces la oferte exclusive și priority delivery.', 'Abonamente', 'Lunar', 29.99, 1, DATEADD(day, -55, GETUTCDATE()), 6),
-('Corporate Meal Plan', 'Program de masă pentru companii: prânz zilnic pentru echipe. Include diverse opțiuni și livrare la birou.', 'Corporate', 'Per angajat/zi', 45.00, 1, DATEADD(day, -40, GETUTCDATE()), 6),
-('Catering Party Box', 'Pachete party pentru 10-50 persoane: pizza, burgeri, sushi sau mix. Perfect pentru petreceri și team building.', 'Evenimente', 'Per pachet', 299.00, 1, DATEADD(day, -25, GETUTCDATE()), 6);
+('Hostess Gală / Eveniment Corporate', 'Hostess pentru gale, premiere, evenimente VIP. Experiență anterioară, aspect impecabil. Ținută furnizată.', 'Evenimente', '6-8 ore', 200.00, 1, DATEADD(day, -55, GETUTCDATE()), 6),
+('Staff Tehnic Sunet/Lumini', 'Ajutor montaj/demontaj echipamente pentru concerte și evenimente. Forță fizică necesară.', 'Evenimente', '10-14 ore', 250.00, 1, DATEADD(day, -40, GETUTCDATE()), 6),
+('Coordonator Parcare', 'Ghidare mașini și gestionare flux trafic la evenimente mari. Comunicare și rezistență la stres.', 'Evenimente', '8 ore', 140.00, 1, DATEADD(day, -25, GETUTCDATE()), 6);
 
--- Regina Maria Services (EntrepreneurProfileId = 7)
+-- Castel Film Studios (EntrepreneurProfileId = 7)
 INSERT INTO Services (Name, Description, Category, Duration, Price, IsActive, CreatedAt, EntrepreneurProfileId) VALUES
-('Consultație Medicina Generală', 'Consultație completă cu medic specialist în medicină internă. Include recomandări și rețetă dacă este necesar.', 'Sanatate', '30 minute', 180.00, 1, DATEADD(day, -60, GETUTCDATE()), 7),
-('Pachet Analize Complete', 'Set complet de analize de sânge: hemoleucogramă, biochimie, markeri hepatici și renali. Include recoltare și interpretare.', 'Sanatate', '1 zi rezultate', 450.00, 1, DATEADD(day, -50, GETUTCDATE()), 7),
-('Abonament Medical Corporativ', 'Pachet medical anual pentru angajați: consultații nelimitate, analize, imagistică de bază și telemedicină 24/7.', 'Corporate', 'Anual', 1200.00, 1, DATEADD(day, -45, GETUTCDATE()), 7),
-('Vaccinare la Domiciliu', 'Serviciu de vaccinare la domiciliu sau sediul firmei. Include consultație pre-vaccinare și monitorizare post-vaccinare.', 'Sanatate', '30 minute', 99.00, 1, DATEADD(day, -30, GETUTCDATE()), 7);
+('Figurant Film/Serial', 'Figurație pentru producții românești și internaționale. Fără experiență necesară. Machiaj și costume asigurate.', 'Figuration', '8-12 ore', 200.00, 1, DATEADD(day, -60, GETUTCDATE()), 7),
+('Figurant cu Mașină', 'Figurație cu mașina personală în scenă. Mașini diverse necesare. Bonus pentru mașini de epocă sau premium.', 'Figuration', '6-10 ore', 350.00, 1, DATEADD(day, -50, GETUTCDATE()), 7),
+('Silhouette / Blur', 'Siluete pentru planuri îndepărtate sau blur. Plată rapidă, fără casting. Diverse vârste și aspecte.', 'Figuration', '4-6 ore', 120.00, 1, DATEADD(day, -45, GETUTCDATE()), 7);
 
--- World Class Services (EntrepreneurProfileId = 8)
+-- MediaPro Pictures (EntrepreneurProfileId = 8)
 INSERT INTO Services (Name, Description, Category, Duration, Price, IsActive, CreatedAt, EntrepreneurProfileId) VALUES
-('Abonament Premium All Access', 'Acces nelimitat la toate cluburile World Class, inclusiv piscină, saună și clase de grup. Include evaluare fizică gratuită.', 'Fitness', 'Lunar', 399.00, 1, DATEADD(day, -55, GETUTCDATE()), 8),
-('Personal Training 10 Sesiuni', 'Pachet de 10 sesiuni cu antrenor personal certificat. Include plan nutrițional personalizat și monitorizare progres.', 'Fitness', '10 x 1 oră', 1499.00, 1, DATEADD(day, -45, GETUTCDATE()), 8),
-('Yoga & Mindfulness Retreat', 'Weekend retreat în natură: sesiuni de yoga, meditație și wellness. Include cazare, mese sănătoase și transport.', 'Wellness', '2 zile', 799.00, 1, DATEADD(day, -35, GETUTCDATE()), 8);
+('Figurant Reclamă TV', 'Figurație pentru spoturi publicitare. Diverse profiluri căutate. Casting rapid, filmare 1 zi.', 'Figuration', '6-10 ore', 250.00, 1, DATEADD(day, -45, GETUTCDATE()), 8),
+('Figurant Videoclip Muzical', 'Figurație pentru videoclipuri artiști români. Aspect tânăr, energie, dans de bază este un plus.', 'Figuration', '8-12 ore', 180.00, 1, DATEADD(day, -35, GETUTCDATE()), 8),
+('Stand-in / Photo Double', 'Stand-in pentru actori principali la setarea luminilor. Înălțime și constituție similare cu actorul.', 'Figuration', '8 ore', 300.00, 1, DATEADD(day, -30, GETUTCDATE()), 8);
 
--- Bitdefender Services (EntrepreneurProfileId = 9)
+-- McCann România (EntrepreneurProfileId = 9)
 INSERT INTO Services (Name, Description, Category, Duration, Price, IsActive, CreatedAt, EntrepreneurProfileId) VALUES
-('Bitdefender Total Security', 'Protecție completă pentru 5 dispozitive: antivirus, anti-malware, firewall, VPN inclus și control parental.', 'Securitate', 'Anual', 249.00, 1, DATEADD(day, -50, GETUTCDATE()), 9),
-('Audit Securitate Companie', 'Evaluare completă a securității IT pentru IMM-uri: vulnerabilități, riscuri, recomandări și plan de acțiune.', 'Corporate', '2-3 zile', 2999.00, 1, DATEADD(day, -40, GETUTCDATE()), 9),
-('Training Cybersecurity', 'Workshop interactiv pentru angajați: recunoașterea amenințărilor, phishing, bune practici și protocol de răspuns.', 'Training', '4 ore', 499.00, 1, DATEADD(day, -30, GETUTCDATE()), 9);
+('Promoter Mall / Magazin', 'Promovare produse în mall-uri și hipermarketuri. Training pe produs inclus. Comunicativ și energic.', 'Promotii', '6-8 ore', 140.00, 1, DATEADD(day, -50, GETUTCDATE()), 9),
+('Hostess Lansare Produs', 'Hostess pentru lansări de produse și evenimente brand. Aspect îngrijit, capacitate de prezentare.', 'Promotii', '6 ore', 180.00, 1, DATEADD(day, -40, GETUTCDATE()), 9),
+('Demonstrator Produs', 'Demonstrații de produse în magazine. Training complet oferit. Ideal pentru produse tech sau cosmetice.', 'Promotii', '8 ore', 170.00, 1, DATEADD(day, -30, GETUTCDATE()), 9);
 
--- UiPath Services (EntrepreneurProfileId = 10)
+-- Street Promo Agency (EntrepreneurProfileId = 10)
 INSERT INTO Services (Name, Description, Category, Duration, Price, IsActive, CreatedAt, EntrepreneurProfileId) VALUES
-('RPA Discovery Workshop', 'Workshop de identificare a proceselor automatizabile în companie. Include analiză ROI și prioritizare procese.', 'Automatizare', '1 zi', 1999.00, 1, DATEADD(day, -45, GETUTCDATE()), 10),
-('Implementare Robot Simplu', 'Dezvoltare și implementare robot RPA pentru un proces de business: facturare, raportare sau data entry.', 'Automatizare', '2-4 săptămâni', 4999.00, 1, DATEADD(day, -35, GETUTCDATE()), 10),
-('Training UiPath Developer', 'Curs intensiv de 5 zile pentru dezvoltatori: UiPath Studio, Orchestrator, best practices și certificare.', 'Training', '5 zile', 2499.00, 1, DATEADD(day, -25, GETUTCDATE()), 10);
+('Sampling Stradal / Flyering', 'Distribuire mostre și fluturași în zone aglomerate. Rezistență la stat în picioare, comunicativ.', 'Promotii', '6 ore', 120.00, 1, DATEADD(day, -55, GETUTCDATE()), 10),
+('Brand Ambassador Eveniment', 'Reprezentare brand la festivaluri și evenimente publice. Training pe brand, tricou furnizat.', 'Promotii', '8-10 ore', 160.00, 1, DATEADD(day, -40, GETUTCDATE()), 10),
+('Echipa Street Marketing', 'Activări de guerrilla marketing în oraș. Creativitate și energie. Ideal pentru studenți.', 'Promotii', '4-6 ore', 130.00, 1, DATEADD(day, -25, GETUTCDATE()), 10);
 
 GO
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- CLIENT STATS (for gamification)
+-- CLIENT STATS (for gamification - tracking worker reliability)
 -- ═══════════════════════════════════════════════════════════════════════════════
 INSERT INTO ClientStats (UserId, Xp, Level, TotalBookingsCreated, TotalBookingsCompleted, UpdatedAt) VALUES
-(12, 850, 5, 12, 10, DATEADD(day, -1, GETUTCDATE())),  -- Ion Popescu - power user
-(13, 420, 3, 6, 5, DATEADD(day, -3, GETUTCDATE())),   -- Maria Ionescu
-(14, 280, 2, 4, 3, DATEADD(day, -5, GETUTCDATE())),   -- Alexandru Popa
-(15, 150, 1, 2, 2, DATEADD(day, -7, GETUTCDATE())),   -- Elena Dumitrescu
-(16, 550, 4, 8, 7, DATEADD(day, -2, GETUTCDATE())),   -- Andrei Stan
-(17, 95, 1, 1, 1, DATEADD(day, -10, GETUTCDATE())),   -- Cristina Marin - new user
-(18, 320, 2, 5, 4, DATEADD(day, -4, GETUTCDATE())),   -- Bogdan Vasile
-(19, 680, 4, 9, 8, DATEADD(day, -1, GETUTCDATE()));   -- Diana Radu
+(12, 1250, 6, 25, 23, DATEADD(day, -1, GETUTCDATE())),
+(13, 720, 4, 15, 14, DATEADD(day, -3, GETUTCDATE())),
+(14, 380, 3, 8, 7, DATEADD(day, -5, GETUTCDATE())),
+(15, 180, 2, 4, 4, DATEADD(day, -7, GETUTCDATE())),
+(16, 950, 5, 20, 18, DATEADD(day, -2, GETUTCDATE())),
+(17, 95, 1, 2, 2, DATEADD(day, -10, GETUTCDATE())),
+(18, 520, 4, 12, 11, DATEADD(day, -4, GETUTCDATE())),
+(19, 880, 5, 18, 17, DATEADD(day, -1, GETUTCDATE()));
 
 GO
 
@@ -172,232 +175,186 @@ GO
 -- BOOKINGS (Status: 0=Pending, 1=Accepted, 2=Rejected, 3=InProgress, 4=Completed, 5=Cancelled)
 -- ═══════════════════════════════════════════════════════════════════════════════
 
--- Completed bookings (for reviews and history)
+-- Completed bookings (past jobs done)
 INSERT INTO Bookings (ClientId, ServiceId, Status, Message, EntrepreneurResponse, CreatedAt, StartDate, CompletedDate) VALUES
-(12, 1, 4, 'Am cumpărat o mașină de spălat nouă și am nevoie de instalare profesională.', 'Perfect, ne programăm pentru data solicitată. Vă rugăm să aveți prize și apă la îndemână.', DATEADD(day, -45, GETUTCDATE()), DATEADD(day, -43, GETUTCDATE()), DATEADD(day, -43, GETUTCDATE())),
-(12, 4, 4, 'Doresc montajul unui dulap PAX de la IKEA.', 'Cu plăcere! Menționați dimensiunile complete când ne vedem.', DATEADD(day, -40, GETUTCDATE()), DATEADD(day, -38, GETUTCDATE()), DATEADD(day, -38, GETUTCDATE())),
-(13, 22, 4, 'Vreau să încerc abonamentul premium pentru o lună.', 'Bine ați venit în familia World Class! Vă așteptăm pentru evaluarea inițială.', DATEADD(day, -35, GETUTCDATE()), DATEADD(day, -34, GETUTCDATE()), DATEADD(day, -4, GETUTCDATE())),
-(14, 8, 4, 'Laptop Dell care se supraîncălzește constant.', 'Am identificat problema - pasta termică era veche. Am curățat și înlocuit totul.', DATEADD(day, -30, GETUTCDATE()), DATEADD(day, -28, GETUTCDATE()), DATEADD(day, -26, GETUTCDATE())),
-(15, 19, 4, 'Consultație pentru dureri de cap frecvente.', 'Vă mulțumim pentru vizită. Urmați tratamentul recomandat și reveniți pentru control.', DATEADD(day, -25, GETUTCDATE()), DATEADD(day, -24, GETUTCDATE()), DATEADD(day, -24, GETUTCDATE())),
-(16, 2, 4, 'TV Samsung 65 inch, perete din rigips.', 'Montaj realizat cu succes. Am folosit dibluri speciale pentru rigips.', DATEADD(day, -20, GETUTCDATE()), DATEADD(day, -19, GETUTCDATE()), DATEADD(day, -19, GETUTCDATE())),
-(16, 11, 4, 'Transfer aeroport Otopeni pentru 4 persoane.', 'Am confirmat rezervarea. Șoferul va fi la ieșirea din terminal.', DATEADD(day, -15, GETUTCDATE()), DATEADD(day, -14, GETUTCDATE()), DATEADD(day, -14, GETUTCDATE())),
-(17, 14, 4, 'Prima comandă, vreau să testez serviciul.', 'Sperăm că v-a plăcut! Așteptăm feedback-ul dumneavoastră.', DATEADD(day, -10, GETUTCDATE()), DATEADD(day, -10, GETUTCDATE()), DATEADD(day, -10, GETUTCDATE())),
-(18, 24, 4, 'Interesat de soluția Bitdefender pentru familie.', 'Licența a fost activată. Verificați email-ul pentru instrucțiuni de instalare.', DATEADD(day, -12, GETUTCDATE()), DATEADD(day, -12, GETUTCDATE()), DATEADD(day, -12, GETUTCDATE())),
-(19, 23, 4, 'Sesiuni personal training pentru pregătire maraton.', 'Felicitări pentru angajament! Planul tău personalizat este gata.', DATEADD(day, -30, GETUTCDATE()), DATEADD(day, -28, GETUTCDATE()), DATEADD(day, -3, GETUTCDATE()));
+(12, 1, 4, 'Bună! Am experiență de 2 ani în HoReCa, fostul meu loc de muncă a fost la Marriott. Sunt disponibil weekendul acesta.', 'Perfect! Te așteptăm sâmbătă la ora 10 pentru briefing. Adu CI pentru contract.', DATEADD(day, -45, GETUTCDATE()), DATEADD(day, -43, GETUTCDATE()), DATEADD(day, -43, GETUTCDATE())),
+(12, 10, 4, 'Am lucrat catering de mai multe ori, cunosc procedurile de servire la evenimente formale.', 'Excelent background! Evenimentul e sâmbăta viitoare, nuntă la Palatul Știrbey.', DATEADD(day, -40, GETUTCDATE()), DATEADD(day, -38, GETUTCDATE()), DATEADD(day, -38, GETUTCDATE())),
+(13, 14, 4, 'Sunt studentă și caut job-uri flexibile. Am lucrat la 3 expoziții anul trecut.', 'Super! Avem nevoie de tine la Târgul de Turism. Training marți la 18:00.', DATEADD(day, -35, GETUTCDATE()), DATEADD(day, -34, GETUTCDATE()), DATEADD(day, -34, GETUTCDATE())),
+(14, 19, 4, 'Sunt disponibil pentru figurație. Înălțime 1.80m, brunet. Am mai făcut figurație la ProTV.', 'Perfect pentru scena de restaurant. Filmăm joi la Castel Film.', DATEADD(day, -30, GETUTCDATE()), DATEADD(day, -28, GETUTCDATE()), DATEADD(day, -28, GETUTCDATE())),
+(15, 25, 4, 'Sunt comunicativă și îmi place să interacționez cu oamenii. Prima experiență ca promoter.', 'Te așteptăm la training luni. Campania e pentru un nou telefon Samsung.', DATEADD(day, -25, GETUTCDATE()), DATEADD(day, -24, GETUTCDATE()), DATEADD(day, -24, GETUTCDATE())),
+(16, 2, 4, 'Barman cu 4 ani experiență, cunosc cocktailuri clasice și moderne. Disponibil pentru concert Cargo.', 'Awesome! Te așteptăm vineri la 17:00 pentru sound check și setup bar.', DATEADD(day, -20, GETUTCDATE()), DATEADD(day, -19, GETUTCDATE()), DATEADD(day, -19, GETUTCDATE())),
+(16, 7, 4, 'Experiență banchet la Intercontinental și Marriott. Cunosc protocolul de servire formală.', 'Exact ce căutam! Evenimentul e gala AmCham, 200 invitați.', DATEADD(day, -15, GETUTCDATE()), DATEADD(day, -14, GETUTCDATE()), DATEADD(day, -14, GETUTCDATE())),
+(17, 28, 4, 'Am 22 ani, sunt studentă la ASE. Îmi doresc să câștig experiență în marketing.', 'Bine ai venit în echipă! Campania e pentru Coca-Cola la Untold.', DATEADD(day, -10, GETUTCDATE()), DATEADD(day, -10, GETUTCDATE()), DATEADD(day, -10, GETUTCDATE())),
+(18, 20, 4, 'Am lucrat ca figurant în 15 producții anul trecut, inclusiv serialul Umbre.', 'Genial CV! Te chemăm pentru scena de petrecere din noul film.', DATEADD(day, -12, GETUTCDATE()), DATEADD(day, -12, GETUTCDATE()), DATEADD(day, -12, GETUTCDATE())),
+(19, 17, 4, 'Hostess cu experiență la evenimente corporate. Vorbesc engleză și franceză fluent.', 'Perfect pentru evenimentul nostru internațional! Gala Ambasadelor.', DATEADD(day, -30, GETUTCDATE()), DATEADD(day, -28, GETUTCDATE()), DATEADD(day, -28, GETUTCDATE()));
 
 -- In Progress bookings
 INSERT INTO Bookings (ClientId, ServiceId, Status, Message, EntrepreneurResponse, CreatedAt, StartDate) VALUES
-(12, 3, 3, 'Vreau să-mi automatizez casa: lumini, termostat, jaluzele.', 'Am planificat vizita pentru evaluare. Pregătiți lista completă de dispozitive dorite.', DATEADD(day, -5, GETUTCDATE()), DATEADD(day, -3, GETUTCDATE())),
-(13, 5, 3, 'Renovare baie completă, aproximativ 8mp.', 'Am început lucrările. Estimăm finalizare în 3 zile.', DATEADD(day, -4, GETUTCDATE()), DATEADD(day, -2, GETUTCDATE())),
-(19, 27, 3, 'Workshop pentru echipa noastră de 15 persoane.', 'Am confirmat data. Vă trimitem agenda detaliată.', DATEADD(day, -3, GETUTCDATE()), DATEADD(day, -1, GETUTCDATE()));
+(12, 4, 3, 'Sunt disponibil pentru tura de seară, am mai lucrat aici anul trecut și știu meniul.', 'Bine te regăsim! Începem la 17:00, intrarea personalului din spate.', DATEADD(day, -5, GETUTCDATE()), DATEADD(day, -1, GETUTCDATE())),
+(13, 22, 3, 'Am experiență ca figurant. 1.65m, brunetă, 28 ani. Pot primi instrucțiuni rapid.', 'Ești selectată pentru scena de restaurant. Filmare în desfășurare la Buftea.', DATEADD(day, -4, GETUTCDATE()), DATEADD(day, -2, GETUTCDATE())),
+(19, 15, 3, 'Disponibilă pentru poziția de hostess la expoziție. Am badge de la editia trecută.', 'Perfect! Te repartizăm la pavilionul C, zona auto.', DATEADD(day, -3, GETUTCDATE()), DATEADD(day, -1, GETUTCDATE()));
 
 -- Accepted bookings (upcoming)
 INSERT INTO Bookings (ClientId, ServiceId, Status, Message, EntrepreneurResponse, CreatedAt, StartDate) VALUES
-(14, 6, 1, 'Schimbare ferestre la apartament, 5 bucăți.', 'Acceptat! Vă contactăm pentru măsurători exacte.', DATEADD(day, -2, GETUTCDATE()), DATEADD(day, 3, GETUTCDATE())),
-(15, 21, 1, 'Pachet analize pentru control anual.', 'Programare confirmată. Veniți à jeun dimineața.', DATEADD(day, -1, GETUTCDATE()), DATEADD(day, 2, GETUTCDATE())),
-(18, 28, 1, 'Interesat de automatizare pentru departamentul HR.', 'Excelent! Organizăm workshop-ul de discovery.', DATEADD(day, -1, GETUTCDATE()), DATEADD(day, 5, GETUTCDATE()));
+(14, 21, 1, 'Am lucrat la filmări de reclame Vodafone și Orange. Disponibil săptămâna viitoare.', 'Super portofoliu! Te contactăm pentru casting rapid mâine.', DATEADD(day, -2, GETUTCDATE()), DATEADD(day, 3, GETUTCDATE())),
+(15, 12, 1, 'Experiență ca barista la 5 to go. Pot prepara latte art și diverse metode.', 'Excelent! Evenimentul e conferința IT din Marriott.', DATEADD(day, -1, GETUTCDATE()), DATEADD(day, 2, GETUTCDATE())),
+(18, 18, 1, 'Am participat ca figurant la 3 concerte anul trecut. Știu să dansez în crowd.', 'Perfect pentru videoclipul Carlas Dreams! Filmare weekend.', DATEADD(day, -1, GETUTCDATE()), DATEADD(day, 5, GETUTCDATE()));
 
--- Pending bookings (awaiting response)
+-- Pending bookings
 INSERT INTO Bookings (ClientId, ServiceId, Status, Message, CreatedAt) VALUES
-(12, 10, 0, 'PC gaming nou, vreau să mă asigur că totul e setat corect pentru performanță maximă.', GETUTCDATE()),
-(16, 15, 0, 'Organizăm petrecere de firmă pentru 30 persoane. Avem nevoie de catering diversificat.', DATEADD(hour, -12, GETUTCDATE())),
-(17, 7, 0, 'Avem nevoie de consultanță pentru renovarea completă a apartamentului.', DATEADD(hour, -6, GETUTCDATE())),
-(19, 26, 0, 'Audit de securitate pentru startup-ul nostru tech.', DATEADD(hour, -3, GETUTCDATE()));
+(12, 23, 0, 'Am 1.82m, similar cu actorul principal. Am mai fost stand-in la MediaPro acum 2 ani.', GETUTCDATE()),
+(16, 11, 0, 'Sunt disponibil pentru ajutor bucătărie. Am certificat HACCP și experiență la catering.', DATEADD(hour, -12, GETUTCDATE())),
+(17, 27, 0, 'Student comunicare, îmi place să interacționez cu oamenii. Prima experiență sampling.', DATEADD(hour, -6, GETUTCDATE())),
+(19, 26, 0, 'Am experiență ca demonstrator la Samsung și Apple. Cunosc produsele tech foarte bine.', DATEADD(hour, -3, GETUTCDATE()));
 
 GO
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- REVIEWS (for completed bookings)
+-- REVIEWS
 -- ═══════════════════════════════════════════════════════════════════════════════
 INSERT INTO Reviews (ServiceId, ClientId, Rating, Comment, IsApproved, ApprovedAt, CreatedAt) VALUES
-(1, 12, 5, 'Instalare impecabilă! Echipa a venit la timp, a lucrat curat și a explicat totul despre utilizarea mașinii. Super recomand!', 1, DATEADD(day, -42, GETUTCDATE()), DATEADD(day, -43, GETUTCDATE())),
-(4, 12, 4, 'Montaj bun în general, dar au întârziat puțin. Dulapul arată perfect acum.', 1, DATEADD(day, -37, GETUTCDATE()), DATEADD(day, -38, GETUTCDATE())),
-(22, 13, 5, 'Cea mai bună decizie! Facilitățile sunt extraordinare și personalul foarte amabil. Merită fiecare ban.', 1, DATEADD(day, -3, GETUTCDATE()), DATEADD(day, -4, GETUTCDATE())),
-(8, 14, 5, 'Mi-au salvat laptopul! Acum funcționează ca nou. Preț corect pentru munca depusă.', 1, DATEADD(day, -25, GETUTCDATE()), DATEADD(day, -26, GETUTCDATE())),
-(19, 15, 4, 'Medic foarte atent și profesionist. Singura problemă a fost timpul de așteptare cam lung.', 1, DATEADD(day, -23, GETUTCDATE()), DATEADD(day, -24, GETUTCDATE())),
-(2, 16, 5, 'Montaj perfect pentru TV-ul meu! Cablurile sunt ascunse frumos, totul arată foarte curat pe perete.', 1, DATEADD(day, -18, GETUTCDATE()), DATEADD(day, -19, GETUTCDATE())),
-(11, 16, 5, 'Șofer punctual și foarte politicos. Mașina curată și confortabilă. Exact ce aveam nevoie după un zbor lung.', 1, DATEADD(day, -13, GETUTCDATE()), DATEADD(day, -14, GETUTCDATE())),
-(14, 17, 4, 'Livrare rapidă și produse proaspete. Voi recomanda cu siguranță!', 1, DATEADD(day, -9, GETUTCDATE()), DATEADD(day, -10, GETUTCDATE())),
-(24, 18, 5, 'Protecție excelentă și ușor de instalat. VPN-ul inclus e un bonus mare!', 1, DATEADD(day, -11, GETUTCDATE()), DATEADD(day, -12, GETUTCDATE())),
-(23, 19, 5, 'Antrenorul meu este fantastic! Am văzut rezultate vizibile în doar 3 săptămâni. Planul nutrițional a făcut diferența.', 1, DATEADD(day, -2, GETUTCDATE()), DATEADD(day, -3, GETUTCDATE()));
+(1, 12, 5, 'Echipă super prietenoasă! M-au instruit bine la început și colegii m-au ajutat. Plata la timp. Recomand!', 1, DATEADD(day, -42, GETUTCDATE()), DATEADD(day, -43, GETUTCDATE())),
+(10, 12, 5, 'Organizare impecabilă la eveniment. Transport asigurat și masă inclusă. Voi mai lucra cu ei!', 1, DATEADD(day, -37, GETUTCDATE()), DATEADD(day, -38, GETUTCDATE())),
+(14, 13, 4, 'Experiență bună la târg. Training clar, dar programul s-a prelungit cu 2 ore fără bonus.', 1, DATEADD(day, -33, GETUTCDATE()), DATEADD(day, -34, GETUTCDATE())),
+(19, 14, 5, 'Prima mea experiență la film și a fost grozavă! Echipa de producție foarte profesionistă.', 1, DATEADD(day, -25, GETUTCDATE()), DATEADD(day, -28, GETUTCDATE())),
+(25, 15, 4, 'Job ok pentru început. Training scurt dar suficient. Plata a venit în 3 zile.', 1, DATEADD(day, -23, GETUTCDATE()), DATEADD(day, -24, GETUTCDATE())),
+(2, 16, 5, 'Atmosferă incredibilă la Hard Rock! Bacșiș generos de la clienți plus bonusuri de la firmă.', 1, DATEADD(day, -18, GETUTCDATE()), DATEADD(day, -19, GETUTCDATE())),
+(7, 16, 5, 'Cel mai profesionist eveniment la care am lucrat. Uniformă de calitate, briefing detaliat.', 1, DATEADD(day, -13, GETUTCDATE()), DATEADD(day, -14, GETUTCDATE())),
+(28, 17, 4, 'Super experiență la festival! Obositor dar fun. Tricou și sampling gratuit ca bonus.', 1, DATEADD(day, -9, GETUTCDATE()), DATEADD(day, -10, GETUTCDATE())),
+(20, 18, 5, 'Filmările sunt obositoare dar plătite corect. Catering excelent și pauze regulate.', 1, DATEADD(day, -11, GETUTCDATE()), DATEADD(day, -12, GETUTCDATE())),
+(17, 19, 5, 'Eveniment de clasă! Am primit și tips de la organizatori pentru profesionalism. 100% recomand!', 1, DATEADD(day, -27, GETUTCDATE()), DATEADD(day, -28, GETUTCDATE()));
 
--- Pending reviews (for admin moderation demo)
+-- Pending reviews
 INSERT INTO Reviews (ServiceId, ClientId, Rating, Comment, IsApproved, CreatedAt) VALUES
-(3, 12, 5, 'Casa mea smart funcționează perfect acum! Pot controla totul de pe telefon. Implementare profesionistă.', 0, DATEADD(hour, -5, GETUTCDATE())),
-(5, 13, 4, 'Lucrare în progres, dar până acum totul arată excelent. Echipa foarte organizată.', 0, DATEADD(hour, -2, GETUTCDATE()));
+(4, 12, 5, 'City Grill e locul perfect să înveți meserie! Colegii te ajută și managerii sunt corecți.', 0, DATEADD(hour, -5, GETUTCDATE())),
+(22, 13, 4, 'Filmare interesantă dar mult timp de așteptare între scene. Totuși, plata e ok.', 0, DATEADD(hour, -2, GETUTCDATE()));
 
 GO
 
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- OFFERS
 -- ═══════════════════════════════════════════════════════════════════════════════
--- OfferType: 0=JobMilestone, 1=EarlyCompletion, 2=Coupon, 3=Discount, 4=Referral, 5=LoyaltyReward
-
 INSERT INTO Offers (Title, Description, Type, MilestoneCount, EarlyCompletionDays, DiscountPercentage, BonusValue, RewardDescription, ValidFrom, ValidUntil, IsActive, CreatedAt, EntrepreneurProfileId) VALUES
--- eMAG
-('Prima Instalare Gratuită', 'La achiziția oricărui electrocasnic mare, prima instalare este inclusă gratuit!', 3, NULL, NULL, 100.00, 149.00, 'Instalare gratuită (valoare 149 RON)', DATEADD(day, -30, GETUTCDATE()), DATEADD(day, 30, GETUTCDATE()), 1, DATEADD(day, -30, GETUTCDATE()), 1),
-('Client Fidel eMAG', 'După 5 servicii de instalare, primești unul gratuit!', 0, 5, NULL, NULL, 149.00, 'Al 6-lea serviciu de instalare gratuit', DATEADD(day, -60, GETUTCDATE()), DATEADD(day, 120, GETUTCDATE()), 1, DATEADD(day, -60, GETUTCDATE()), 1),
-
--- Dedeman
-('Reducere 20% Montaj', 'Discount 20% la orice serviciu de montaj pentru clienții cu card Dedeman Club.', 3, NULL, NULL, 20.00, NULL, '20% reducere la montaj', DATEADD(day, -15, GETUTCDATE()), DATEADD(day, 45, GETUTCDATE()), 1, DATEADD(day, -15, GETUTCDATE()), 2),
-('Consultanță GRATUITĂ', 'Consultanță renovare gratuită la orice proiect de peste 5000 RON materiale cumpărate.', 2, NULL, NULL, NULL, 0.00, 'Consultanță gratuită', DATEADD(day, -20, GETUTCDATE()), DATEADD(day, 60, GETUTCDATE()), 1, DATEADD(day, -20, GETUTCDATE()), 2),
-
--- Altex
-('Back to School -15%', 'Reducere 15% la configurare și transfer date pentru studenți!', 3, NULL, NULL, 15.00, NULL, '15% discount cu legitimație student', DATEADD(day, -10, GETUTCDATE()), DATEADD(day, 20, GETUTCDATE()), 1, DATEADD(day, -10, GETUTCDATE()), 3),
-
--- Autonom
-('Weekend Getaway', 'Închiriere weekend la preț de 2 zile! Ofertă limitată.', 3, NULL, NULL, 33.33, 63.00, 'Economisești o zi de închiriere', DATEADD(day, -5, GETUTCDATE()), DATEADD(day, 25, GETUTCDATE()), 1, DATEADD(day, -5, GETUTCDATE()), 4),
-('Referral Bonus', 'Recomandă un prieten și ambii primiți 50 RON credit!', 4, NULL, NULL, NULL, 50.00, '50 RON credit pentru fiecare referral', DATEADD(day, -45, GETUTCDATE()), DATEADD(day, 90, GETUTCDATE()), 1, DATEADD(day, -45, GETUTCDATE()), 4),
-
--- Freshful
-('Prima Livrare Gratuită', 'Livrare express gratuită la prima comandă peste 100 RON!', 2, NULL, NULL, NULL, 19.90, 'Livrare gratuită', DATEADD(day, -25, GETUTCDATE()), DATEADD(day, 35, GETUTCDATE()), 1, DATEADD(day, -25, GETUTCDATE()), 5),
-
--- Tazz
-('Tazz Plus 50% OFF', 'Prima lună de abonament Tazz Plus la jumătate de preț!', 3, NULL, NULL, 50.00, 15.00, 'Economisești 15 RON prima lună', DATEADD(day, -7, GETUTCDATE()), DATEADD(day, 23, GETUTCDATE()), 1, DATEADD(day, -7, GETUTCDATE()), 6),
-
--- Regina Maria
-('Pachet Family Health', 'Reducere 25% la pachetul de analize când aduci toată familia (min. 3 persoane).', 3, NULL, NULL, 25.00, NULL, '25% reducere per persoană', DATEADD(day, -20, GETUTCDATE()), DATEADD(day, 40, GETUTCDATE()), 1, DATEADD(day, -20, GETUTCDATE()), 7),
-('Bonus Vaccinare', 'Vaccin antigripal gratuit pentru clienții cu abonament corporativ!', 5, NULL, NULL, NULL, 99.00, 'Vaccin antigripal gratuit', DATEADD(day, -30, GETUTCDATE()), DATEADD(day, 60, GETUTCDATE()), 1, DATEADD(day, -30, GETUTCDATE()), 7),
-
--- World Class
-('New Year Resolution', 'Înscrie-te în ianuarie și primești 2 luni la preț de 1!', 0, 1, NULL, NULL, 399.00, 'O lună gratuită de abonament', DATEADD(day, -35, GETUTCDATE()), DATEADD(day, 25, GETUTCDATE()), 1, DATEADD(day, -35, GETUTCDATE()), 8),
-('Bring a Friend', 'Adu un prieten la antrenament și primești o sesiune PT gratuită!', 4, NULL, NULL, NULL, 150.00, 'Sesiune personal training gratuită', DATEADD(day, -15, GETUTCDATE()), DATEADD(day, 45, GETUTCDATE()), 1, DATEADD(day, -15, GETUTCDATE()), 8),
-
--- Bitdefender
-('Cyber Monday Special', 'Bitdefender Total Security cu 40% reducere! Protejează-ți familia.', 3, NULL, NULL, 40.00, 100.00, 'Economisești 100 RON', DATEADD(day, -8, GETUTCDATE()), DATEADD(day, 7, GETUTCDATE()), 1, DATEADD(day, -8, GETUTCDATE()), 9),
-
--- UiPath
-('Starter Pack Automation', 'Workshop de discovery gratuit pentru companiile care implementează primul robot RPA!', 2, NULL, NULL, NULL, 1999.00, 'Workshop gratuit (valoare 1999 RON)', DATEADD(day, -40, GETUTCDATE()), DATEADD(day, 50, GETUTCDATE()), 1, DATEADD(day, -40, GETUTCDATE()), 10),
-('Early Bird Training', 'Înscriere cu 30 de zile înainte = 20% reducere la cursul de developer!', 1, NULL, 30, 20.00, 500.00, 'Economisești 500 RON', DATEADD(day, -25, GETUTCDATE()), DATEADD(day, 65, GETUTCDATE()), 1, DATEADD(day, -25, GETUTCDATE()), 10);
+('Bonus Weekend Warrior', 'Lucrezi 4 weekenduri consecutive? Primești bonus de 200 RON!', 0, 4, NULL, NULL, 200.00, 'Bonus cash 200 RON', DATEADD(day, -30, GETUTCDATE()), DATEADD(day, 30, GETUTCDATE()), 1, DATEADD(day, -30, GETUTCDATE()), 1),
+('Referral Bonus HRC', 'Adu un prieten care lucrează minim 3 ture și primești 100 RON!', 4, NULL, NULL, NULL, 100.00, '100 RON pentru fiecare referral valid', DATEADD(day, -60, GETUTCDATE()), DATEADD(day, 120, GETUTCDATE()), 1, DATEADD(day, -60, GETUTCDATE()), 1),
+('Prima Tură Dublă', 'La prima tură, dacă rămâi și pentru seară, primești +50% la plată!', 1, NULL, NULL, 50.00, 80.00, '50% extra pentru tură dublă', DATEADD(day, -15, GETUTCDATE()), DATEADD(day, 45, GETUTCDATE()), 1, DATEADD(day, -15, GETUTCDATE()), 2),
+('Fidelitate City Grill', 'După 10 ture completate, primești voucher 150 RON în restaurantele noastre!', 0, 10, NULL, NULL, 150.00, 'Voucher consum 150 RON', DATEADD(day, -20, GETUTCDATE()), DATEADD(day, 60, GETUTCDATE()), 1, DATEADD(day, -20, GETUTCDATE()), 2),
+('Excellence Bonus', 'Rating 5 stele de la 3 clienți consecutivi = 150 RON bonus!', 0, 3, NULL, NULL, 150.00, 'Bonus excelență 150 RON', DATEADD(day, -10, GETUTCDATE()), DATEADD(day, 50, GETUTCDATE()), 1, DATEADD(day, -10, GETUTCDATE()), 3),
+('Last Minute Hero', 'Accepți un job cu mai puțin de 24h înainte? +30% la plată!', 1, NULL, 1, 30.00, NULL, '30% bonus last minute', DATEADD(day, -5, GETUTCDATE()), DATEADD(day, 55, GETUTCDATE()), 1, DATEADD(day, -5, GETUTCDATE()), 4),
+('Sezon Nunți Bonus', 'Lucrezi la 5 nunți în sezon? Bonus de 300 RON!', 0, 5, NULL, NULL, 300.00, 'Bonus sezon nunți', DATEADD(day, -45, GETUTCDATE()), DATEADD(day, 90, GETUTCDATE()), 1, DATEADD(day, -45, GETUTCDATE()), 4),
+('Expo Veteran', 'Ai lucrat la 3 expoziții mari? Primești prioritate și +20 RON/zi!', 5, 3, NULL, NULL, 20.00, 'Bonus zilnic +20 RON', DATEADD(day, -25, GETUTCDATE()), DATEADD(day, 35, GETUTCDATE()), 1, DATEADD(day, -25, GETUTCDATE()), 5),
+('Night Shift Premium', 'Evenimente după ora 22:00 = tarif +40%!', 3, NULL, NULL, 40.00, NULL, '40% extra pentru night shift', DATEADD(day, -7, GETUTCDATE()), DATEADD(day, 53, GETUTCDATE()), 1, DATEADD(day, -7, GETUTCDATE()), 6),
+('Figurant Fidel', 'Participi la 10 zile de filmare? Bonus de 500 RON + prioritate casting!', 0, 10, NULL, NULL, 500.00, 'Bonus fidelitate + prioritate', DATEADD(day, -30, GETUTCDATE()), DATEADD(day, 60, GETUTCDATE()), 1, DATEADD(day, -30, GETUTCDATE()), 7),
+('Early Bird Casting', 'Confirmi participarea cu 48h înainte = garantat în producție!', 1, NULL, 2, NULL, NULL, 'Loc garantat în producție', DATEADD(day, -20, GETUTCDATE()), DATEADD(day, 40, GETUTCDATE()), 1, DATEADD(day, -20, GETUTCDATE()), 7),
+('Videoclip Star', 'Apari în prim-plan într-un videoclip? Bonus 200 RON!', 2, NULL, NULL, NULL, 200.00, 'Bonus featured extra', DATEADD(day, -15, GETUTCDATE()), DATEADD(day, 45, GETUTCDATE()), 1, DATEADD(day, -15, GETUTCDATE()), 8),
+('Top Promoter', 'Cele mai multe sample-uri distribuite în echipă? +100 RON bonus!', 0, 1, NULL, NULL, 100.00, 'Bonus performanță', DATEADD(day, -8, GETUTCDATE()), DATEADD(day, 22, GETUTCDATE()), 1, DATEADD(day, -8, GETUTCDATE()), 9),
+('Campanie Completă', 'Participi la toată durata campaniei (7 zile)? Bonus final 200 RON!', 0, 7, NULL, NULL, 200.00, 'Bonus finalizare campanie', DATEADD(day, -12, GETUTCDATE()), DATEADD(day, 48, GETUTCDATE()), 1, DATEADD(day, -12, GETUTCDATE()), 9),
+('Festival Warrior', 'Lucrezi toate cele 3 zile de festival? +50% la ultima zi!', 0, 3, NULL, 50.00, NULL, '50% extra ziua 3', DATEADD(day, -40, GETUTCDATE()), DATEADD(day, 50, GETUTCDATE()), 1, DATEADD(day, -40, GETUTCDATE()), 10),
+('Adu Echipa', 'Vii cu 2 prieteni pentru aceeași campanie? 150 RON bonus pentru fiecare!', 4, NULL, NULL, NULL, 150.00, 'Bonus team referral', DATEADD(day, -25, GETUTCDATE()), DATEADD(day, 65, GETUTCDATE()), 1, DATEADD(day, -25, GETUTCDATE()), 10);
 
 GO
 
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- CHALLENGES
 -- ═══════════════════════════════════════════════════════════════════════════════
--- ChallengeType: 0=BookingMilestone, 1=ReviewChallenge, 2=SpeedChallenge, 3=LoyaltyChallenge, 4=ReferralChallenge, 5=SeasonalChallenge
--- ChallengeStatus: 0=Draft, 1=Active, 2=Completed, 3=Cancelled
-
-INSERT INTO Challenges (Title, Description, Type, Status, TargetCount, TimeLimitDays, XpReward, BadgeCode, RewardDescription, BonusValue, StartDate, EndDate, MaxParticipants, CreatedAt, EntrepreneurProfileId) VALUES
--- eMAG
-('Smart Home Champion', 'Configurează-ți casa inteligentă completă! Finalizează 3 servicii de instalare smart home.', 0, 1, 3, 90, 200, 'SMART_PIONEER', 'Voucher 100 RON pentru accesorii smart', 100.00, DATEADD(day, -30, GETUTCDATE()), DATEADD(day, 60, GETUTCDATE()), 50, DATEADD(day, -35, GETUTCDATE()), 1),
-('Review Hero eMAG', 'Lasă 5 recenzii detaliate pentru serviciile noastre și ajută comunitatea!', 1, 1, 5, 60, 150, 'TOP_REVIEWER', 'Badge Top Reviewer + 50 RON voucher', 50.00, DATEADD(day, -20, GETUTCDATE()), DATEADD(day, 40, GETUTCDATE()), 100, DATEADD(day, -25, GETUTCDATE()), 1),
-
--- Dedeman
-('Renovator Pro', 'Completează 5 proiecte de renovare cu Dedeman și devino Renovator Pro!', 0, 1, 5, 180, 300, 'RENOVATOR_PRO', 'Card VIP Dedeman + 200 RON credit', 200.00, DATEADD(day, -45, GETUTCDATE()), DATEADD(day, 135, GETUTCDATE()), 30, DATEADD(day, -50, GETUTCDATE()), 2),
-
--- Autonom
-('Road Tripper', 'Închiriază mașini pentru 10 zile în total și deblochează avantaje exclusive!', 3, 1, 10, 365, 250, 'ROAD_TRIPPER', 'Upgrade gratuit la categoria superioară', 189.00, DATEADD(day, -60, GETUTCDATE()), DATEADD(day, 305, GETUTCDATE()), NULL, DATEADD(day, -65, GETUTCDATE()), 4),
-('Speed Booker', 'Rezervă în mai puțin de 24h de la căutare și primești bonus!', 2, 1, 1, NULL, 75, 'SPEED_DEMON', '10% extra discount la rezervare', NULL, DATEADD(day, -15, GETUTCDATE()), DATEADD(day, 45, GETUTCDATE()), NULL, DATEADD(day, -20, GETUTCDATE()), 4),
-
--- Freshful
-('Healthy Week', 'Comandă coșul săptămânal timp de 4 săptămâni consecutive!', 3, 1, 4, 28, 100, 'HEALTHY_HABIT', 'Livrare gratuită pe termen nelimitat pentru luna următoare', 79.60, DATEADD(day, -10, GETUTCDATE()), DATEADD(day, 50, GETUTCDATE()), 200, DATEADD(day, -15, GETUTCDATE()), 5),
-
--- Tazz
-('Foodie Explorer', 'Comandă de la 10 restaurante diferite și descoperă noi gusturi!', 0, 1, 10, 30, 120, 'FOODIE_EXPLORER', 'Voucher 75 RON pentru orice restaurant', 75.00, DATEADD(day, -5, GETUTCDATE()), DATEADD(day, 25, GETUTCDATE()), NULL, DATEADD(day, -10, GETUTCDATE()), 6),
-
--- Regina Maria
-('Health First', 'Completează check-up-ul anual complet: consultație + analize + vaccin.', 0, 1, 3, 90, 175, 'HEALTH_CHAMPION', '15% reducere la următorul pachet medical', NULL, DATEADD(day, -40, GETUTCDATE()), DATEADD(day, 50, GETUTCDATE()), NULL, DATEADD(day, -45, GETUTCDATE()), 7),
-
--- World Class
-('Fitness Warrior', 'Participă la 20 de clase de grup într-o lună!', 0, 1, 20, 30, 200, 'FITNESS_WARRIOR', 'Sesiune spa gratuită + smoothie bar credit', 150.00, DATEADD(day, -8, GETUTCDATE()), DATEADD(day, 22, GETUTCDATE()), 100, DATEADD(day, -12, GETUTCDATE()), 8),
-('New Member Journey', 'Finalizează programul de inițiere: evaluare + 3 sesiuni PT + 5 clase grup.', 3, 1, 9, 45, 350, 'WORLD_CLASS_MEMBER', 'O lună gratuită de abonament', 399.00, DATEADD(day, -30, GETUTCDATE()), DATEADD(day, 60, GETUTCDATE()), 50, DATEADD(day, -35, GETUTCDATE()), 8),
-
--- Bitdefender
-('Cyber Guardian', 'Protejează 3 dispozitive și completează security assessment-ul personal.', 0, 1, 3, 60, 100, 'CYBER_GUARDIAN', 'VPN Premium 6 luni gratuit', 89.00, DATEADD(day, -25, GETUTCDATE()), DATEADD(day, 35, GETUTCDATE()), NULL, DATEADD(day, -30, GETUTCDATE()), 9),
-
--- UiPath
-('Automation Pioneer', 'Participă la workshop și implementează primul tău robot RPA!', 0, 1, 2, 90, 500, 'RPA_PIONEER', 'Certificare UiPath gratuită + 1 an suport premium', 999.00, DATEADD(day, -50, GETUTCDATE()), DATEADD(day, 40, GETUTCDATE()), 20, DATEADD(day, -55, GETUTCDATE()), 10);
+INSERT INTO Challenges (Title, Description, Type, Status, TargetCount, TimeLimitDays, XpReward, BadgeCode, RewardDescription, BonusValue, StartDate, EndDate, MaxParticipants, TrackingMode, ProofInstructions, CoinsReward, CreatedAt, EntrepreneurProfileId) VALUES
+('HRC Rockstar', 'Completează 5 ture la Hard Rock Cafe și devino Rockstar oficial!', 0, 1, 5, 60, 250, 'HRC_ROCKSTAR', 'Tricou Hard Rock + 200 RON bonus', 200.00, DATEADD(day, -30, GETUTCDATE()), DATEADD(day, 60, GETUTCDATE()), 50, 1, NULL, 100, DATEADD(day, -35, GETUTCDATE()), 1),
+('Review Champion HRC', 'Lasă 3 review-uri pozitive despre experiența ta la HRC!', 1, 1, 3, 45, 100, 'HRC_REVIEWER', 'Badge Top Reviewer + 50 RON', 50.00, DATEADD(day, -20, GETUTCDATE()), DATEADD(day, 40, GETUTCDATE()), 100, 2, NULL, 50, DATEADD(day, -25, GETUTCDATE()), 1),
+('City Grill Pro', 'Lucrează 10 ture la City Grill în 90 de zile!', 0, 1, 10, 90, 400, 'CITYGRILL_PRO', 'Card VIP City Grill + 300 RON', 300.00, DATEADD(day, -45, GETUTCDATE()), DATEADD(day, 45, GETUTCDATE()), 30, 1, NULL, 150, DATEADD(day, -50, GETUTCDATE()), 2),
+('Hospitality Star', 'Completează 8 job-uri la Grand Hotel Continental.', 0, 1, 8, 120, 350, 'HOTEL_STAR', 'O noapte gratuită la hotel + 250 RON', 250.00, DATEADD(day, -60, GETUTCDATE()), DATEADD(day, 60, GETUTCDATE()), NULL, 1, NULL, 120, DATEADD(day, -65, GETUTCDATE()), 3),
+('Wedding Season Champion', 'Participă la 7 nunți în acest sezon de vară!', 5, 1, 7, 90, 300, 'WEDDING_CHAMP', 'Bonus 400 RON + prioritate evenimente premium', 400.00, DATEADD(day, -40, GETUTCDATE()), DATEADD(day, 50, GETUTCDATE()), 40, 1, NULL, 100, DATEADD(day, -45, GETUTCDATE()), 4),
+('Last Minute Hero', 'Acceptă și completează 3 job-uri last-minute (sub 24h notice)!', 2, 1, 3, 60, 200, 'LAST_MIN_HERO', 'Badge + prioritate la job-uri urgente', NULL, DATEADD(day, -15, GETUTCDATE()), DATEADD(day, 45, GETUTCDATE()), NULL, 4, 'Încarcă screenshot cu confirmarea booking-ului arătând data și ora acceptării', 80, DATEADD(day, -20, GETUTCDATE()), 4),
+('Expo Expert', 'Lucrează la 5 expoziții diferite la Romexpo!', 3, 1, 5, 180, 250, 'EXPO_EXPERT', 'Card acces VIP + 200 RON', 200.00, DATEADD(day, -50, GETUTCDATE()), DATEADD(day, 130, GETUTCDATE()), 50, 1, NULL, 100, DATEADD(day, -55, GETUTCDATE()), 5),
+('Event Master', 'Participă la 6 evenimente corporate de nivel înalt!', 0, 1, 6, 120, 350, 'EVENT_MASTER', 'Recomandare pentru agenții partenere + 300 RON', 300.00, DATEADD(day, -30, GETUTCDATE()), DATEADD(day, 90, GETUTCDATE()), 25, 1, NULL, 130, DATEADD(day, -35, GETUTCDATE()), 6),
+('Figurant Star', 'Participă la 15 zile de filmare în producții Castel Film!', 3, 1, 15, 180, 500, 'FILM_STAR', 'Acces la casting-uri pentru roluri vorbite + 500 RON', 500.00, DATEADD(day, -60, GETUTCDATE()), DATEADD(day, 120, GETUTCDATE()), 100, 1, NULL, 200, DATEADD(day, -65, GETUTCDATE()), 7),
+('Set Photo Challenge', 'Fă o poză în costume pe platou și share-uiește experiența!', 1, 1, 1, 30, 50, 'SET_MEMORY', 'Photo print + 30 RON', 30.00, DATEADD(day, -10, GETUTCDATE()), DATEADD(day, 20, GETUTCDATE()), NULL, 4, 'Încarcă o poză de pe platou în costum (fără spoilere despre producție!)', 20, DATEADD(day, -15, GETUTCDATE()), 7),
+('Reclame Collector', 'Apari în 5 reclame TV diferite!', 0, 1, 5, 120, 300, 'AD_COLLECTOR', 'Demo reel profesional + 300 RON', 300.00, DATEADD(day, -45, GETUTCDATE()), DATEADD(day, 75, GETUTCDATE()), 60, 1, NULL, 120, DATEADD(day, -50, GETUTCDATE()), 8),
+('Promo All-Star', 'Completează 8 campanii de promovare pentru McCann!', 0, 1, 8, 90, 350, 'PROMO_STAR', 'Poziție permanentă part-time + 350 RON bonus', 350.00, DATEADD(day, -40, GETUTCDATE()), DATEADD(day, 50, GETUTCDATE()), 30, 1, NULL, 140, DATEADD(day, -45, GETUTCDATE()), 9),
+('Festival Season', 'Lucrează la 4 festivaluri în această vară!', 5, 1, 4, 120, 250, 'FESTIVAL_VET', 'Acces VIP festival + 250 RON', 250.00, DATEADD(day, -50, GETUTCDATE()), DATEADD(day, 70, GETUTCDATE()), NULL, 1, NULL, 100, DATEADD(day, -55, GETUTCDATE()), 10),
+('Street Team Leader', 'Coordonează o echipă de 5 persoane la un eveniment!', 0, 1, 1, 60, 200, 'TEAM_LEADER', 'Poziție de team leader permanent + 200 RON', 200.00, DATEADD(day, -20, GETUTCDATE()), DATEADD(day, 40, GETUTCDATE()), 20, 4, 'Încarcă confirmarea de la coordonator că ai fost team leader', 80, DATEADD(day, -25, GETUTCDATE()), 10);
 
 GO
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- CHALLENGE PARTICIPATIONS (for active gamification demo)
--- Status: 0=Pending, 1=Accepted, 2=Rejected, 3=InProgress, 4=Completed, 5=Failed, 6=Withdrawn
+-- CHALLENGE PARTICIPATIONS
 -- ═══════════════════════════════════════════════════════════════════════════════
 INSERT INTO ChallengeParticipations (ChallengeId, UserId, CurrentProgress, Status, CreatedAt, CompletedAt, RewardAwarded, XpAwarded) VALUES
--- Ion Popescu - active challenger
-(1, 12, 2, 3, DATEADD(day, -25, GETUTCDATE()), NULL, 0, 0),  -- Smart Home Champion: 2/3 done
-(2, 12, 4, 3, DATEADD(day, -18, GETUTCDATE()), NULL, 0, 0),  -- Review Hero: 4/5 done
--- Maria Ionescu
-(9, 13, 12, 3, DATEADD(day, -6, GETUTCDATE()), NULL, 0, 0),  -- Fitness Warrior: 12/20 classes
--- Andrei Stan  
-(4, 16, 5, 3, DATEADD(day, -40, GETUTCDATE()), NULL, 0, 0),  -- Road Tripper: 5/10 days
-(5, 16, 1, 4, DATEADD(day, -10, GETUTCDATE()), DATEADD(day, -10, GETUTCDATE()), 1, 75), -- Speed Booker: completed
--- Diana Radu
-(10, 19, 7, 3, DATEADD(day, -25, GETUTCDATE()), NULL, 0, 0), -- New Member Journey: 7/9 done
-(7, 19, 8, 3, DATEADD(day, -4, GETUTCDATE()), NULL, 0, 0),   -- Foodie Explorer: 8/10 restaurants
--- Alexandru Popa
-(11, 14, 2, 3, DATEADD(day, -20, GETUTCDATE()), NULL, 0, 0), -- Cyber Guardian: 2/3 devices
--- Elena Dumitrescu
-(8, 15, 2, 3, DATEADD(day, -35, GETUTCDATE()), NULL, 0, 0);  -- Health First: 2/3 steps done
+(1, 12, 3, 3, DATEADD(day, -25, GETUTCDATE()), NULL, 0, 0),
+(3, 12, 7, 3, DATEADD(day, -40, GETUTCDATE()), NULL, 0, 0),
+(9, 13, 8, 3, DATEADD(day, -50, GETUTCDATE()), NULL, 0, 0),
+(10, 13, 1, 4, DATEADD(day, -8, GETUTCDATE()), DATEADD(day, -6, GETUTCDATE()), 1, 50),
+(11, 14, 3, 3, DATEADD(day, -30, GETUTCDATE()), NULL, 0, 0),
+(4, 16, 5, 3, DATEADD(day, -45, GETUTCDATE()), NULL, 0, 0),
+(2, 16, 2, 3, DATEADD(day, -15, GETUTCDATE()), NULL, 0, 0),
+(12, 15, 4, 3, DATEADD(day, -35, GETUTCDATE()), NULL, 0, 0),
+(7, 19, 3, 3, DATEADD(day, -40, GETUTCDATE()), NULL, 0, 0),
+(8, 19, 4, 3, DATEADD(day, -25, GETUTCDATE()), NULL, 0, 0);
 
 GO
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- MESSAGES (for chat demo)
+-- MESSAGES
 -- ═══════════════════════════════════════════════════════════════════════════════
--- Message conversations between clients and entrepreneurs
-
--- Conversation: Ion Popescu <-> eMAG about Smart Home
 INSERT INTO Messages (ServiceId, SenderId, RecipientId, Content, SentAt, IsRead) VALUES
-(3, 12, 2, 'Bună ziua! Am văzut că oferiți servicii de configurare smart home. Aș dori să automatizez întreaga casă - lumini, termostat, jaluzele. Cam care ar fi costul total?', DATEADD(day, -6, GETUTCDATE()), 1),
-(3, 2, 12, 'Bună ziua! Mulțumim pentru interes. Pentru o configurare completă avem nevoie de câteva detalii: câte camere, ce dispozitive aveți deja, și ce ecosistem preferați (Google, Alexa, Apple)?', DATEADD(day, -6, GETUTCDATE()), 1),
-(3, 12, 2, 'Am 4 camere + living. Nu am nimic smart momentan. Prefer Google pentru că am deja un telefon Android și un Chromecast.', DATEADD(day, -5, GETUTCDATE()), 1),
-(3, 2, 12, 'Perfect! Pentru configurarea ta recomand: 15 becuri Philips Hue, 1 termostat Nest, 3 prize smart, 1 Google Home Hub. Total estimat: ~2500 RON produse + 249 RON instalare. Putem programa o vizită de evaluare gratuită?', DATEADD(day, -5, GETUTCDATE()), 1),
-(3, 12, 2, 'Sună bine! Da, haideți să programăm vizita. Sunt disponibil weekendul acesta.', DATEADD(day, -5, GETUTCDATE()), 1),
-(3, 2, 12, 'Excelent! Te-am programat pentru sâmbătă între 10:00-12:00. Colegul nostru Mihai te va contacta pentru confirmare. Îți mulțumim!', DATEADD(day, -5, GETUTCDATE()), 0);
+(1, 12, 2, 'Bună! Am văzut că aveți nevoie de ospătari weekendul acesta. Sunt disponibil sâmbătă și duminică. Am mai lucrat în HoReCa.', DATEADD(day, -6, GETUTCDATE()), 1),
+(1, 2, 12, 'Salut Ion! Super, avem nevoie urgentă. Ai experiență cu POS-uri și cu comenzi complexe? Sâmbăta e concert live, va fi aglomerat.', DATEADD(day, -6, GETUTCDATE()), 1),
+(1, 12, 2, 'Da, am lucrat cu diverse sisteme POS la Marriott. Știu să gestionez comenzi mari și muncă sub presiune.', DATEADD(day, -5, GETUTCDATE()), 1),
+(1, 2, 12, 'Perfect! Te așteptăm sâmbătă la 10:00 pentru briefing. Adu CI și cont IBAN pentru plată. Uniformă primești de la noi.', DATEADD(day, -5, GETUTCDATE()), 1),
+(1, 12, 2, 'Înțeles! O întrebare - cât durează de obicei tura sâmbăta cu concert?', DATEADD(day, -5, GETUTCDATE()), 1),
+(1, 2, 12, 'În mod normal 8 ore, dar la concerte poate fi 10-11 ore. Orele extra sunt plătite cu 50% bonus.', DATEADD(day, -5, GETUTCDATE()), 0);
 
--- Conversation: Maria Ionescu <-> Dedeman about renovation
 INSERT INTO Messages (ServiceId, SenderId, RecipientId, Content, SentAt, IsRead) VALUES
-(5, 13, 3, 'Bună! Am nevoie de faianță nouă în baie. Suprafața e de 8mp. Puteți să-mi spuneți cam cât durează și ce preț ar fi?', DATEADD(day, -5, GETUTCDATE()), 1),
-(5, 3, 13, 'Salut! Pentru 8mp de faianță, durata e de 2-3 zile. Prețul include: pregătire suprafață + montaj + rostuire. Costul e 45 RON/mp, deci aproximativ 360 RON manoperă. Materialele le achiziționați separat.', DATEADD(day, -5, GETUTCDATE()), 1),
-(5, 13, 3, 'Mulțumesc! Aș vrea să vin să aleg faianța săptămâna asta. Puteți să îmi recomandați ceva potrivit pentru o baie modernă?', DATEADD(day, -4, GETUTCDATE()), 1),
-(5, 3, 13, 'Sigur! Îți recomand colecția Nordic Marble - foarte populară anul acesta, rezistentă și ușor de întreținut. E în stoc la magazinul din Militari. Când veniți, cereți un consultant și vă ajută cu calculul exact.', DATEADD(day, -4, GETUTCDATE()), 1),
-(5, 13, 3, 'Super, mulțumesc mult! Vin mâine dimineață.', DATEADD(day, -4, GETUTCDATE()), 0);
+(19, 13, 8, 'Bună! Sunt interesată de poziția de figurant. Am 28 ani, 1.65m, brunetă. Ce producții aveți în lucru?', DATEADD(day, -5, GETUTCDATE()), 1),
+(19, 8, 13, 'Salut Maria! Filmăm acum un serial TV și un film internațional. Pentru serialul TV căutăm figuranți pentru scene de restaurant. Te-ar interesa?', DATEADD(day, -5, GETUTCDATE()), 1),
+(19, 13, 8, 'Da, absolut! Când ar fi filmările?', DATEADD(day, -4, GETUTCDATE()), 1),
+(19, 8, 13, 'Marți și miercuri săptămâna viitoare. Pickup din București ora 6:00, filmare la Buftea. Masă și transport incluse. 200 RON/zi.', DATEADD(day, -4, GETUTCDATE()), 1),
+(19, 13, 8, 'Super! Confirm pentru ambele zile. Trebuie să aduc ceva anume?', DATEADD(day, -4, GETUTCDATE()), 0);
 
--- Conversation: Diana Radu <-> World Class about personal training
 INSERT INTO Messages (ServiceId, SenderId, RecipientId, Content, SentAt, IsRead) VALUES
-(23, 19, 9, 'Bună! Am terminat cele 10 sesiuni de personal training și vreau să continui. Pot să cumpăr un nou pachet?', DATEADD(day, -4, GETUTCDATE()), 1),
-(23, 9, 19, 'Felicitări pentru perseverență, Diana! 🎉 Da, poți achiziționa un nou pachet. Ai progres excelent - antrenorul Radu mi-a arătat fișa ta. Vrei să continui cu el sau să încerci și alți antrenori?', DATEADD(day, -4, GETUTCDATE()), 1),
-(23, 19, 9, 'Vreau să continui cu Radu, mă înțeleg foarte bine cu el. Și pregătirea pentru maraton merge bine datorită lui!', DATEADD(day, -3, GETUTCDATE()), 1),
-(23, 9, 19, 'Perfect! Ai și challenge-ul "New Member Journey" aproape complet - mai ai nevoie de 2 clase de grup. După ce îl finalizezi, primești O LUNĂ GRATUITĂ! 💪', DATEADD(day, -3, GETUTCDATE()), 1),
-(23, 19, 9, 'Wow, nu știam! Mă duc la yoga diseară și pilates mâine. Mulțumesc pentru reminder!', DATEADD(day, -3, GETUTCDATE()), 0);
+(7, 16, 4, 'Bună ziua! Am văzut anunțul pentru ospătar banchet. Am experiență la evenimente formale, am lucrat la gale și conferințe.', DATEADD(day, -4, GETUTCDATE()), 1),
+(7, 4, 16, 'Bună Andrei! Excelent background. Avem o gală vineri pentru 200 de persoane. Cunoști servirea la farfurie în stil francez?', DATEADD(day, -4, GETUTCDATE()), 1),
+(7, 16, 4, 'Da, am făcut training pentru servire formală. Știu și wine service basics.', DATEADD(day, -3, GETUTCDATE()), 1),
+(7, 4, 16, 'Perfect! Te programăm pentru vineri. Start ora 16:00 pentru setup, eveniment 19:00-24:00. Ținută neagră elegantă, vesta și papion le primești de la noi.', DATEADD(day, -3, GETUTCDATE()), 1),
+(7, 16, 4, 'Mulțumesc! Confirm prezența. O să fiu acolo la 16:00.', DATEADD(day, -3, GETUTCDATE()), 0);
 
--- Conversation: Bogdan Vasile <-> Bitdefender
 INSERT INTO Messages (ServiceId, SenderId, RecipientId, Content, SentAt, IsRead) VALUES
-(24, 18, 10, 'Bună! Am instalat Bitdefender pe laptop dar nu reușesc să activez VPN-ul. Îmi puteți ajuta?', DATEADD(day, -2, GETUTCDATE()), 1),
-(24, 10, 18, 'Bună ziua! Pentru activarea VPN: deschideți aplicația Bitdefender -> Privacy -> VPN -> Connect. Dacă cereți locație specifică, selectați din listă. Funcționează?', DATEADD(day, -2, GETUTCDATE()), 1),
-(24, 18, 10, 'Merge acum! Mulțumesc. Încă o întrebare - pot folosi aceeași licență și pe telefonul soției?', DATEADD(day, -2, GETUTCDATE()), 1),
-(24, 10, 18, 'Da, licența Total Security acoperă 5 dispozitive. Descărcați aplicația Bitdefender Mobile Security pe telefon și folosiți aceleași credențiale. Totul e sincronizat în contul Bitdefender Central.', DATEADD(day, -2, GETUTCDATE()), 0);
+(17, 19, 7, 'Bună! Sunt interesată de poziția de hostess pentru evenimente corporate. Vorbesc engleză și franceză fluent.', DATEADD(day, -2, GETUTCDATE()), 1),
+(17, 7, 19, 'Bună Diana! Wow, exact ce căutăm! Avem un eveniment internațional săptămâna viitoare - ambasade și corporații. Ai experiență similară?', DATEADD(day, -2, GETUTCDATE()), 1),
+(17, 19, 7, 'Da! Am fost hostess la conferința IT Summit și la câteva lansări de produse. Am și experiență ca translator.', DATEADD(day, -2, GETUTCDATE()), 1),
+(17, 7, 19, 'Excelent! Te vrem pentru Gala Ambasadelor de joi. Poți face și interpretariat rapid dacă e nevoie? Plata e 250 RON pentru seară.', DATEADD(day, -2, GETUTCDATE()), 0);
 
 GO
 
 PRINT 'Demo data seeded successfully!';
 PRINT '================================';
+PRINT 'App Purpose: Temporary One-Day Jobs Platform';
 PRINT 'Universal Password: Demo123!';
 PRINT '';
 PRINT 'Admin: admin@bizquits.ro';
 PRINT '';
-PRINT 'Entrepreneurs (10 companies):';
-PRINT '  - contact@emag.ro (eMAG)';
-PRINT '  - servicii@dedeman.ro (Dedeman)';
-PRINT '  - support@altex.ro (Altex)';
-PRINT '  - office@autonom.ro (Autonom)';
-PRINT '  - contact@freshful.ro (Freshful)';
-PRINT '  - hello@tazz.ro (Tazz)';
-PRINT '  - office@regina-maria.ro (Regina Maria)';
-PRINT '  - contact@worldclass.ro (World Class)';
-PRINT '  - servicii@bitdefender.ro (Bitdefender)';
-PRINT '  - contact@uipath.ro (UiPath)';
+PRINT 'Entrepreneurs (Companies posting temporary jobs):';
+PRINT '  HORECA:';
+PRINT '    - hr@hardrockcafe.ro (Hard Rock Cafe București)';
+PRINT '    - jobs@citygrillbucharest.ro (City Grill)';
+PRINT '    - angajari@grandhotelcontinental.ro (Grand Hotel Continental)';
+PRINT '    - contact@cateringexpert.ro (Catering Expert)';
+PRINT '  Events:';
+PRINT '    - staff@romexpo.ro (Romexpo SA)';
+PRINT '    - hr@evenimentebucuresti.ro (Evenimente București)';
+PRINT '  Figuration/Casting:';
+PRINT '    - casting@castelfilm.ro (Castel Film Studios)';
+PRINT '    - figuranti@mediapro.ro (MediaPro Pictures)';
+PRINT '  Promotions:';
+PRINT '    - promotii@mccann.ro (McCann România)';
+PRINT '    - sampling@streetpromo.ro (Street Promo Agency)';
 PRINT '';
-PRINT 'Clients (8 users):';
-PRINT '  - ion.popescu@gmail.com (Level 5, power user)';
-PRINT '  - maria.ionescu@yahoo.com (Level 3)';
-PRINT '  - alexandru.popa@outlook.com (Level 2)';
-PRINT '  - elena.dumitrescu@gmail.com (Level 1)';
-PRINT '  - andrei.stan@icloud.com (Level 4)';
-PRINT '  - cristina.marin@gmail.com (Level 1, new)';
-PRINT '  - bogdan.vasile@yahoo.com (Level 2)';
-PRINT '  - diana.radu@gmail.com (Level 4)';
+PRINT 'Workers (People looking for temporary jobs):';
+PRINT '  - ion.popescu@gmail.com (Level 6, experienced - 25 jobs)';
+PRINT '  - maria.ionescu@yahoo.com (Level 4, reliable - 15 jobs)';
+PRINT '  - alexandru.popa@outlook.com (Level 3 - 8 jobs)';
+PRINT '  - elena.dumitrescu@gmail.com (Level 2, newer - 4 jobs)';
+PRINT '  - andrei.stan@icloud.com (Level 5, active - 20 jobs)';
+PRINT '  - cristina.marin@gmail.com (Level 1, just started - 2 jobs)';
+PRINT '  - bogdan.vasile@yahoo.com (Level 4 - 12 jobs)';
+PRINT '  - diana.radu@gmail.com (Level 5, frequent - 18 jobs)';
 GO

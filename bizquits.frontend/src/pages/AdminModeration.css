@@ -167,9 +167,34 @@
   font-weight: var(--font-weight-bold);
 }
 
+.admin-moderation-container .tab-btn .badge.warning {
+  background: var(--warning);
+  color: white;
+}
+
 .admin-moderation-container .tab-btn:not(.active) .badge {
   background: var(--stone-100);
   color: var(--muted);
+}
+
+.admin-moderation-container .tab-btn:not(.active) .badge.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--warning);
+}
+
+/* Rating Display */
+.rating-display {
+  display: flex;
+  gap: 2px;
+}
+
+.rating-display .star {
+  color: var(--stone-300);
+  font-size: 14px;
+}
+
+.rating-display .star.filled {
+  color: #f59e0b;
 }
 
 /* ═══════════════════════════════════════════════════════

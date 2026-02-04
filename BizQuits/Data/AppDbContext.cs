@@ -27,6 +27,7 @@ public class AppDbContext : DbContext
 
     public DbSet<Achievement> Achievements { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<BugReport> BugReports { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -259,5 +260,26 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<ChallengeParticipation>()
             .HasIndex(cp => cp.Status);
+
+        // --------------------
+        // BugReports
+        // --------------------
+        modelBuilder.Entity<BugReport>()
+            .HasOne(b => b.User)
+            .WithMany()
+            .HasForeignKey(b => b.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<BugReport>()
+            .HasIndex(b => b.Status);
+
+        modelBuilder.Entity<BugReport>()
+            .HasIndex(b => b.Severity);
+
+        modelBuilder.Entity<BugReport>()
+            .HasIndex(b => b.Priority);
+
+        modelBuilder.Entity<BugReport>()
+            .HasIndex(b => b.CreatedAt);
     }
 }

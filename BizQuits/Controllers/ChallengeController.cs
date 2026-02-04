@@ -14,11 +14,13 @@ public class ChallengeController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly GamificationService _gamification;
+    private readonly ChallengeProgressService _challengeProgress;
 
-    public ChallengeController(AppDbContext context, GamificationService gamification)
+    public ChallengeController(AppDbContext context, GamificationService gamification, ChallengeProgressService challengeProgress)
     {
         _context = context;
         _gamification = gamification;
+        _challengeProgress = challengeProgress;
     }
 
     private int GetUserId()
@@ -67,11 +69,14 @@ public class ChallengeController : ControllerBase
                 c.Title,
                 c.Description,
                 Type = c.Type.ToString(),
+                TrackingMode = c.TrackingMode.ToString(),
                 c.TargetCount,
                 c.TimeLimitDays,
                 c.XpReward,
+                c.CoinsReward,
                 c.BadgeCode,
                 c.RewardDescription,
+                c.ProofInstructions,
                 c.BonusValue,
                 c.StartDate,
                 c.EndDate,
@@ -133,12 +138,15 @@ public class ChallengeController : ControllerBase
             challenge.Title,
             challenge.Description,
             Type = challenge.Type.ToString(),
+            TrackingMode = challenge.TrackingMode.ToString(),
             Status = challenge.Status.ToString(),
             challenge.TargetCount,
             challenge.TimeLimitDays,
             challenge.XpReward,
+            challenge.CoinsReward,
             challenge.BadgeCode,
             challenge.RewardDescription,
+            challenge.ProofInstructions,
             challenge.BonusValue,
             challenge.StartDate,
             challenge.EndDate,
@@ -156,9 +164,16 @@ public class ChallengeController : ControllerBase
                 myParticipation.Id,
                 Status = myParticipation.Status.ToString(),
                 myParticipation.CurrentProgress,
+                TargetProgress = challenge.TargetCount ?? 1,
+                ProgressPercentage = challenge.TargetCount.HasValue && challenge.TargetCount > 0 
+                    ? Math.Min(100, (myParticipation.CurrentProgress * 100) / challenge.TargetCount.Value) 
+                    : 0,
                 myParticipation.Deadline,
                 myParticipation.RewardAwarded,
-                myParticipation.XpAwarded
+                myParticipation.XpAwarded,
+                myParticipation.CoinsAwarded,
+                ProofSubmitted = myParticipation.ProofSubmittedAt != null,
+                myParticipation.ProofSubmittedAt
             } : null
         });
     }
@@ -179,12 +194,15 @@ public class ChallengeController : ControllerBase
             Title = dto.Title.Trim(),
             Description = dto.Description.Trim(),
             Type = dto.Type,
+            TrackingMode = dto.TrackingMode,
             Status = ChallengeStatus.Draft,
             TargetCount = dto.TargetCount,
             TimeLimitDays = dto.TimeLimitDays,
             XpReward = dto.XpReward,
+            CoinsReward = dto.CoinsReward,
             BadgeCode = dto.BadgeCode?.Trim(),
             RewardDescription = dto.RewardDescription?.Trim(),
+            ProofInstructions = dto.ProofInstructions?.Trim(),
             BonusValue = dto.BonusValue,
             StartDate = dto.StartDate,
             EndDate = dto.EndDate,
@@ -222,11 +240,14 @@ public class ChallengeController : ControllerBase
                 c.Title,
                 c.Description,
                 Type = c.Type.ToString(),
+                TrackingMode = c.TrackingMode.ToString(),
                 Status = c.Status.ToString(),
                 c.TargetCount,
                 c.TimeLimitDays,
                 c.XpReward,
+                c.CoinsReward,
                 c.RewardDescription,
+                c.ProofInstructions,
                 c.BonusValue,
                 c.StartDate,
                 c.EndDate,
@@ -235,7 +256,9 @@ public class ChallengeController : ControllerBase
                 ParticipantsCount = _context.ChallengeParticipations
                     .Count(cp => cp.ChallengeId == c.Id),
                 PendingCount = _context.ChallengeParticipations
-                    .Count(cp => cp.ChallengeId == c.Id && cp.Status == ParticipationStatus.Pending)
+                    .Count(cp => cp.ChallengeId == c.Id && cp.Status == ParticipationStatus.Pending),
+                ProofPendingCount = _context.ChallengeParticipations
+                    .Count(cp => cp.ChallengeId == c.Id && cp.Status == ParticipationStatus.ProofSubmitted)
             })
             .ToListAsync();
 
@@ -260,11 +283,14 @@ public class ChallengeController : ControllerBase
         if (dto.Description != null) challenge.Description = dto.Description.Trim();
         if (dto.Type.HasValue) challenge.Type = dto.Type.Value;
         if (dto.Status.HasValue) challenge.Status = dto.Status.Value;
+        if (dto.TrackingMode.HasValue) challenge.TrackingMode = dto.TrackingMode.Value;
         if (dto.TargetCount.HasValue) challenge.TargetCount = dto.TargetCount;
         if (dto.TimeLimitDays.HasValue) challenge.TimeLimitDays = dto.TimeLimitDays;
         if (dto.XpReward.HasValue) challenge.XpReward = dto.XpReward.Value;
+        if (dto.CoinsReward.HasValue) challenge.CoinsReward = dto.CoinsReward.Value;
         if (dto.BadgeCode != null) challenge.BadgeCode = dto.BadgeCode.Trim();
         if (dto.RewardDescription != null) challenge.RewardDescription = dto.RewardDescription.Trim();
+        if (dto.ProofInstructions != null) challenge.ProofInstructions = dto.ProofInstructions.Trim();
         if (dto.BonusValue.HasValue) challenge.BonusValue = dto.BonusValue;
         if (dto.StartDate.HasValue) challenge.StartDate = dto.StartDate;
         if (dto.EndDate.HasValue) challenge.EndDate = dto.EndDate;
@@ -408,22 +434,32 @@ public class ChallengeController : ControllerBase
                 cp.Id,
                 Status = cp.Status.ToString(),
                 cp.CurrentProgress,
+                TargetProgress = cp.Challenge.TargetCount ?? 1,
+                ProgressPercentage = cp.Challenge.TargetCount.HasValue && cp.Challenge.TargetCount > 0 
+                    ? Math.Min(100, (cp.CurrentProgress * 100) / cp.Challenge.TargetCount.Value) 
+                    : 0,
                 cp.Deadline,
                 cp.RewardAwarded,
                 cp.XpAwarded,
+                cp.CoinsAwarded,
                 cp.EntrepreneurResponse,
                 cp.CreatedAt,
                 cp.CompletedAt,
+                ProofSubmitted = cp.ProofSubmittedAt != null,
+                cp.ProofSubmittedAt,
                 Challenge = new
                 {
                     cp.Challenge.Id,
                     cp.Challenge.Title,
                     cp.Challenge.Description,
                     Type = cp.Challenge.Type.ToString(),
+                    TrackingMode = cp.Challenge.TrackingMode.ToString(),
                     ChallengeStatus = cp.Challenge.Status.ToString(),
                     cp.Challenge.TargetCount,
                     cp.Challenge.XpReward,
+                    cp.Challenge.CoinsReward,
                     cp.Challenge.RewardDescription,
+                    cp.Challenge.ProofInstructions,
                     cp.Challenge.BonusValue,
                     Entrepreneur = new
                     {
@@ -630,4 +666,110 @@ public class ChallengeController : ControllerBase
 
         return Ok(new { failed = true });
     }
+
+    // =========================
+    // CLIENT: Get live progress for a participation
+    // =========================
+    [HttpGet("participations/{participationId}/progress")]
+    [Authorize(Roles = nameof(Role.Client))]
+    public async Task<IActionResult> GetProgress(int participationId)
+    {
+        var userId = GetUserId();
+
+        var progressInfo = await _challengeProgress.GetProgressInfo(participationId, userId);
+        if (progressInfo == null)
+            return NotFound("Participation not found.");
+
+        return Ok(progressInfo);
+    }
+
+    // =========================
+    // CLIENT: Submit proof for manual verification challenges
+    // =========================
+    [HttpPost("participations/{participationId}/proof")]
+    [Authorize(Roles = nameof(Role.Client))]
+    public async Task<IActionResult> SubmitProof(int participationId, [FromBody] SubmitProofDto dto)
+    {
+        var userId = GetUserId();
+
+        if (string.IsNullOrWhiteSpace(dto.ProofText) && string.IsNullOrWhiteSpace(dto.ProofImageUrl))
+            return BadRequest("You must provide either proof text or an image URL.");
+
+        var success = await _challengeProgress.SubmitProof(participationId, userId, dto.ProofText, dto.ProofImageUrl);
+        if (!success)
+            return BadRequest("Could not submit proof. Make sure the challenge requires manual verification and you are still participating.");
+
+        return Ok(new { proofSubmitted = true });
+    }
+
+    // =========================
+    // ENTREPRENEUR: Verify submitted proof
+    // =========================
+    [HttpPatch("participations/{participationId}/verify")]
+    [Authorize(Roles = nameof(Role.Entrepreneur))]
+    public async Task<IActionResult> VerifyProof(int participationId, [FromBody] VerifyProofDto dto)
+    {
+        var profile = await GetEntrepreneurProfile();
+        if (profile == null) return Forbid();
+
+        var success = await _challengeProgress.VerifyProof(participationId, profile.Id, dto.Approved, dto.Response);
+        if (!success)
+            return BadRequest("Could not verify proof. Make sure proof has been submitted.");
+
+        return Ok(new { verified = true, approved = dto.Approved });
+    }
+
+    // =========================
+    // ENTREPRENEUR: Get participations with pending proof
+    // =========================
+    [HttpGet("{id}/pending-proofs")]
+    [Authorize(Roles = nameof(Role.Entrepreneur))]
+    public async Task<IActionResult> GetPendingProofs(int id)
+    {
+        var profile = await GetEntrepreneurProfile();
+        if (profile == null) return Forbid();
+
+        var challenge = await _context.Challenges
+            .FirstOrDefaultAsync(c => c.Id == id && c.EntrepreneurProfileId == profile.Id);
+
+        if (challenge == null)
+            return NotFound("Challenge not found.");
+
+        var pendingProofs = await _context.ChallengeParticipations
+            .Include(cp => cp.User)
+            .Where(cp => cp.ChallengeId == id)
+            .Where(cp => cp.Status == ParticipationStatus.ProofSubmitted)
+            .OrderByDescending(cp => cp.ProofSubmittedAt)
+            .Select(cp => new
+            {
+                cp.Id,
+                cp.CurrentProgress,
+                TargetProgress = cp.Challenge.TargetCount ?? 1,
+                cp.ProofText,
+                cp.ProofImageUrl,
+                cp.ProofSubmittedAt,
+                cp.CreatedAt,
+                User = new
+                {
+                    cp.User.Id,
+                    cp.User.Email
+                }
+            })
+            .ToListAsync();
+
+        return Ok(pendingProofs);
+    }
+}
+
+// DTOs for proof submission
+public class SubmitProofDto
+{
+    public string? ProofText { get; set; }
+    public string? ProofImageUrl { get; set; }
+}
+
+public class VerifyProofDto
+{
+    public bool Approved { get; set; }
+    public string? Response { get; set; }
 }

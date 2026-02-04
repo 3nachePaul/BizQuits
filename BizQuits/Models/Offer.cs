@@ -38,6 +38,9 @@ public class Offer
     [Precision(18, 2)]
     public decimal? BonusValue { get; set; }           // Valoarea bonusului/cuponului
 
+    // Monetization: cost in coins to claim this offer
+    public int CoinCost { get; set; } = 0;
+
     [MaxLength(500)]
     public string? RewardDescription { get; set; }     // Ce primește clientul
 

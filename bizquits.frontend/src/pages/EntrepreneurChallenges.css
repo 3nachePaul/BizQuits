@@ -1218,3 +1218,213 @@
     padding: var(--space-5);
   }
 }
+
+/* ═══════════════════════════════════════════════════════
+   TRACKING MODE GRID
+   ═══════════════════════════════════════════════════════ */
+.tracking-mode-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tracking-mode-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--stone-50);
+  border: 2px solid var(--stone-200);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tracking-mode-card:hover {
+  border-color: var(--sage-300);
+  background: var(--sage-50);
+}
+
+.tracking-mode-card.selected {
+  background: var(--sage-100);
+  border-color: var(--sage-600);
+  box-shadow: 0 0 0 2px var(--sage-200);
+}
+
+.tracking-mode-card .mode-label {
+  font-weight: var(--font-weight-medium);
+  color: var(--stone-800);
+}
+
+.tracking-mode-card .mode-description {
+  font-size: var(--font-size-sm);
+  color: var(--stone-500);
+}
+
+/* ═══════════════════════════════════════════════════════
+   PENDING PROOFS SECTION
+   ═══════════════════════════════════════════════════════ */
+.pending-proofs-section {
+  margin-bottom: var(--space-6);
+  padding: var(--space-5);
+  background: var(--info-light);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--info);
+}
+
+.pending-proofs-section h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--info);
+  margin: 0 0 var(--space-4) 0;
+}
+
+.pending-proofs-section .section-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.pending-proofs-section .section-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.pending-proofs-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.proof-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.proof-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--stone-100);
+}
+
+.proof-user {
+  font-weight: var(--font-weight-medium);
+  color: var(--stone-800);
+}
+
+.proof-date {
+  font-size: var(--font-size-sm);
+  color: var(--stone-500);
+}
+
+.proof-content {
+  margin-bottom: var(--space-3);
+}
+
+.proof-text,
+.proof-image {
+  margin-bottom: var(--space-2);
+}
+
+.proof-text .label,
+.proof-image .label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--stone-500);
+  margin-bottom: var(--space-1);
+}
+
+.proof-text p {
+  margin: 0;
+  color: var(--stone-700);
+}
+
+.proof-image img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--stone-200);
+  object-fit: contain;
+}
+
+.proof-actions {
+  display: flex;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--stone-100);
+}
+
+.btn-approve-proof,
+.btn-reject-proof {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-approve-proof {
+  background: var(--success);
+  color: white;
+}
+
+.btn-approve-proof:hover:not(:disabled) {
+  background: var(--success-dark);
+}
+
+.btn-reject-proof {
+  background: var(--stone-200);
+  color: var(--stone-700);
+}
+
+.btn-reject-proof:hover:not(:disabled) {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-approve-proof:disabled,
+.btn-reject-proof:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-approve-proof .btn-icon,
+.btn-reject-proof .btn-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.btn-approve-proof .btn-icon svg,
+.btn-reject-proof .btn-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Proof Badge on Participants Button */
+.proof-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 var(--space-1);
+  background: var(--danger);
+  color: white;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-full);
+  margin-left: var(--space-2);
+}

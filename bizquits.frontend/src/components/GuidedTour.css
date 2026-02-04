@@ -1,0 +1,474 @@
+/* ═══════════════════════════════════════════════════════
+   GUIDED TOUR - Interactive App Walkthrough
+   ═══════════════════════════════════════════════════════ */
+
+/* Overlay */
+.guided-tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.guided-tour-overlay.transitioning .guided-tour-highlight {
+  opacity: 0.5;
+}
+
+.guided-tour-overlay.transitioning .guided-tour-tooltip {
+  opacity: 0.7;
+  transform: scale(0.98);
+}
+
+/* Backdrop - DISABLED - we use highlight shadow instead */
+.guided-tour-backdrop {
+  display: none !important;
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Highlight box - creates a "spotlight" effect with dark overlay around it */
+.guided-tour-highlight {
+  position: fixed;
+  border-radius: 16px;
+  pointer-events: none;
+  z-index: 9999;
+  
+  /* TRANSPARENT background - let the element show through */
+  background: transparent;
+  
+  /* THE KEY: Use huge box-shadow to create dark overlay AROUND the highlight */
+  box-shadow: 
+    0 0 0 4px #8b5cf6,
+    0 0 0 8px rgba(139, 92, 246, 0.5),
+    0 0 30px rgba(139, 92, 246, 0.6),
+    0 0 0 9999px rgba(0, 0, 0, 0.7);
+  
+  /* Smooth transitions for position and size changes */
+  transition: 
+    top 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    left 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease;
+  
+  animation: highlightAppear 0.5s ease-out, highlightPulse 2.5s ease-in-out 0.5s infinite;
+}
+
+@keyframes highlightAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes highlightPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 4px #8b5cf6,
+      0 0 0 8px rgba(139, 92, 246, 0.5),
+      0 0 30px rgba(139, 92, 246, 0.6),
+      0 0 0 9999px rgba(0, 0, 0, 0.7);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 6px #a855f7,
+      0 0 0 12px rgba(168, 85, 247, 0.6),
+      0 0 50px rgba(168, 85, 247, 0.7),
+      0 0 0 9999px rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* Tooltip */
+.guided-tour-tooltip {
+  position: fixed;
+  width: 400px;
+  max-width: calc(100vw - 32px);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: var(--space-6);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(139, 92, 246, 0.2),
+    0 0 40px rgba(139, 92, 246, 0.15);
+  z-index: 10001;
+  pointer-events: auto;
+  
+  /* Smooth transitions for position changes */
+  transition: 
+    top 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    left 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease;
+  
+  animation: tooltipSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.guided-tour-tooltip.animating {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+.guided-tour-tooltip.final {
+  background: linear-gradient(135deg, var(--violet-50), var(--pink-50));
+  border: 2px solid var(--violet-200);
+}
+
+@keyframes tooltipSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Skip button */
+.tour-skip-btn {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6b7280;
+}
+
+.tour-skip-btn:hover {
+  background: #e5e7eb;
+  color: #1f2937;
+  transform: scale(1.1);
+}
+
+.tour-skip-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Progress bar */
+.tour-progress {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: var(--space-4);
+}
+
+.tour-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #ec4899);
+  border-radius: 3px;
+  transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+.tour-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* Content area */
+.tour-content {
+  display: flex;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+/* Mascot */
+.tour-mascot {
+  flex-shrink: 0;
+  animation: mascotBounce 2s ease-in-out infinite;
+}
+
+@keyframes mascotBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Text content */
+.tour-text {
+  flex: 1;
+}
+
+.tour-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: #1f2937;
+  margin: 0 0 var(--space-2) 0;
+  line-height: 1.3;
+}
+
+.tour-description {
+  font-size: var(--text-base);
+  color: #374151;
+  margin: 0;
+  line-height: 1.7;
+  white-space: pre-line;
+  font-weight: 500;
+}
+
+/* Navigation */
+.tour-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-4);
+  border-top: 1px solid #e5e7eb;
+}
+
+.tour-step-indicator {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+}
+
+.tour-buttons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Buttons */
+.tour-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: none;
+}
+
+.tour-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.tour-btn-secondary {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+}
+
+.tour-btn-secondary:hover {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.tour-btn-primary {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.tour-btn-primary:hover {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+}
+
+.tour-btn-cta {
+  background: linear-gradient(135deg, var(--violet-500), var(--pink-500));
+  color: white;
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-base);
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+  animation: ctaGlow 2s ease-in-out infinite;
+}
+
+.tour-btn-cta:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(168, 85, 247, 0.5);
+}
+
+@keyframes ctaGlow {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 30px rgba(168, 85, 247, 0.6);
+  }
+}
+
+/* Confetti */
+.tour-confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10002;
+}
+
+.tour-confetti .confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--color);
+  top: -10px;
+  left: var(--x);
+  transform: rotate(var(--rotation));
+  animation: confettiFall 2.5s ease-out forwards;
+  animation-delay: var(--delay);
+  border-radius: 2px;
+}
+
+.tour-confetti .confetti-piece:nth-child(even) {
+  width: 8px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+@keyframes confettiFall {
+  0% {
+    top: -10px;
+    opacity: 1;
+    transform: rotate(var(--rotation)) translateX(0);
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+    transform: rotate(calc(var(--rotation) + 720deg)) translateX(80px);
+  }
+}
+
+/* Arrow pointer (for positioned tooltips) */
+.guided-tour-tooltip::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: var(--white);
+  transform: rotate(45deg);
+  display: none; /* Enable for specific positions if needed */
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .guided-tour-tooltip {
+    width: calc(100vw - 32px);
+    padding: var(--space-4);
+    border-radius: 20px;
+  }
+
+  .tour-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .tour-mascot {
+    margin-bottom: var(--space-2);
+  }
+
+  .tour-navigation {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .tour-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tour-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* Spotlight cutout effect (alternative to highlight) */
+.guided-tour-spotlight {
+  position: fixed;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 
+    0 0 0 4px #8b5cf6,
+    0 0 40px rgba(139, 92, 246, 0.5),
+    0 0 0 9999px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  z-index: 10000;
+  transition: all 0.3s ease;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOUR TARGET HIGHLIGHT - Subtle enhancement for targeted elements
+   ═══════════════════════════════════════════════════════ */
+
+/* Global class for any element being highlighted in the tour */
+.tour-target-highlighted {
+  position: relative !important;
+  outline: none !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Make highlighted links/buttons slightly pop */
+a.tour-target-highlighted,
+button.tour-target-highlighted {
+  transform: scale(1.01);
+}
+
+/* Sidebar highlight - different styling for sidebar items */
+.guided-tour-highlight.sidebar-highlight {
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: 
+    0 0 0 3px #f59e0b,
+    0 0 0 6px rgba(245, 158, 11, 0.5),
+    0 0 30px rgba(245, 158, 11, 0.5),
+    0 0 0 9999px rgba(0, 0, 0, 0.7);
+  animation: sidebarHighlightPulse 2s ease-in-out infinite;
+}
+
+@keyframes sidebarHighlightPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 3px #f59e0b,
+      0 0 0 6px rgba(245, 158, 11, 0.5),
+      0 0 30px rgba(245, 158, 11, 0.5),
+      0 0 0 9999px rgba(0, 0, 0, 0.7);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 4px #fbbf24,
+      0 0 0 10px rgba(251, 191, 36, 0.6),
+      0 0 50px rgba(251, 191, 36, 0.6),
+      0 0 0 9999px rgba(0, 0, 0, 0.7);
+  }
+}

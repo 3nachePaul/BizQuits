@@ -142,6 +142,7 @@ export default function ClientOffers() {
   const [filter, setFilter] = useState('all');
   const [activeTab, setActiveTab] = useState('browse');
   const [claimingId, setClaimingId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadData();
@@ -201,9 +202,14 @@ export default function ClientOffers() {
     return myClaims.find(claim => claim.offerId === offerId);
   };
 
-  const filteredOffers = filter === 'all' 
-    ? offers 
-    : offers.filter(offer => offer.type === filter);
+  const filteredOffers = offers.filter(offer => {
+    const matchesFilter = filter === 'all' || offer.type === filter;
+    const matchesSearch = searchQuery === '' || 
+      offer.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      offer.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      offer.entrepreneurCompanyName?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
   const formatDate = (dateString) => {
     if (!dateString) return 'No expiration';
@@ -272,6 +278,22 @@ export default function ClientOffers() {
 
       {activeTab === 'browse' ? (
         <>
+          {/* Search and Filter */}
+          <div className="offers-toolbar">
+            <div className="search-box">
+              <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
+              <input
+                type="text"
+                placeholder="Search offers..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
+
           {/* Filter Tabs */}
           <div className="filter-tabs">
             <button 
@@ -306,7 +328,7 @@ export default function ClientOffers() {
             </div>
           ) : (
             <div className="offers-grid">
-              {filteredOffers.map((offer) => {
+              {filteredOffers.map((offer, index) => {
                 const typeInfo = OFFER_TYPES[offer.type] || { label: offer.type, icon: Icons.gift, color: 'var(--sage-600)' };
                 const expiringSoon = isExpiringSoon(offer.validUntil);
                 const expired = isExpired(offer.validUntil);
@@ -317,6 +339,7 @@ export default function ClientOffers() {
                   <div 
                     key={offer.id} 
                     className={`offer-card ${expired ? 'expired' : ''} ${expiringSoon ? 'expiring-soon' : ''} ${claimed ? 'claimed' : ''}`}
+                    {...(index === 0 ? { 'data-tour': 'offer-card' } : {})}
                   >
                     {expiringSoon && !expired && (
                       <div className="expiring-badge">
@@ -450,6 +473,7 @@ export default function ClientOffers() {
                             className="btn-claim"
                             onClick={() => handleClaim(offer.id)}
                             disabled={claimingId === offer.id || expired}
+                            {...(index === 0 ? { 'data-tour': 'claim-button' } : {})}
                           >
                             {claimingId === offer.id ? (
                               <>

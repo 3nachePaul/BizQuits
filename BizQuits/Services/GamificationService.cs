@@ -133,6 +133,20 @@ public class GamificationService
     }
 
     // =========================
+    // COINS
+    // =========================
+    public async Task AwardCoins(int userId, int amount, string? reason = null)
+    {
+        if (amount <= 0) return;
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) return;
+
+        user.Coins += amount;
+        await _context.SaveChangesAsync();
+    }
+
+    // =========================
     // REVIEWS (DOAR DUPĂ APPROVE)
     // =========================
     public async Task AwardReviewApproved(int userId)

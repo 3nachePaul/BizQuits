@@ -10,6 +10,7 @@ function ClientBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
@@ -55,9 +56,18 @@ function ClientBookings() {
     { value: 'Cancelled', label: 'Cancelled' }
   ];
 
-  const filteredBookings = filter === 'all'
-    ? bookings
-    : bookings.filter(b => b.status === filter);
+  const filteredBookings = bookings
+    .filter(b => filter === 'all' || b.status === filter)
+    .filter(b => {
+      if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        b.service?.name?.toLowerCase().includes(query) ||
+        b.service?.category?.toLowerCase().includes(query) ||
+        b.service?.entrepreneurCompanyName?.toLowerCase().includes(query) ||
+        b.message?.toLowerCase().includes(query)
+      );
+    });
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -252,21 +262,35 @@ function ClientBookings() {
         </div>
       </div>
 
-      <div className="filters-bar">
-        {filters.map(f => (
-          <button
-            key={f.value}
-            className={`filter-btn ${filter === f.value ? 'active' : ''}`}
-            onClick={() => setFilter(f.value)}
-          >
-            {f.label}
-            {f.value !== 'all' && (
-              <span className="filter-count">
-                {bookings.filter(b => b.status === f.value).length}
-              </span>
-            )}
-          </button>
-        ))}
+      <div className="bookings-toolbar">
+        <div className="search-box">
+          <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search bookings..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="filters-bar">
+          {filters.map(f => (
+            <button
+              key={f.value}
+              className={`filter-btn ${filter === f.value ? 'active' : ''}`}
+              onClick={() => setFilter(f.value)}
+            >
+              {f.label}
+              {f.value !== 'all' && (
+                <span className="filter-count">
+                  {bookings.filter(b => b.status === f.value).length}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {filteredBookings.length === 0 ? (
@@ -285,6 +309,7 @@ function ClientBookings() {
               key={booking.id} 
               className={`booking-card status-${booking.status.toLowerCase()}`}
               style={{ animationDelay: `${index * 0.05}s` }}
+              {...(index === 0 ? { 'data-tour': 'booking-card' } : {})}
             >
               <div className="booking-card-glow"></div>
               <div className="booking-main">
@@ -293,7 +318,10 @@ function ClientBookings() {
                     <span className="service-category">{booking.service.category}</span>
                     <h3 className="service-name">{booking.service.name}</h3>
                   </div>
-                  <div className={`booking-status status-badge-${booking.status.toLowerCase()}`}>
+                  <div 
+                    className={`booking-status status-badge-${booking.status.toLowerCase()}`}
+                    {...(index === 0 ? { 'data-tour': 'booking-status' } : {})}
+                  >
                     <span className="status-icon">{getStatusIcon(booking.status)}</span>
                     {booking.status === 'InProgress' ? 'In Progress' : booking.status}
                   </div>
@@ -358,6 +386,7 @@ function ClientBookings() {
                     className="btn btn-outline btn-sm"
                     onClick={() => navigate(`/chat?serviceId=${booking.service.id}`)}
                     title="Chat with entrepreneur"
+                    {...(index === 0 ? { 'data-tour': 'chat-button' } : {})}
                   >
                     Chat
                   </button>

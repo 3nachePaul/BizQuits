@@ -56,16 +56,28 @@ function ChatPage() {
     }
   }, [user, searchParams]);
 
-  // Load messages for selected conversation
+  // Load messages for selected conversation and mark as read
   useEffect(() => {
     if (selectedConversation) {
       setLoading(true);
       setError(null);
       setNewConversationService(null); // Clear new conversation mode
-      api.get(`/message/conversation/service/${selectedConversation.serviceId}`)
-        .then(res => {
-          const data = res.data;
+      
+      // Load messages and mark conversation as read
+      Promise.all([
+        api.get(`/message/conversation/service/${selectedConversation.serviceId}`),
+        api.post(`/message/read/service/${selectedConversation.serviceId}`)
+      ])
+        .then(([messagesRes, _]) => {
+          const data = messagesRes.data;
           setMessages(Array.isArray(data) ? data : []);
+          
+          // Clear unread count in conversations list
+          setConversations(prev => prev.map(c => 
+            c.serviceId === selectedConversation.serviceId 
+              ? { ...c, unreadCount: 0 }
+              : c
+          ));
         })
         .catch(err => {
           console.error('Error fetching messages:', err);

@@ -1,6 +1,7 @@
 using BizQuits.Data;
 using BizQuits.DTOs;
 using BizQuits.Models;
+using BizQuits.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,12 @@ namespace BizQuits.Controllers;
 public class OfferController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly ChallengeProgressService _challengeProgress;
 
-    public OfferController(AppDbContext context)
+    public OfferController(AppDbContext context, ChallengeProgressService challengeProgress)
     {
         _context = context;
+        _challengeProgress = challengeProgress;
     }
 
     private static string GetOfferTypeDisplayName(OfferType type) => type switch
@@ -512,6 +515,18 @@ public class OfferController : ControllerBase
             return BadRequest("Ai revendicat deja această ofertă");
         }
 
+        // Check if user has enough coins
+        if (offer.CoinCost > 0 && user.Coins < offer.CoinCost)
+        {
+            return BadRequest($"Nu ai suficiente monede. Ai nevoie de {offer.CoinCost} monede, dar ai doar {user.Coins}.");
+        }
+
+        // Deduct coins if offer has a cost
+        if (offer.CoinCost > 0)
+        {
+            user.Coins -= offer.CoinCost;
+        }
+
         // Generate unique claim code
         var claimCode = GenerateClaimCode();
 
@@ -527,6 +542,9 @@ public class OfferController : ControllerBase
 
         _context.OfferClaims.Add(claim);
         await _context.SaveChangesAsync();
+
+        // Update challenge progress for offer claim challenges
+        await _challengeProgress.OnOfferClaimed(user.Id, offer.Id);
 
         return Ok(new OfferClaimResponseDto
         {

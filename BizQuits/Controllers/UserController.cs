@@ -42,6 +42,8 @@ public class UserController : ControllerBase
         {
             user.Id,
             user.Email,
+            user.Coins,
+            user.HasSeenTutorial,
             Role = user.Role.ToString(),
             EntrepreneurProfile = user.EntrepreneurProfile != null ? new
             {
@@ -53,6 +55,25 @@ public class UserController : ControllerBase
         };
 
         return Ok(response);
+    }
+
+    // GET: api/user/coins - Get user's coin balance
+    [HttpGet("coins")]
+    public async Task<IActionResult> GetCoins()
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email))
+        {
+            return Unauthorized();
+        }
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(new { coins = user.Coins });
     }
 
     public class UpdateProfileDto
@@ -190,5 +211,49 @@ public class UserController : ControllerBase
     public class DeleteAccountDto
     {
         public string? Password { get; set; }
+    }
+
+    // POST: api/user/tutorial/complete - Mark tutorial as seen
+    [HttpPost("tutorial/complete")]
+    public async Task<IActionResult> CompleteTutorial()
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email))
+        {
+            return Unauthorized();
+        }
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        user.HasSeenTutorial = true;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { success = true, hasSeenTutorial = true });
+    }
+
+    // POST: api/user/tutorial/reset - Reset tutorial (for replay)
+    [HttpPost("tutorial/reset")]
+    public async Task<IActionResult> ResetTutorial()
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email))
+        {
+            return Unauthorized();
+        }
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        user.HasSeenTutorial = false;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { success = true, hasSeenTutorial = false });
     }
 }

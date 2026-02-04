@@ -228,7 +228,7 @@ function ClientServices() {
         </div>
 
         <div className="filter-row">
-          <div className="filter-group">
+          <div className="filter-group" data-tour="categories">
             <label>Category</label>
             <div className="filter-pills">
               {categories.map(cat => (
@@ -281,6 +281,7 @@ function ClientServices() {
               key={service.id} 
               className="service-card"
               style={{ animationDelay: `${index * 0.05}s` }}
+              {...(index === 0 ? { 'data-tour': 'service-card' } : {})}
             >
               <div className="service-card-glow"></div>
               <div className="service-header">
@@ -327,7 +328,11 @@ function ClientServices() {
                   >
                     {Icons.message}
                   </button>
-                  <button className="btn btn-primary btn-book" onClick={() => handleBookService(service)}>
+                  <button 
+                    className="btn btn-primary btn-book" 
+                    onClick={() => handleBookService(service)}
+                    {...(index === 0 ? { 'data-tour': 'apply-button' } : {})}
+                  >
                     <span className="btn-sparkle">{Icons.sparkle}</span>
                     Accept Quest
                   </button>

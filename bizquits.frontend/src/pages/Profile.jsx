@@ -1,7 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { userService, gamificationApi } from '../services/api';
 import { useToast } from '../components/Toast';
+import OnboardingModal from '../components/OnboardingModal';
+import GuidedTour from '../components/GuidedTour';
 import './Profile.css';
 
 const Icons = {
@@ -92,6 +95,15 @@ const Icons = {
       <line x1="18" y1="6" x2="6" y2="18"/>
       <line x1="6" y1="6" x2="18" y2="18"/>
     </svg>
+  ),
+  sparkles: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+      <path d="M5 3v4"/>
+      <path d="M19 17v4"/>
+      <path d="M3 5h4"/>
+      <path d="M17 19h4"/>
+    </svg>
   )
 };
 
@@ -102,6 +114,8 @@ const Profile = () => {
   const [gamification, setGamification] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showGuidedTour, setShowGuidedTour] = useState(false);
   
   // Edit mode states
   const [isEditing, setIsEditing] = useState(false);
@@ -460,9 +474,12 @@ const Profile = () => {
 
           {/* Client Gamification */}
           {profile?.role === 'Client' && (
-            <div className="card">
-              <div className="card-header" style={{ padding: 'var(--space-4) var(--space-6)', borderBottom: '1px solid var(--border-subtle)' }}>
-                <h3 className="card-title">Progress</h3>
+            <div className="card gamification-card">
+              <div className="card-header" style={{ padding: 'var(--space-4) var(--space-6)', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 className="card-title">🎮 Your Progress</h3>
+                <Link to="/client/achievements" className="view-all-link">
+                  View All Achievements →
+                </Link>
               </div>
 
               <div className="card-body" style={{ padding: 'var(--space-6)' }}>
@@ -473,76 +490,124 @@ const Profile = () => {
                   </div>
                 ) : (
                   <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--space-4)', marginBottom: 'var(--space-3)' }}>
-                      <div>
-                        <div style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--primary-color)' }}>
-                          Level {levelProgress?.level ?? 1}
-                        </div>
-                        <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
-                          XP: {levelProgress?.xp ?? 0}
+                    {/* Stats Grid */}
+                    <div className="gamification-stats-grid">
+                      <div className="gamification-stat-card level-card">
+                        <div className="stat-icon">🏆</div>
+                        <div className="stat-content">
+                          <span className="stat-value">{levelProgress?.level ?? 1}</span>
+                          <span className="stat-label">Level</span>
                         </div>
                       </div>
-
-                      <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
-                        {levelProgress?.intoLevel ?? 0} / {levelProgress?.neededThisLevel ?? 0} XP to next level
+                      <div className="gamification-stat-card xp-card">
+                        <div className="stat-icon">⚡</div>
+                        <div className="stat-content">
+                          <span className="stat-value">{levelProgress?.xp ?? 0}</span>
+                          <span className="stat-label">Total XP</span>
+                        </div>
+                      </div>
+                      <div className="gamification-stat-card coins-card">
+                        <div className="stat-icon">🪙</div>
+                        <div className="stat-content">
+                          <span className="stat-value">{gamification.coins ?? 0}</span>
+                          <span className="stat-label">Coins</span>
+                        </div>
+                      </div>
+                      <div className="gamification-stat-card badges-card">
+                        <div className="stat-icon">🎖️</div>
+                        <div className="stat-content">
+                          <span className="stat-value">{gamification.achievements?.length ?? 0}</span>
+                          <span className="stat-label">Badges</span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Progress bar */}
-                    <div style={{
-                      width: '100%',
-                      height: '8px',
-                      background: 'var(--stone-100)',
-                      borderRadius: 'var(--radius-full)',
-                      overflow: 'hidden',
-                      marginBottom: 'var(--space-6)'
-                    }}>
-                      <div style={{
-                        width: `${levelProgress?.pct ?? 0}%`,
-                        height: '100%',
-                        background: 'var(--primary-color)',
-                        borderRadius: 'var(--radius-full)',
-                        transition: 'width 0.3s ease'
-                      }} />
+                    {/* Level Progress */}
+                    <div className="level-progress-section">
+                      <div className="level-progress-header">
+                        <span className="level-text">Level {levelProgress?.level ?? 1}</span>
+                        <span className="xp-text">{levelProgress?.intoLevel ?? 0} / {levelProgress?.neededThisLevel ?? 0} XP</span>
+                      </div>
+                      <div className="level-progress-bar">
+                        <div 
+                          className="level-progress-fill" 
+                          style={{ width: `${levelProgress?.pct ?? 0}%` }} 
+                        />
+                      </div>
+                      <div className="level-progress-footer">
+                        <span>Next level: {(levelProgress?.neededThisLevel ?? 0) - (levelProgress?.intoLevel ?? 0)} XP needed</span>
+                      </div>
                     </div>
 
-                    {/* Achievements */}
-                    <div style={{ marginTop: 'var(--space-3)' }}>
-                      <h4 style={{ margin: '0 0 var(--space-4) 0', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)', textTransform: 'uppercase', letterSpacing: 'var(--letter-spacing-wide)', color: 'var(--text-secondary)' }}>Achievements</h4>
+                    {/* How to Earn Section */}
+                    <div className="how-to-earn-section">
+                      <h4 className="section-title">💡 How to Earn Rewards</h4>
+                      <div className="earn-tips-grid">
+                        <div className="earn-tip">
+                          <span className="earn-emoji">📅</span>
+                          <div>
+                            <strong>Book Services</strong>
+                            <span>+10 XP per booking</span>
+                          </div>
+                        </div>
+                        <div className="earn-tip">
+                          <span className="earn-emoji">✅</span>
+                          <div>
+                            <strong>Complete Bookings</strong>
+                            <span>+25 XP + 10 Coins</span>
+                          </div>
+                        </div>
+                        <div className="earn-tip">
+                          <span className="earn-emoji">✍️</span>
+                          <div>
+                            <strong>Leave Reviews</strong>
+                            <span>+10 XP per review</span>
+                          </div>
+                        </div>
+                        <div className="earn-tip">
+                          <span className="earn-emoji">🎯</span>
+                          <div>
+                            <strong>Complete Challenges</strong>
+                            <span>Bonus XP + Badges</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Recent Achievements */}
+                    <div className="achievements-preview-section">
+                      <div className="achievements-header">
+                        <h4 className="section-title">🎖️ Recent Achievements</h4>
+                        <Link to="/client/achievements" className="see-all-link">See all →</Link>
+                      </div>
 
                       {(!gamification.achievements || gamification.achievements.length === 0) ? (
-                        <div style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)' }}>
-                          No achievements yet. Complete bookings to unlock badges.
+                        <div className="no-achievements-message">
+                          <span className="no-achievements-icon">🏅</span>
+                          <p>No achievements yet. Complete bookings and challenges to unlock badges!</p>
+                          <Link to="/client/achievements" className="explore-achievements-btn">
+                            Explore Achievements Gallery
+                          </Link>
                         </div>
                       ) : (
-                        <div style={{
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                          gap: 'var(--space-3)'
-                        }}>
-                          {gamification.achievements.map((a) => (
-                            <div key={a.code} style={{
-                              border: '1px solid var(--border-subtle)',
-                              borderRadius: 'var(--radius-md)',
-                              padding: 'var(--space-3)',
-                              background: 'var(--stone-50)',
-                              display: 'flex',
-                              gap: 'var(--space-3)',
-                              alignItems: 'flex-start'
-                            }}>
-                              <div style={{ width: '24px', height: '24px', color: 'var(--primary-color)', flexShrink: 0 }}>
-                                {Icons.award}
+                        <div className="achievements-preview-grid">
+                          {gamification.achievements.slice(0, 3).map((a) => (
+                            <div key={a.code} className="achievement-preview-card">
+                              <div className="achievement-badge-icon">
+                                {a.badgeIcon || '🏆'}
                               </div>
-                              <div>
-                                <div style={{ fontWeight: 'var(--font-weight-medium)', fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)' }}>{a.name}</div>
-                                {a.description && (
-                                  <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-1)' }}>
-                                    {a.description}
-                                  </div>
-                                )}
+                              <div className="achievement-info">
+                                <div className="achievement-name">{a.name}</div>
+                                <div className="achievement-xp">+{a.xpReward || 0} XP</div>
                               </div>
                             </div>
                           ))}
+                          {gamification.achievements.length > 3 && (
+                            <Link to="/client/achievements" className="more-achievements-card">
+                              <span className="more-count">+{gamification.achievements.length - 3}</span>
+                              <span>more</span>
+                            </Link>
+                          )}
                         </div>
                       )}
                     </div>
@@ -605,6 +670,21 @@ const Profile = () => {
                   <span className="action-icon">{Icons.mail}</span>
                   <span>Update Email</span>
                 </button>
+                {profile?.role !== 'Admin' && (
+                  <button className="action-btn tutorial-btn" onClick={async () => {
+                    try {
+                      await userService.resetTutorial();
+                      setShowOnboarding(true);
+                    } catch (error) {
+                      console.error('Error resetting tutorial:', error);
+                      // Still show the tutorial even if API fails
+                      setShowOnboarding(true);
+                    }
+                  }}>
+                    <span className="action-icon">{Icons.sparkles}</span>
+                    <span>Replay Tutorial</span>
+                  </button>
+                )}
                 {profile?.role !== 'Admin' && (
                   <button className="action-btn danger" onClick={() => setShowDeleteModal(true)}>
                     <span className="action-icon">{Icons.trash}</span>
@@ -696,6 +776,20 @@ const Profile = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Onboarding Tutorial Modal */}
+      {showOnboarding && (
+        <OnboardingModal onComplete={() => {
+          setShowOnboarding(false);
+          // After onboarding, start the guided tour
+          setTimeout(() => setShowGuidedTour(true), 300);
+        }} />
+      )}
+
+      {/* Guided Tour */}
+      {showGuidedTour && (
+        <GuidedTour onComplete={() => setShowGuidedTour(false)} />
       )}
     </div>
   );

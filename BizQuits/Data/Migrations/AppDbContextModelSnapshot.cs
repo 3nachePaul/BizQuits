@@ -107,6 +107,58 @@ namespace BizQuits.Data.Migrations
                     b.ToTable("Bookings");
                 });
 
+            modelBuilder.Entity("BizQuits.Models.BugReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AdminNotes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Severity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("Priority");
+
+                    b.HasIndex("Severity");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BugReports");
+                });
+
             modelBuilder.Entity("BizQuits.Models.Challenge", b =>
                 {
                     b.Property<int>("Id")
@@ -122,6 +174,9 @@ namespace BizQuits.Data.Migrations
                     b.Property<decimal?>("BonusValue")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CoinsReward")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -139,6 +194,10 @@ namespace BizQuits.Data.Migrations
 
                     b.Property<int?>("MaxParticipants")
                         .HasColumnType("int");
+
+                    b.Property<string>("ProofInstructions")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("RewardDescription")
                         .HasMaxLength(500)
@@ -160,6 +219,9 @@ namespace BizQuits.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("TrackingMode")
+                        .HasColumnType("int");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
@@ -195,6 +257,9 @@ namespace BizQuits.Data.Migrations
                     b.Property<int>("ChallengeId")
                         .HasColumnType("int");
 
+                    b.Property<int>("CoinsAwarded")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
 
@@ -211,10 +276,24 @@ namespace BizQuits.Data.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("ProofImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("ProofSubmittedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ProofText")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<bool>("RewardAwarded")
                         .HasColumnType("bit");
 
                     b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TargetProgress")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -358,6 +437,9 @@ namespace BizQuits.Data.Migrations
                     b.Property<decimal?>("BonusValue")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CoinCost")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -603,9 +685,15 @@ namespace BizQuits.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("Coins")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("HasSeenTutorial")
+                        .HasColumnType("bit");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -666,6 +754,17 @@ namespace BizQuits.Data.Migrations
                     b.Navigation("Client");
 
                     b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("BizQuits.Models.BugReport", b =>
+                {
+                    b.HasOne("BizQuits.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BizQuits.Models.Challenge", b =>
